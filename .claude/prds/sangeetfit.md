@@ -43,7 +43,7 @@ We believe **a 3-step flow (occasion select → skin-tone analysis → occasion-
 | # | Milestone | Outcome | Status | Plan |
 |---|---|---|---|---|
 | 1 | Foundation & data model | Outfit catalog + colour similarity utility ship; type-check passes | complete | `.claude/plans/fuzzy-wondering-hare.md` |
-| 2 | Skin-tone analysis pipeline | Upload selfie → API call → display skin profile; works in mock mode | pending | — |
+| 2 | Skin-tone analysis pipeline | Upload selfie → API call → display skin profile; works in mock mode | complete | `.claude/plans/sangeetfit-phase-2-skin-tone-analysis.md` |
 | 3 | Occasion-curated gallery | Filter + sort by harmony score; favorites toggle; shortlist view | pending | — |
 | 4 | Virtual try-on | Click-to-VTO modal with loading/result/error states; batch endpoint works | pending | — |
 | 5 | Share & polish | WhatsApp share, copy link, visual polish; end-to-end demoable flow | pending | — |
