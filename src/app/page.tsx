@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import { X, CheckCircle, Shirt, ArrowLeft, Palette, Heart, Loader2, AlertCircle, Download } from "lucide-react";
+import { X, CheckCircle, Shirt, ArrowLeft, Palette, Heart, Loader2, AlertCircle, Download, Share2, Link } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { OUTFITS, type Outfit, type Occasion } from "@/data/outfits";
 import { hueSimilarity } from "@/lib/color";
@@ -33,6 +33,7 @@ export default function Home() {
   const [vtoError, setVtoError] = useState<string | null>(null);
   const [vtoModal, setVtoModal] = useState<{ open: boolean; outfit: Outfit; resultUrl: string; mode: string } | null>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
   const [showShortlist, setShowShortlist] = useState(false);
 
   const analyzeSkin = useCallback(async (dataUrl: string) => {
@@ -94,6 +95,19 @@ export default function Home() {
     setVtoError(null);
   }, []);
 
+  const copyShareLink = useCallback(async () => {
+    if (!vtoModal?.resultUrl) return;
+    const pageUrl = `${window.location.origin}/?step=3&occasion=${vtoModal.outfit.occasion}&skin=${skinColor}&vto=${vtoModal.outfit.id}`;
+    try {
+      await navigator.clipboard.writeText(pageUrl);
+      setCopyStatus("copied");
+      setTimeout(() => setCopyStatus("idle"), 2000);
+    } catch {
+      setCopyStatus("error");
+      setTimeout(() => setCopyStatus("idle"), 2000);
+    }
+  }, [vtoModal, skinColor]);
+
   const toggleFavorite = useCallback((outfitId: string) => {
     setFavorites(prev => {
       const next = new Set(prev);
@@ -126,14 +140,14 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="glass rounded-xl p-6 mb-6">
           <h1 className="font-bold text-xl gradient-text mb-2">SangeetFit</h1>
-          <p className="text-sm text-gray-400">Occasion → Skin-tone analysis → Occasion-curated gallery</p>
+          <p className="text-sm text-gray-400">Occasion → Skin-tone analysis → Occasion-curated gallery → Virtual try-on</p>
           <div className="step-indicator mt-4">
             <div className={`step-dot ${step >= 1 ? "active" : ""}`} />
             <div className={`step-line ${step >= 2 ? "active" : ""}`} />
             <div className={`step-dot ${step >= 2 ? "active" : ""}`} />
             <div className={`step-line ${step === 3 ? "active" : ""}`} />
             <div className={`step-dot ${step === 3 ? "active" : ""}`} />
-            <span className="text-xs text-gray-500 ml-2">{stepLabel(step)} ({step} of 3)</span>
+            <span className="text-xs text-gray-500 ml-2">{stepLabel(step)}</span>
           </div>
         </div>
 
@@ -371,26 +385,45 @@ export default function Home() {
                   )}
 
                   {/* Actions */}
-                  <div className="flex items-center gap-3 mt-5 pt-4 border-t border-gray-800">
+                  <div className="flex items-center gap-2 mt-5 pt-4 border-t border-gray-800">
                     <button
                       onClick={retryVTO}
                       disabled={vtoLoading}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-xs border border-violet-500 text-violet-400 rounded-lg hover:bg-violet-500/10 transition-colors disabled:opacity-50"
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs border border-violet-500 text-violet-400 rounded-lg hover:bg-violet-500/10 transition-colors disabled:opacity-50"
                     >
                       <Loader2 className={`w-3 h-3 ${vtoLoading ? "animate-spin" : ""}`} />
                       {vtoLoading ? "Processing…" : "Re-render"}
                     </button>
                     {vtoModal.resultUrl && !vtoLoading && (
-                      <a
-                        href={vtoModal.resultUrl}
-                        download={`vto-${vtoModal.outfit.id}.png`}
-                        className="flex items-center gap-2 px-4 py-2.5 text-xs border border-gray-700 text-gray-400 rounded-lg hover:border-gray-500 transition-colors"
-                      >
-                        <Download className="w-3 h-3" />
-                        Save
-                      </a>
+                      <>
+                        <a
+                          href={vtoModal.resultUrl}
+                          download={`vto-${vtoModal.outfit.id}.png`}
+                          className="flex items-center gap-1.5 px-3 py-2 text-xs border border-gray-700 text-gray-400 rounded-lg hover:border-gray-500 transition-colors"
+                          title="Download result"
+                        >
+                          <Download className="w-3 h-3" />
+                          Save
+                        </a>
+                        <button
+                          onClick={copyShareLink}
+                          disabled={vtoLoading}
+                          className={`flex items-center gap-1.5 px-3 py-2 text-xs border rounded-lg transition-colors ${
+                            copyStatus === "copied"
+                              ? "border-green-500/50 text-green-400 bg-green-500/10"
+                              : "border-gray-700 text-gray-400 hover:border-gray-500"
+                          } disabled:opacity-50`}
+                          title={copyStatus === "copied" ? "Link copied!" : "Copy share link"}
+                        >
+                          {copyStatus === "copied" ? <CheckCircle className="w-3 h-3" /> : <Share2 className="w-3 h-3" />}
+                          {copyStatus === "copied" ? "Copied" : "Share"}
+                        </button>
+                      </>
                     )}
                   </div>
+                  {copyStatus === "error" && (
+                    <p className="text-xs text-red-400 mt-2 text-center">Failed to copy link — please copy manually.</p>
+                  )}
                 </div>
               </div>
             )}
