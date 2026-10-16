@@ -27,7 +27,7 @@ export const OUTFITS: Outfit[] = [
     category: "lehenga",
     primaryColor: "#8B008B",
     secondaryColor: "#FFD700",
-    imageUrl: "/outfits/sangeet-01.jpg",
+    imageUrl: "/outfits/sangeet-01.svg",
     description:
       "Deep purple lehenga with gold zardozi embroidery — bold and festive.",
   },
@@ -38,7 +38,7 @@ export const OUTFITS: Outfit[] = [
     category: "anarkali",
     primaryColor: "#DC143C",
     secondaryColor: "#FFF8DC",
-    imageUrl: "/outfits/sangeet-02.jpg",
+    imageUrl: "/outfits/sangeet-02.svg",
     description:
       "Crimson anarkali with ivory threadwork — elegant for evening celebrations.",
   },
@@ -51,7 +51,7 @@ export const OUTFITS: Outfit[] = [
     category: "saree",
     primaryColor: "#228B22",
     secondaryColor: "#FFDAB9",
-    imageUrl: "/outfits/mehendi-01.jpg",
+    imageUrl: "/outfits/mehendi-01.svg",
     description:
       "Forest-green cotton saree with peach border — fresh and daytime-appropriate.",
   },
@@ -62,7 +62,7 @@ export const OUTFITS: Outfit[] = [
     category: "palazzo",
     primaryColor: "#32CD32",
     secondaryColor: "#90EE90",
-    imageUrl: "/outfits/mehendi-02.jpg",
+    imageUrl: "/outfits/mehendi-02.svg",
     description:
       "Lime-green sharara set with mint dupatta — vibrant mehendi-energy.",
   },
@@ -75,7 +75,7 @@ export const OUTFITS: Outfit[] = [
     category: "lehenga",
     primaryColor: "#FFD700",
     secondaryColor: "#FFA500",
-    imageUrl: "/outfits/haldi-01.jpg",
+    imageUrl: "/outfits/haldi-01.svg",
     description:
       "Bright-yellow chaniya choli with orange border — the classic haldi look.",
   },
@@ -86,7 +86,7 @@ export const OUTFITS: Outfit[] = [
     category: "kurti",
     primaryColor: "#DAA520",
     secondaryColor: "#F0E68C",
-    imageUrl: "/outfits/haldi-02.jpg",
+    imageUrl: "/outfits/haldi-02.svg",
     description:
       "Mustard-yellow kurti with pale-gold dupatta — earthy and joyful.",
   },
@@ -99,7 +99,7 @@ export const OUTFITS: Outfit[] = [
     category: "lehenga",
     primaryColor: "#8B0000",
     secondaryColor: "#FFD700",
-    imageUrl: "/outfits/wedding-01.jpg",
+    imageUrl: "/outfits/wedding-01.svg",
     description:
       "Burgundy bridal lehenga with heavy gold embroidery — traditional centerpiece.",
   },
@@ -110,7 +110,7 @@ export const OUTFITS: Outfit[] = [
     category: "sharara",
     primaryColor: "#800020",
     secondaryColor: "#FFC0CB",
-    imageUrl: "/outfits/wedding-02.jpg",
+    imageUrl: "/outfits/wedding-02.svg",
     description:
       "Deep maroon sharara with blush-pink dupatta — regal yet soft.",
   },
@@ -123,7 +123,7 @@ export const OUTFITS: Outfit[] = [
     category: "gown",
     primaryColor: "#4B0082",
     secondaryColor: "#C0C0C0",
-    imageUrl: "/outfits/reception-01.jpg",
+    imageUrl: "/outfits/reception-01.svg",
     description:
       "Indigo ballerina gown with silver sequin detailing — modern and chic.",
   },
@@ -134,7 +134,7 @@ export const OUTFITS: Outfit[] = [
     category: "suit",
     primaryColor: "#800080",
     secondaryColor: "#FFD700",
-    imageUrl: "/outfits/reception-02.jpg",
+    imageUrl: "/outfits/reception-02.svg",
     description:
       "Plum velvet co-ord set with gold jewellery — luxe evening glamour.",
   },

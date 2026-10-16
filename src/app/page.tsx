@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import { X, CheckCircle, Shirt, ArrowLeft, Palette, Heart } from "lucide-react";
+import { X, CheckCircle, Shirt, ArrowLeft, Palette, Heart, Loader2, AlertCircle, Download } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { OUTFITS, type Outfit, type Occasion } from "@/data/outfits";
 import { hueSimilarity } from "@/lib/color";
@@ -29,9 +29,9 @@ export default function Home() {
   const [skinColor, setSkinColor] = useState<string | null>(null);
   const [skinError, setSkinError] = useState<string | null>(null);
   const [skinLoading, setSkinLoading] = useState(false);
-  const [vtoResult, setVtoResult] = useState<string | null>(null);
   const [vtoLoading, setVtoLoading] = useState(false);
   const [vtoError, setVtoError] = useState<string | null>(null);
+  const [vtoModal, setVtoModal] = useState<{ open: boolean; outfit: Outfit; resultUrl: string; mode: string } | null>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [showShortlist, setShowShortlist] = useState(false);
 
@@ -54,11 +54,15 @@ export default function Home() {
     }
   }, []);
 
+  const openVTO = useCallback((outfit: Outfit) => {
+    setVtoModal({ open: true, outfit, resultUrl: "", mode: "" });
+    setVtoError(null);
+    runVTO(outfit.id, outfit.category);
+  }, []);
+
   const runVTO = useCallback(
     async (garmentId: string, category: string) => {
       setVtoLoading(true);
-      setVtoResult(null);
-      setVtoError(null);
       try {
         const res = await fetch("/api/vto", {
           method: "POST",
@@ -66,8 +70,11 @@ export default function Home() {
           body: JSON.stringify({ userId: "user_skin", garmentId, category }),
         });
         const data = await res.json();
-        if (data.success) {
-          setVtoResult(data.resultUrl || `Rendered ${garmentId}`);
+        if (data.success && data.resultUrl) {
+          const resolvedUrl = data.mode === "mock"
+        ? `/garment_test/${o => o.id}_hd_result.png` // placeholder, will be resolved later
+        : data.resultUrl;
+      setVtoModal(prev => prev ? { ...prev, resultUrl: data.resultUrl, mode: data.mode || "mock" } : null);
         } else {
           setVtoError(data.error || "VTO failed");
         }
@@ -79,6 +86,16 @@ export default function Home() {
     },
     []
   );
+
+  const retryVTO = useCallback(() => {
+    if (vtoModal) runVTO(vtoModal.outfit.id, vtoModal.outfit.category);
+  }, [vtoModal, runVTO]);
+
+  const closeVTO = useCallback(() => {
+    setVtoModal(null);
+    setVtoLoading(false);
+    setVtoError(null);
+  }, []);
 
   const toggleFavorite = useCallback((outfitId: string) => {
     setFavorites(prev => {
@@ -232,7 +249,7 @@ export default function Home() {
                 return (
                   <button
                     key={o.id}
-                    onClick={() => runVTO(o.id, o.category)}
+                    onClick={() => openVTO(o)}
                     disabled={vtoLoading}
                     className={`group p-3 rounded-lg border transition-all ${
                       vtoLoading ? "opacity-60 cursor-not-allowed" : "border-gray-700 hover:border-violet-500 hover:bg-violet-500/5"
@@ -262,21 +279,122 @@ export default function Home() {
               })}
             </div>
 
-            {vtoLoading && (
-              <div className="mt-4 flex items-center gap-2 text-sm text-gray-400">
-                <CheckCircle className="w-4 h-4 animate-spin text-violet-400" /> Rendering try-on…
-              </div>
-            )}
-            {vtoError && (
-              <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
-                <X className="w-3 h-3" /> {vtoError}
-              </p>
-            )}
-            {vtoResult && !vtoError && (
-              <div className="p-4 rounded-lg border border-green-500/30 bg-green-500/5">
-                <div className="text-xs text-gray-400 mb-1">Try-on result</div>
-                <div className="font-mono text-sm text-green-400">{vtoResult}</div>
-                <p className="text-xs text-gray-600 mt-1">Mock mode active — connect YOUCAM_API_KEY for real renders.</p>
+            {/* ── VTO Modal ── */}
+            {vtoModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeVTO} />
+                <div className="relative glass rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-violet-500/30">
+                  <button onClick={closeVTO} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
+                    <X className="w-5 h-5" />
+                  </button>
+
+                  <div className="flex items-center gap-3 mb-5">
+                    <img src={vtoModal.outfit.imageUrl} alt={vtoModal.outfit.name} className="w-16 h-16 object-cover rounded-lg bg-gray-900" />
+                    <div>
+                      <div className="font-semibold">{vtoModal.outfit.name}</div>
+                      <div className="text-xs text-gray-500">{vtoModal.outfit.category} · {vtoModal.outfit.occasion}</div>
+                    </div>
+                  </div>
+
+                  {/* Loading */}
+                  {vtoLoading && (
+                    <div className="flex flex-col items-center justify-center py-12 gap-3">
+                      <Loader2 className="w-10 h-10 animate-spin text-violet-400" />
+                      <div className="text-sm text-gray-400 text-center">
+                        YouCam VTO {vtoModal.mode === "live" ? "processing" : "rendering in mock mode"}…
+                        <br />
+                        <span className="text-xs text-gray-600">This may take 30–90 seconds</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Error */}
+                  {vtoError && !vtoLoading && (
+                    <div className="py-8 text-center">
+                      <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+                      <p className="text-sm text-red-400 mb-1">{vtoError}</p>
+                      <p className="text-xs text-gray-600 mb-4">
+                        {vtoModal.mode === "live"
+                          ? "Check YOUCAM_API_KEY and source files."
+                          : "Connect YOUCAM_API_KEY for real API processing."}
+                      </p>
+                      <button
+                        onClick={retryVTO}
+                        disabled={vtoLoading}
+                        className="px-4 py-2 text-xs border border-violet-500 text-violet-400 rounded hover:bg-violet-500/10 transition-colors"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Result */}
+                  {!vtoLoading && !vtoError && vtoModal.resultUrl && (
+                    <div className="space-y-3">
+                      <img
+                        src={vtoModal.resultUrl.startsWith("/") ? vtoModal.resultUrl : ""}
+                        alt={`Try-on result for ${vtoModal.outfit.name}`}
+                        className="w-full rounded-lg bg-gray-900"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = "none";
+                          if (vtoModal.resultUrl) {
+                            const link = document.createElement("a");
+                            link.href = vtoModal.resultUrl;
+                            link.download = `vto-${vtoModal.outfit.id}.png`;
+                            link.click();
+                          }
+                        }}
+                      />
+                      {!vtoModal.resultUrl.startsWith("http") && !vtoModal.resultUrl.startsWith("/") && (
+                        <div className="p-3 rounded-lg bg-violet-500/5 border border-violet-500/20 text-xs text-gray-400 font-mono break-all">
+                          {vtoModal.resultUrl}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        {vtoModal.mode === "live" ? (
+                          <CheckCircle className="w-3 h-3 text-green-400" />
+                        ) : (
+                          <AlertCircle className="w-3 h-3 text-yellow-400" />
+                        )}
+                        <span>
+                          {vtoModal.mode === "live"
+                            ? "Live render from YouCam API"
+                            : "Mock result — set YOUCAM_API_KEY for real renders"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Initial state (before any request) */}
+                  {!vtoLoading && !vtoError && !vtoModal.resultUrl && (
+                    <div className="py-8 text-center text-sm text-gray-500">
+                      Click below to start virtual try-on
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-3 mt-5 pt-4 border-t border-gray-800">
+                    <button
+                      onClick={retryVTO}
+                      disabled={vtoLoading}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-xs border border-violet-500 text-violet-400 rounded-lg hover:bg-violet-500/10 transition-colors disabled:opacity-50"
+                    >
+                      <Loader2 className={`w-3 h-3 ${vtoLoading ? "animate-spin" : ""}`} />
+                      {vtoLoading ? "Processing…" : "Re-render"}
+                    </button>
+                    {vtoModal.resultUrl && !vtoLoading && (
+                      <a
+                        href={vtoModal.resultUrl}
+                        download={`vto-${vtoModal.outfit.id}.png`}
+                        className="flex items-center gap-2 px-4 py-2.5 text-xs border border-gray-700 text-gray-400 rounded-lg hover:border-gray-500 transition-colors"
+                      >
+                        <Download className="w-3 h-3" />
+                        Save
+                      </a>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </div>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="320" viewBox="0 0 400 320">
+  <rect width="400" height="320" fill="#1a1a2e"/>
+  <text x="200" y="150" text-anchor="middle" fill="#a78bfa" font-size="18" font-family="sans-serif" font-weight="bold">
+    SangeetFit Placeholder
+  </text>
+  <text x="200" y="180" text-anchor="middle" fill="#6b7280" font-size="14" font-family="sans-serif">
+    [outfit image]
+  </text>
+</svg>
