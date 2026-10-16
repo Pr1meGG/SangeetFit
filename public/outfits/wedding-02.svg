@@ -1,9 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="320" viewBox="0 0 400 320">
-  <rect width="400" height="320" fill="#1a1a2e"/>
-  <text x="200" y="150" text-anchor="middle" fill="#a78bfa" font-size="18" font-family="sans-serif" font-weight="bold">
-    SangeetFit Placeholder
-  </text>
-  <text x="200" y="180" text-anchor="middle" fill="#6b7280" font-size="14" font-family="sans-serif">
-    [outfit image]
-  </text>
+  <defs>
+    <linearGradient id="w2bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a0510"/>
+      <stop offset="100%" stop-color="#0a0208"/>
+    </linearGradient>
+    <linearGradient id="w2maroon" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#800020"/>
+      <stop offset="100%" stop-color="#4a0010"/>
+    </linearGradient>
+    <linearGradient id="w2blush" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFC0CB"/>
+      <stop offset="100%" stop-color="#FFB6C1"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="320" fill="url(#w2bg)"/>
+  <path d="M160 100 Q140 180 125 265 L275 265 Q260 180 240 100 Z" fill="url(#w2maroon)" opacity="0.9"/>
+  <path d="M155 95 Q110 115 100 175 Q95 230 130 265 L165 265 Q140 190 145 140 Q150 110 160 95 Z" fill="url(#w2blush)" opacity="0.7"/>
+  <path d="M130 160 Q200 180 270 160" stroke="url(#w2blush)" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M125 200 Q200 220 275 200" stroke="url(#w2blush)" stroke-width="1.5" fill="none" opacity="0.4"/>
+  <circle cx="170" cy="140" r="4" fill="url(#w2blush)" opacity="0.4"/>
+  <circle cx="200" cy="130" r="5" fill="url(#w2blush)" opacity="0.5"/>
+  <circle cx="230" cy="140" r="4" fill="url(#w2blush)" opacity="0.4"/>
+  <text x="200" y="310" text-anchor="middle" fill="#a78bfa" font-size="11" font-family="system-ui" font-weight="500">Wedding · Maroon Sharara</text>
 </svg>

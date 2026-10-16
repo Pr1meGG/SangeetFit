@@ -1,9 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="320" viewBox="0 0 400 320">
-  <rect width="400" height="320" fill="#1a1a2e"/>
-  <text x="200" y="150" text-anchor="middle" fill="#a78bfa" font-size="18" font-family="sans-serif" font-weight="bold">
-    SangeetFit Placeholder
-  </text>
-  <text x="200" y="180" text-anchor="middle" fill="#6b7280" font-size="14" font-family="sans-serif">
-    [outfit image]
-  </text>
+  <defs>
+    <linearGradient id="w1bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a0505"/>
+      <stop offset="100%" stop-color="#0a0202"/>
+    </linearGradient>
+    <linearGradient id="w1burg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8B0000"/>
+      <stop offset="100%" stop-color="#4a0000"/>
+    </linearGradient>
+    <linearGradient id="w1gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="100%" stop-color="#DAA520"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="320" fill="url(#w1bg)"/>
+  <path d="M145 100 Q110 200 100 270 L300 270 Q290 200 255 100 Z" fill="url(#w1burg)" opacity="0.95"/>
+  <path d="M105 200 Q200 225 295 200" stroke="url(#w1gold)" stroke-width="3" fill="none" opacity="0.8"/>
+  <path d="M100 230 Q200 255 300 230" stroke="url(#w1gold)" stroke-width="2.5" fill="none" opacity="0.7"/>
+  <path d="M108 255 Q200 275 292 255" stroke="url(#w1gold)" stroke-width="2" fill="none" opacity="0.6"/>
+  <circle cx="160" cy="170" r="6" fill="url(#w1gold)" opacity="0.5"/>
+  <circle cx="200" cy="160" r="8" fill="url(#w1gold)" opacity="0.6"/>
+  <circle cx="240" cy="170" r="6" fill="url(#w1gold)" opacity="0.5"/>
+  <circle cx="150" cy="210" r="5" fill="url(#w1gold)" opacity="0.4"/>
+  <circle cx="250" cy="210" r="5" fill="url(#w1gold)" opacity="0.4"/>
+  <path d="M155 95 Q100 120 90 200 Q85 250 120 275 L160 275 Q130 200 140 140 Z" fill="url(#w1burg)" opacity="0.8"/>
+  <path d="M90 200 Q85 250 120 275" stroke="url(#w1gold)" stroke-width="2" fill="none" opacity="0.6"/>
+  <text x="200" y="310" text-anchor="middle" fill="#a78bfa" font-size="11" font-family="system-ui" font-weight="500">Wedding · Red Bridal Lehenga</text>
 </svg>

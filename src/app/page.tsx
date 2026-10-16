@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import { X, CheckCircle, Shirt, ArrowLeft, Palette, Heart, Loader2, AlertCircle, Download, Share2, Link } from "lucide-react";
+// force-dynamic: useSearchParams() 在 client component 中需要动态渲染
+export const dynamic = "force-dynamic";
+
+import { useState, useCallback, useMemo, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { X, CheckCircle, Shirt, ArrowLeft, Palette, Heart, Loader2, AlertCircle, Download, Share2, Link, MessageCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { OUTFITS, type Outfit, type Occasion } from "@/data/outfits";
 import { hueSimilarity } from "@/lib/color";
@@ -23,6 +27,32 @@ interface SkinResult {
   error?: string;
 }
 
+// Separate component to use useSearchParams() — wrapped in Suspense for prerendering
+function SearchParamHandler({
+  onRestore,
+}: {
+  onRestore: (params: { step?: Step; occasion?: Occasion; skin?: string; vto?: string }) => void;
+}) {
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const s = searchParams.get("step");
+    const o = searchParams.get("occasion") as Occasion | null;
+    const sk = searchParams.get("skin");
+    const v = searchParams.get("vto");
+
+    const result: { step?: Step; occasion?: Occasion; skin?: string; vto?: string } = {};
+    if (o && OCCASIONS.some(x => x.id === o)) result.occasion = o;
+    if (sk && /^#[0-9A-Fa-f]{6}$/.test(sk)) result.skin = sk;
+    if (s === "2") result.step = 2;
+    else if (s === "3") result.step = 3;
+    if (v) result.vto = v;
+
+    if (Object.keys(result).length > 0) onRestore(result);
+  }, [searchParams, onRestore]);
+
+  return null;
+}
+
 export default function Home() {
   const [step, setStep] = useState<Step>(1);
   const [occasion, setOccasion] = useState<Occasion>("sangeet");
@@ -35,6 +65,19 @@ export default function Home() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
   const [showShortlist, setShowShortlist] = useState(false);
+
+  const handleRestore = useCallback((params: { step?: Step; occasion?: Occasion; skin?: string; vto?: string }) => {
+    if (params.occasion) setOccasion(params.occasion);
+    if (params.skin) setSkinColor(params.skin);
+    if (params.step) setStep(params.step);
+    if (params.vto && params.skin) {
+      const outfit = OUTFITS.find(o => o.id === params.vto);
+      if (outfit) {
+        setVtoModal({ open: true, outfit, resultUrl: "", mode: "" });
+        setTimeout(() => runVTO(outfit.id, outfit.category), 100);
+      }
+    }
+  }, []);
 
   const analyzeSkin = useCallback(async (dataUrl: string) => {
     setSkinError(null);
@@ -97,7 +140,7 @@ export default function Home() {
 
   const copyShareLink = useCallback(async () => {
     if (!vtoModal?.resultUrl) return;
-    const pageUrl = `${window.location.origin}/?step=3&occasion=${vtoModal.outfit.occasion}&skin=${skinColor}&vto=${vtoModal.outfit.id}`;
+    const pageUrl = `${window.location.origin}/?step=3&occasion=${encodeURIComponent(vtoModal.outfit.occasion)}&skin=${encodeURIComponent(skinColor || '')}&vto=${encodeURIComponent(vtoModal.outfit.id)}`;
     try {
       await navigator.clipboard.writeText(pageUrl);
       setCopyStatus("copied");
@@ -107,6 +150,12 @@ export default function Home() {
       setTimeout(() => setCopyStatus("idle"), 2000);
     }
   }, [vtoModal, skinColor]);
+
+  const shareWhatsApp = useCallback(() => {
+    if (!vtoModal?.outfit) return;
+    const text = `我在 SangeetFit 为你找到了这件 ${vtoModal.outfit.name}，适合${vtoModal.outfit.occasion}！来看看：${window.location.origin}/?step=3&occasion=${encodeURIComponent(vtoModal.outfit.occasion)}&vto=${encodeURIComponent(vtoModal.outfit.id)}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  }, [vtoModal]);
 
   const toggleFavorite = useCallback((outfitId: string) => {
     setFavorites(prev => {
@@ -136,6 +185,9 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
+      <Suspense fallback={<div className="p-8 text-center text-gray-400">加载中...</div>}>
+        <SearchParamHandler onRestore={handleRestore} />
+      </Suspense>
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="glass rounded-xl p-6 mb-6">
@@ -405,6 +457,15 @@ export default function Home() {
                           <Download className="w-3 h-3" />
                           Save
                         </a>
+                        <button
+                          onClick={shareWhatsApp}
+                          disabled={vtoLoading || !vtoModal?.outfit}
+                          className="flex items-center gap-1.5 px-3 py-2 text-xs border border-gray-700 text-gray-400 rounded-lg hover:border-green-500 hover:text-green-400 transition-colors disabled:opacity-50"
+                          title="Share via WhatsApp"
+                        >
+                          <MessageCircle className="w-3 h-3" />
+                          WhatsApp
+                        </button>
                         <button
                           onClick={copyShareLink}
                           disabled={vtoLoading}
