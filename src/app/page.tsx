@@ -71,9 +71,6 @@ export default function Home() {
         });
         const data = await res.json();
         if (data.success && data.resultUrl) {
-          const resolvedUrl = data.mode === "mock"
-        ? `/garment_test/${o => o.id}_hd_result.png` // placeholder, will be resolved later
-        : data.resultUrl;
       setVtoModal(prev => prev ? { ...prev, resultUrl: data.resultUrl, mode: data.mode || "mock" } : null);
         } else {
           setVtoError(data.error || "VTO failed");
