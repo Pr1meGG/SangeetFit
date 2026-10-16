@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { X, CheckCircle, Shirt, ArrowLeft, Palette } from "lucide-react";
+import { useState, useCallback, useMemo } from "react";
+import { X, CheckCircle, Shirt, ArrowLeft, Palette, Heart } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { OUTFITS, type Outfit, type Occasion } from "@/data/outfits";
 import { hueSimilarity } from "@/lib/color";
@@ -32,6 +32,8 @@ export default function Home() {
   const [vtoResult, setVtoResult] = useState<string | null>(null);
   const [vtoLoading, setVtoLoading] = useState(false);
   const [vtoError, setVtoError] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [showShortlist, setShowShortlist] = useState(false);
 
   const analyzeSkin = useCallback(async (dataUrl: string) => {
     setSkinError(null);
@@ -78,14 +80,29 @@ export default function Home() {
     []
   );
 
-  const curated = OUTFITS.filter(o => o.occasion === occasion).sort((a, b) => {
-    const sa = skinColor ? hueSimilarity(skinColor, a.primaryColor) : null;
-    const sb = skinColor ? hueSimilarity(skinColor, b.primaryColor) : null;
-    if (sa === null && sb === null) return 0;
-    if (sa === null) return 1;
-    if (sb === null) return -1;
-    return sb - sa;
-  });
+  const toggleFavorite = useCallback((outfitId: string) => {
+    setFavorites(prev => {
+      const next = new Set(prev);
+      if (next.has(outfitId)) next.delete(outfitId);
+      else next.add(outfitId);
+      return next;
+    });
+  }, []);
+
+  const curated = useMemo(() => {
+    const filtered = OUTFITS.filter(o => o.occasion === occasion);
+    if (showShortlist) return filtered.filter(o => favorites.has(o.id));
+    return filtered.sort((a, b) => {
+      const sa = skinColor ? hueSimilarity(skinColor, a.primaryColor) : null;
+      const sb = skinColor ? hueSimilarity(skinColor, b.primaryColor) : null;
+      if (sa === null && sb === null) return 0;
+      if (sa === null) return 1;
+      if (sb === null) return -1;
+      return sb - sa;
+    });
+  }, [occasion, skinColor, favorites, showShortlist]);
+
+  const shortlistCount = favorites.size;
 
   const stepLabel = (s: Step) => (s === 1 ? "Select occasion" : s === 2 ? "Skin-tone analysis" : "Curated gallery");
 
@@ -190,13 +207,26 @@ export default function Home() {
                 <ArrowLeft className="w-4 h-4 text-gray-500 cursor-pointer hover:text-violet-400" onClick={() => setStep(2)} />
                 <h2 className="font-semibold">Curated gallery — {occasion.charAt(0).toUpperCase() + occasion.slice(1)}</h2>
               </div>
-              {skinColor && (
-                <span className="text-xs text-gray-500">Sorted by colour harmony to skin tone <span className="font-mono">{skinColor}</span></span>
-              )}
+              <div className="flex items-center gap-3">
+                {skinColor && (
+                  <span className="text-xs text-gray-500">Sorted by colour harmony to skin tone <span className="font-mono">{skinColor}</span></span>
+                )}
+                <button
+                  onClick={() => setShowShortlist(v => !v)}
+                  className={`flex items-center gap-1 px-3 py-1.5 text-xs border rounded transition-colors ${
+                    showShortlist
+                      ? "border-violet-500 bg-violet-500/10 text-violet-400"
+                      : "border-gray-700 text-gray-500 hover:border-gray-500"
+                  }`}
+                >
+                  <Heart className="w-3 h-3" fill={showShortlist ? "currentColor" : "none"} />
+                  Shortlist{shortlistCount > 0 && ` (${shortlistCount})`}
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {curated.map(o => {
+              {curated.map((o: Outfit) => {
                 const sim = skinColor ? hueSimilarity(skinColor, o.primaryColor) : null;
                 const score = sim == null ? null : Math.round(sim * 100);
                 return (
@@ -208,7 +238,17 @@ export default function Home() {
                       vtoLoading ? "opacity-60 cursor-not-allowed" : "border-gray-700 hover:border-violet-500 hover:bg-violet-500/5"
                     }`}
                   >
-                    <img src={o.imageUrl} alt={o.name} className="w-full h-32 object-cover rounded mb-2 bg-gray-900" />
+                    <div className="relative">
+                      <img src={o.imageUrl} alt={o.name} className="w-full h-32 object-cover rounded mb-2 bg-gray-900" />
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleFavorite(o.id); }}
+                        disabled={vtoLoading}
+                        className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+                        aria-label={favorites.has(o.id) ? "Remove from shortlist" : "Add to shortlist"}
+                      >
+                        <Heart className="w-3.5 h-3.5" fill={favorites.has(o.id) ? "var(--violet-400, #a78bfa)" : "none"} style={{ color: favorites.has(o.id) ? "#a78bfa" : "white" }} />
+                      </button>
+                    </div>
                     <div className="text-sm font-medium">{o.name}</div>
                     <div className="text-xs text-gray-500">{o.category}</div>
                     {score != null && (
