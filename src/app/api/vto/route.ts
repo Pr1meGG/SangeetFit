@@ -81,7 +81,7 @@ async function submitTask(apiKey: string, srcFileId: string, refFileId: string, 
 async function pollTask(apiKey: string, taskId: string, timeout = 180000): Promise<string> {
   const start = Date.now();
   while (Date.now() - start < timeout) {
-    const res = await fetch(`${YOUCAM_BASE}/task/cloth-v4/{taskId}`, {
+    const res = await fetch(`${YOUCAM_BASE}/task/cloth-v4/${taskId}`, {
       headers: { "Authorization": `Bearer ${apiKey}` },
     });
 
