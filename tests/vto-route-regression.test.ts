@@ -42,10 +42,14 @@ assert(
   "FAIL: mock-mode guard missing"
 );
 assert(
-  vtoRouteSource.includes('resultUrl: `/garment_test/${garmentId}_hd_result.png`'),
-  "FAIL: mock resultUrl format changed unexpectedly"
+  vtoRouteSource.includes('const MOCK_RESULT: Record<string, string>'),
+  "FAIL: mock category-to-image mapping missing"
 );
-console.log("PASS: mock mode guard and resultUrl format intact");
+assert(
+  vtoRouteSource.includes('resultUrl: mockUrl'),
+  "FAIL: mock resultUrl should use category-mapped mockUrl"
+);
+console.log("PASS: mock mode guard and category-mapped resultUrl intact");
 
 // ── Test 3: submitTask returns data.data.task_id (contract preserved) ────────
 

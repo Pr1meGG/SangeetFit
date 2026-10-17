@@ -1,46 +1,30 @@
-# YouCam Hackathon — Proof / Pivot
+# SangeetFit
 
-**Honest documentation of a research-first prototype that measured the API, found the noise floor, and moved on.**
+**Occasion-curated outfit gallery with skin-tone harmony scoring and virtual try-on for Indian weddings.**
 
----
-
-## What we tried
-
-**Concept:** "Proof" — skin AI analysis for daily progress tracking via the YouCam API. We wanted to detect small daily changes in a `raw_score` metric and show users an improvement trajectory over a hackathon week.
-
-**Method:** Repeated scans under controlled conditions (same light, 20-minute spacing, post-exercise) to establish a baseline band and check whether real-life shifts exceeded measurement noise.
+Built for the YouCam API Hackathon.
 
 ---
 
-## What we learned (noise test)
+## What it does
 
-Results are in [`docs/noise-test.md`](docs/noise-test.md).
+Indian weddings involve 5+ functions (sangeet, mehendi, haldi, wedding, reception), each with distinct outfit expectations. SangeetFit is a 3-step flow:
 
-- **Spread (API variance):** ~3 pts on `raw_score`
-- **Shift (real stimulus, e.g., post-exercise):** ~2 pts
-- **Verdict:** spread > shift. The API's noise floor is larger than the small changes we wanted to detect.
+1. **Select occasion** — pick the wedding function you're attending
+2. **Skin-tone analysis** — upload a selfie; the YouCam API returns a skin-tone hex
+3. **Curated gallery** — outfits filtered by occasion, sorted by colour-harmony score against your skin tone, with one-click virtual try-on
 
-Implications:
-- Daily irritation early-warning requires detecting <3 pt changes — impossible.
-- 4-week change detection needs ~28 days; only ~17 days remained to deadline.
-- Any "improving" verdict would need shift > spread + temporal evidence — neither exists.
-
-**We measured the API's noise floor; single-point deltas are not shown.**
-
----
-
-## Pivot
-
-Stopped Proof. Moved to **Clothes VTO** (garment try-on) using the same YouCam API. Scripts and outputs in `scripts/garment_test.py` and `out/garment_test/`.
+Shortlisted outfits can be shared via WhatsApp or a copy link.
 
 ---
 
 ## Tech stack
 
-- Next.js 14
-- TypeScript
-- Tailwind CSS
-- YouCam API
+- **Next.js 14** (App Router)
+- **TypeScript**
+- **Tailwind CSS**
+- **YouCam API** — skin-tone analysis (`/task/skin-tone-analysis`) and clothes VTO (`/task/cloth-v4`)
+- **Lucide React** — icons
 
 ---
 
@@ -51,22 +35,57 @@ npm install
 npm run dev
 ```
 
----
+Open [http://localhost:3000](http://localhost:3000).
 
-## API key setup
+### Environment variables
 
-Create `.env`:
+Create `.env.local` (never committed):
 
 ```
 YOUCAM_API_KEY=your_key_here
+YOUCAM_BASE_URL=https://yce-api-01.makeupar.com/s2s/v2.0
+MOCK_MODE=true
 ```
+
+| Variable | Purpose |
+|----------|---------|
+| `YOUCAM_API_KEY` | Bearer token for all YouCam API calls |
+| `YOUCAM_BASE_URL` | Base URL for the YouCam S2S API |
+| `MOCK_MODE` | `true` = return mock data without live API calls (safe for demos) |
+
+> **Note:** With `MOCK_MODE=true` or no API key set, the app returns pre-built mock results — no live API calls are made.
+
+---
+
+## Project structure
+
+```
+src/
+├── app/
+│   ├── page.tsx              # Main 3-step flow (occasion → skin → gallery)
+│   ├── layout.tsx            # Root layout + metadata
+│   ├── globals.css           # Design tokens + glassmorphism
+│   └── api/
+│       ├── skin/route.ts     # Skin-tone analysis (upload → submit → poll)
+│       └── vto/route.ts      # Clothes VTO (upload → submit → poll)
+├── components/
+│   └── Navbar.tsx            # App header
+├── data/
+│   └── outfits.ts            # 10-item outfit catalog (5 occasions × 2)
+└── lib/
+    └── color.ts              # Hex → HSL conversion + hue similarity scoring
+```
+
+---
+
+## Background: pivot from Proof
+
+This project started as **Proof** — a skin-analysis daily-tracking concept. Noise testing showed the API's measurement variance (~3 pts) exceeded the real-world signal (~2 pts), making daily change detection impossible. See [`docs/noise-test.md`](docs/noise-test.md) for details.
+
+We pivoted to **SangeetFit** — using the same YouCam API for occasion-aware outfit styling instead.
 
 ---
 
 ## License
 
 MIT
-
----
-
-*Built for the YouCam hackathon. Not a product. A measured decision to stop on data rather than demo fiction.*

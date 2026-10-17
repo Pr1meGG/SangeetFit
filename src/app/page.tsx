@@ -153,7 +153,7 @@ export default function Home() {
 
   const shareWhatsApp = useCallback(() => {
     if (!vtoModal?.outfit) return;
-    const text = `我在 SangeetFit 为你找到了这件 ${vtoModal.outfit.name}，适合${vtoModal.outfit.occasion}！来看看：${window.location.origin}/?step=3&occasion=${encodeURIComponent(vtoModal.outfit.occasion)}&vto=${encodeURIComponent(vtoModal.outfit.id)}`;
+    const text = `Check out this ${vtoModal.outfit.name} I found on SangeetFit for the ${vtoModal.outfit.occasion}! Try it on: ${window.location.origin}/?step=3&occasion=${encodeURIComponent(vtoModal.outfit.occasion)}&vto=${encodeURIComponent(vtoModal.outfit.id)}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   }, [vtoModal]);
 

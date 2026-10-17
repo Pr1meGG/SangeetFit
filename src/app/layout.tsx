@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Proof — Garment VTO",
-  description: "YouCam API Skin AI & eCommerce VTO Hackathon",
+  title: "SangeetFit — Indian Wedding Outfit Styling",
+  description: "Occasion-curated outfit gallery with skin-tone harmony scoring and virtual try-on, powered by the YouCam API.",
 };
 
 export default function RootLayout({

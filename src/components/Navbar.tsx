@@ -9,8 +9,8 @@ export default function Navbar() {
             <Shirt className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h1 className="font-bold text-lg gradient-text">Proof</h1>
-            <p className="text-xs text-gray-500">Garment VTO · YouCam API</p>
+            <h1 className="font-bold text-lg gradient-text">SangeetFit</h1>
+            <p className="text-xs text-gray-500">Indian Wedding Styling · YouCam API</p>
           </div>
         </div>
         <div className="flex items-center gap-4 text-sm text-gray-400">

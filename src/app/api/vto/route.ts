@@ -110,9 +110,21 @@ export async function POST(req: NextRequest) {
     const { userId, garmentId, category } = body;
 
     if (MOCK_MODE || !YOUCAM_API_KEY) {
+      // Map outfit categories to existing mock result images
+      const MOCK_RESULT: Record<string, string> = {
+        lehenga: "/garment_test/lehenga_ethnic_hd.png",
+        anarkali: "/garment_test/saree_hd.png",
+        saree: "/garment_test/saree_hd.png",
+        palazzo: "/garment_test/kurta_set_hd.png",
+        kurti: "/garment_test/kurta_set_hd.png",
+        gown: "/garment_test/western_dress_hd.png",
+        suit: "/garment_test/western_dress_hd.png",
+        sharara: "/garment_test/lehenga_ethnic_hd.png",
+      };
+      const mockUrl = MOCK_RESULT[category] || "/garment_test/saree_hd.png";
       return NextResponse.json({
         success: true,
-        resultUrl: `/garment_test/${garmentId}_hd_result.png`,
+        resultUrl: mockUrl,
         mode: "mock",
       });
     }
