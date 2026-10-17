@@ -310,17 +310,20 @@ export default function Home() {
                 const sim = skinColor ? hueSimilarity(skinColor, o.primaryColor) : null;
                 const score = sim == null ? null : Math.round(sim * 100);
                 return (
-                  <button
+                  <div
                     key={o.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => openVTO(o)}
-                    disabled={vtoLoading}
-                    className={`group p-3 rounded-lg border transition-all ${
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openVTO(o); } }}
+                    className={`group p-3 rounded-lg border transition-all cursor-pointer ${
                       vtoLoading ? "opacity-60 cursor-not-allowed" : "border-gray-700 hover:border-violet-500 hover:bg-violet-500/5"
                     }`}
                   >
                     <div className="relative">
                       <img src={o.imageUrl} alt={o.name} className="w-full h-32 object-cover rounded mb-2 bg-gray-900" />
                       <button
+                        type="button"
                         onClick={(e) => { e.stopPropagation(); toggleFavorite(o.id); }}
                         disabled={vtoLoading}
                         className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
@@ -337,7 +340,7 @@ export default function Home() {
                         <span className="text-green-400">{score}% harmony</span>
                       </div>
                     )}
-                  </button>
+                  </div>
                 );
               })}
             </div>
