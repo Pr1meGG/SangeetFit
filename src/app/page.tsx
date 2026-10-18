@@ -5,9 +5,9 @@ export const dynamic = "force-dynamic";
 
 import { useState, useCallback, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { X, CheckCircle, Shirt, ArrowLeft, Palette, Heart, Loader2, AlertCircle, Download, Share2, Link, MessageCircle } from "lucide-react";
+import { X, CheckCircle, Shirt, ArrowLeft, Palette, Heart, Loader2, AlertCircle, Download, Share2, MessageCircle, Bell } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import { OUTFITS, type Outfit, type Occasion } from "@/data/outfits";
+import { OUTFITS, type Outfit, type Occasion, type Audience } from "@/data/outfits";
 import { hueSimilarity } from "@/lib/color";
 import { compressImageForUpload } from "@/lib/image";
 
@@ -17,6 +17,12 @@ const OCCASIONS: { id: Occasion; label: string }[] = [
   { id: "haldi", label: "Haldi" },
   { id: "wedding", label: "Wedding" },
   { id: "reception", label: "Reception" },
+];
+
+const AUDIENCES: { id: Audience | "all"; label: string }[] = [
+  { id: "women", label: "Women's wear" },
+  { id: "men", label: "Men's wear" },
+  { id: "all", label: "All styles" },
 ];
 
 type Step = 1 | 2 | 3;
@@ -33,6 +39,20 @@ interface VTOResult {
   resultUrl?: string;
   mode?: string;
   error?: string;
+}
+
+// Warm-tinted hue names for the honest colour-harmony explanation line.
+function harmonyNote(skinHex: string, outfit: Outfit): string | null {
+  const r = parseInt(skinHex.slice(1, 3), 16);
+  const g = parseInt(skinHex.slice(3, 5), 16);
+  const b = parseInt(skinHex.slice(5, 7), 16);
+  const warmth = r - b; // positive = warm/golden, negative = cool
+  const warmOutfit = (hueSimilarity(skinHex, outfit.primaryColor) ?? 0) >= 0.5;
+  if (warmth > 30 && warmOutfit) return "Golden tones suit this warm palette";
+  if (warmth > 30) return "Golden tones pair well with richer variants of this palette";
+  if (warmth < -30 && !warmOutfit) return "Cooler tones suit this palette";
+  if (warmth < -30) return "Cooler tones pair well with lighter variants of this palette";
+  return "Neutral tones work across this palette";
 }
 
 // Separate component to use useSearchParams() — wrapped in Suspense for prerendering
@@ -64,8 +84,8 @@ function SearchParamHandler({
 export default function Home() {
   const [step, setStep] = useState<Step>(1);
   const [occasion, setOccasion] = useState<Occasion>("sangeet");
+  const [audience, setAudience] = useState<Audience | "all">("all");
   const [skinColor, setSkinColor] = useState<string | null>(null);
-  const [selfieDataUrl, setSelfieDataUrl] = useState<string | null>(null);
   const [fullBodyDataUrl, setFullBodyDataUrl] = useState<string | null>(null);
   const [fullBodyError, setFullBodyError] = useState<string | null>(null);
   const [skinError, setSkinError] = useState<string | null>(null);
@@ -76,12 +96,17 @@ export default function Home() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
   const [showShortlist, setShowShortlist] = useState(false);
+  const [consentGiven, setConsentGiven] = useState(false);
 
   const runVTO = useCallback(
-    async (garmentId: string, category: string, source?: string) => {
+    async (outfit: Outfit, source?: string) => {
       const src = source ?? fullBodyDataUrl ?? null;
       if (!src) {
         setVtoError("Please upload a full-body photo before trying on outfits.");
+        return;
+      }
+      if (!outfit.vtoSupported || !outfit.tryOnReference) {
+        setVtoError("Try-on is not available for this piece yet.");
         return;
       }
       setVtoLoading(true);
@@ -89,7 +114,13 @@ export default function Home() {
         const res = await fetch("/api/vto", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fullBodyDataUrl: src, garmentId, category }),
+          body: JSON.stringify({
+            fullBodyDataUrl: src,
+            garmentId: outfit.id,
+            referenceAsset: outfit.tryOnReference,
+            vtoSupported: outfit.vtoSupported,
+            displayImage: outfit.imageUrl,
+          }),
         });
         const data: VTOResult = await res.json();
         if (data.success && typeof data.resultUrl === "string") {
@@ -116,7 +147,7 @@ export default function Home() {
       if (outfit) {
         setVtoModal({ open: true, outfit, resultUrl: "", mode: "" });
         if (fullBodyDataUrl) {
-          setTimeout(() => runVTO(outfit.id, outfit.category), 100);
+          setTimeout(() => runVTO(outfit), 100);
         }
       }
     }
@@ -134,7 +165,6 @@ export default function Home() {
       const data: SkinResult = await res.json();
       if (!data.success || !data.skin_color) throw new Error(data.error || "Skin analysis failed");
       setSkinColor(data.skin_color);
-      setSelfieDataUrl(dataUrl);
     } catch (err: any) {
       setSkinError(err.message || "Skin analysis failed");
     } finally {
@@ -143,15 +173,16 @@ export default function Home() {
   }, []);
 
   const openVTO = useCallback((outfit: Outfit) => {
+    if (!outfit.vtoSupported) return;
     setVtoModal({ open: true, outfit, resultUrl: "", mode: "" });
     setVtoError(null);
     setFullBodyError(null);
-    if (fullBodyDataUrl) runVTO(outfit.id, outfit.category);
+    if (fullBodyDataUrl) runVTO(outfit);
   }, [fullBodyDataUrl, runVTO]);
 
 
   const retryVTO = useCallback(() => {
-    if (vtoModal) runVTO(vtoModal.outfit.id, vtoModal.outfit.category);
+    if (vtoModal) runVTO(vtoModal.outfit);
   }, [vtoModal, runVTO]);
 
   const closeVTO = useCallback(() => {
@@ -189,7 +220,8 @@ export default function Home() {
   }, []);
 
   const curated = useMemo(() => {
-    const filtered = OUTFITS.filter(o => o.occasion === occasion);
+    const filtered = OUTFITS.filter(o => o.occasion === occasion)
+      .filter(o => audience === "all" || o.audience === audience || o.audience === "unisex");
     if (showShortlist) return filtered.filter(o => favorites.has(o.id));
     return filtered.sort((a, b) => {
       const sa = skinColor ? hueSimilarity(skinColor, a.primaryColor) : null;
@@ -199,11 +231,26 @@ export default function Home() {
       if (sb === null) return -1;
       return sb - sa;
     });
-  }, [occasion, skinColor, favorites, showShortlist]);
+  }, [occasion, audience, skinColor, favorites, showShortlist]);
 
   const shortlistCount = favorites.size;
 
   const stepLabel = (s: Step) => (s === 1 ? "Select occasion" : s === 2 ? "Skin-tone analysis" : "Curated gallery");
+
+  const handleFullBodyFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { setFullBodyError("Please upload an image file"); return; }
+    if (file.size > 10 * 1024 * 1024) { setFullBodyError("Full-body photo must be under 10MB"); return; }
+    setFullBodyError(null);
+    compressImageForUpload(file, 1600)
+      .then(dataUrl => {
+        setFullBodyDataUrl(dataUrl);
+        if (vtoModal) runVTO(vtoModal.outfit, dataUrl);
+      })
+      .catch(err => setFullBodyError((err as Error).message || "Could not process the image"));
+  };
 
   return (
     <main className="min-h-screen">
@@ -304,7 +351,7 @@ export default function Home() {
         {/* ── Step 3: Gallery ── */}
         {step === 3 && (
           <div className="glass rounded-xl p-6 space-y-5">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-2">
                 <ArrowLeft className="w-4 h-4 text-gray-500 cursor-pointer hover:text-violet-400" onClick={() => setStep(2)} />
                 <h2 className="font-semibold">Curated gallery — {occasion.charAt(0).toUpperCase() + occasion.slice(1)}</h2>
@@ -327,10 +374,28 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Collection selector — explicit choice, never inferred from photos */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {AUDIENCES.map(a => (
+                <button
+                  key={a.id}
+                  onClick={() => setAudience(a.id)}
+                  className={`px-4 py-1.5 text-xs border rounded-full transition-colors ${
+                    audience === a.id
+                      ? "border-violet-500 bg-violet-500/10 text-violet-400"
+                      : "border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-400"
+                  }`}
+                >
+                  {a.label}
+                </button>
+              ))}
+            </div>
+
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {curated.map((o: Outfit) => {
                 const sim = skinColor ? hueSimilarity(skinColor, o.primaryColor) : null;
                 const score = sim == null ? null : Math.round(sim * 100);
+                const note = skinColor ? harmonyNote(skinColor, o) : null;
                 return (
                   <div
                     key={o.id}
@@ -338,12 +403,25 @@ export default function Home() {
                     tabIndex={0}
                     onClick={() => openVTO(o)}
                     onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openVTO(o); } }}
-                    className={`group p-3 rounded-lg border transition-all cursor-pointer ${
-                      vtoLoading ? "opacity-60 cursor-not-allowed" : "border-gray-700 hover:border-violet-500 hover:bg-violet-500/5"
+                    className={`group p-3 rounded-lg border transition-all ${
+                      o.vtoSupported
+                        ? vtoLoading ? "opacity-60 cursor-not-allowed" : "cursor-pointer border-gray-700 hover:border-violet-500 hover:bg-violet-500/5"
+                        : "border-gray-700 opacity-90"
                     }`}
+                    aria-disabled={!o.vtoSupported}
                   >
                     <div className="relative">
-                      <img src={o.imageUrl} alt={o.name} className="w-full h-32 object-cover rounded mb-2 bg-gray-900" />
+                      <div className="w-full h-32 rounded mb-2 bg-gray-900" style={{ aspectRatio: "1 / 1" }}>
+                        <img src={o.imageUrl} alt={o.name} className="w-full h-full object-cover rounded" />
+                      </div>
+                      <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 text-[10px] rounded bg-black/60 text-gray-300 capitalize">
+                        {o.audience}
+                      </span>
+                      {!o.vtoSupported && (
+                        <span className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 text-[10px] rounded bg-black/70 text-yellow-400">
+                          Try-on not available
+                        </span>
+                      )}
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); toggleFavorite(o.id); }}
@@ -355,11 +433,18 @@ export default function Home() {
                       </button>
                     </div>
                     <div className="text-sm font-medium">{o.name}</div>
-                    <div className="text-xs text-gray-500">{o.category}</div>
+                    <div className="text-xs text-gray-500 capitalize">{o.garmentType} · {o.collection}</div>
                     {score != null && (
                       <div className="mt-2 text-xs flex items-center gap-1">
                         <Palette className="w-3 h-3" style={{ backgroundColor: o.primaryColor }} />
                         <span className="text-green-400">{score}% harmony</span>
+                      </div>
+                    )}
+                    {note && <div className="mt-1 text-xs text-gray-500">{note}</div>}
+                    {!o.vtoSupported && (
+                      <div className="mt-2 text-xs text-gray-600 flex items-start gap-1">
+                        <Bell className="w-3 h-3 mt-0.5 shrink-0 text-gray-600" />
+                        <span>Try-on not available for this piece yet — new garment models are coming.</span>
                       </div>
                     )}
                   </div>
@@ -371,19 +456,21 @@ export default function Home() {
             {vtoModal && (
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                 <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeVTO} />
-                <div className="relative glass rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto border border-violet-500/30">
-                  <button onClick={closeVTO} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
+                <div className="relative glass rounded-2xl p-6 w-full max-w-lg max-h-[90vh] flex flex-col border border-violet-500/30">
+                  <button onClick={closeVTO} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors z-10">
                     <X className="w-5 h-5" />
                   </button>
 
-                  <div className="flex items-center gap-3 mb-5">
+                  <div className="flex items-center gap-3 mb-5 shrink-0">
                     <img src={vtoModal.outfit.imageUrl} alt={vtoModal.outfit.name} className="w-16 h-16 object-cover rounded-lg bg-gray-900" />
                     <div>
                       <div className="font-semibold">{vtoModal.outfit.name}</div>
-                      <div className="text-xs text-gray-500">{vtoModal.outfit.category} · {vtoModal.outfit.occasion}</div>
+                      <div className="text-xs text-gray-500 capitalize">{vtoModal.outfit.garmentType} · {vtoModal.outfit.occasion}</div>
+                      <div className="text-[10px] text-gray-600 mt-0.5">Catalog preview image — not your photo, not an AI result</div>
                     </div>
                   </div>
 
+                  <div className="overflow-y-auto flex-1 min-h-0 pr-1">
                   {/* Loading */}
                   {vtoLoading && (
                     <div className="flex flex-col items-center justify-center py-12 gap-3">
@@ -419,37 +506,35 @@ export default function Home() {
                   {/* Result */}
                   {!vtoLoading && !vtoError && vtoModal.resultUrl && (
                     <div className="space-y-3">
-                      <img
-                        src={vtoModal.resultUrl}
-                        alt={`Try-on result for ${vtoModal.outfit.name}`}
-                        className="w-full rounded-lg bg-gray-900"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = "none";
-                          if (vtoModal.resultUrl) {
-                            const link = document.createElement("a");
-                            link.href = vtoModal.resultUrl;
-                            link.download = `vto-${vtoModal.outfit.id}.png`;
-                            link.click();
-                          }
-                        }}
-                      />
-                      {!vtoModal.resultUrl.startsWith("http") && !vtoModal.resultUrl.startsWith("/") && (
-                        <div className="p-3 rounded-lg bg-violet-500/5 border border-violet-500/20 text-xs text-gray-400 font-mono break-all">
-                          {vtoModal.resultUrl}
-                        </div>
-                      )}
+                      <div className="w-full rounded-lg bg-gray-900" style={{ aspectRatio: "3 / 4" }}>
+                        <img
+                          src={vtoModal.resultUrl}
+                          alt={`Try-on result for ${vtoModal.outfit.name}`}
+                          className="w-full h-full object-cover rounded-lg"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = "none";
+                            if (vtoModal.resultUrl) {
+                              const link = document.createElement("a");
+                              link.href = vtoModal.resultUrl;
+                              link.download = `vto-${vtoModal.outfit.id}.png`;
+                              link.click();
+                            }
+                          }}
+                        />
+                      </div>
                       <div className="flex items-center gap-2 text-xs text-gray-500">
                         {vtoModal.mode === "live" ? (
-                          <CheckCircle className="w-3 h-3 text-green-400" />
+                          <>
+                            <CheckCircle className="w-3 h-3 text-green-400" />
+                            <span>Generated result — live render from YouCam API</span>
+                          </>
                         ) : (
-                          <AlertCircle className="w-3 h-3 text-yellow-400" />
+                          <>
+                            <AlertCircle className="w-3 h-3 text-yellow-400" />
+                            <span>Mock placeholder — set YOUCAM_API_KEY for real renders</span>
+                          </>
                         )}
-                        <span>
-                          {vtoModal.mode === "live"
-                            ? "Live render from YouCam API"
-                            : "Mock result — set YOUCAM_API_KEY for real renders"}
-                        </span>
                       </div>
                     </div>
                   )}
@@ -460,7 +545,19 @@ export default function Home() {
                       <p className="text-sm text-gray-400 mb-3">
                         Start virtual try-on with a photo of yourself.
                       </p>
-                      {fullBodyDataUrl ? (
+                      {!consentGiven ? (
+                        <div className="space-y-3">
+                          <div className="p-3 rounded-lg border border-violet-500/30 bg-violet-500/5 text-xs text-gray-400 text-left">
+                            Your photo is sent to YouCam&apos;s AI to generate the try-on. It is used only to render this result and is not stored by us.
+                          </div>
+                          <button
+                            onClick={() => setConsentGiven(true)}
+                            className="px-4 py-2 text-xs border border-violet-500 text-violet-400 rounded hover:bg-violet-500/10 transition-colors"
+                          >
+                            I understand — continue
+                          </button>
+                        </div>
+                      ) : fullBodyDataUrl ? (
                         <div className="flex flex-col items-center gap-3">
                           <img
                             src={fullBodyDataUrl}
@@ -504,27 +601,15 @@ export default function Home() {
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={e => {
-                          const file = e.target.files?.[0];
-                          e.target.value = "";
-                          if (!file) return;
-                          if (!file.type.startsWith("image/")) { setFullBodyError("Please upload an image file"); return; }
-                          if (file.size > 10 * 1024 * 1024) { setFullBodyError("Full-body photo must be under 10MB"); return; }
-                          setFullBodyError(null);
-                          compressImageForUpload(file, 1600)
-                            .then(dataUrl => {
-                              setFullBodyDataUrl(dataUrl);
-                              if (vtoModal) runVTO(vtoModal.outfit.id, vtoModal.outfit.category, dataUrl);
-                            })
-                            .catch(err => setFullBodyError((err as Error).message || "Could not process the image"));
-                        }}
+                        onChange={handleFullBodyFile}
                       />
                     </div>
                   )}
+                  </div>
 
-                  {/* Actions */}
+                  {/* Actions — sticky within the modal on small screens */}
                   {fullBodyDataUrl && (
-                  <div className="flex items-center gap-2 mt-5 pt-4 border-t border-gray-800">
+                  <div className="flex items-center gap-2 flex-wrap mt-4 pt-4 border-t border-gray-800 shrink-0 sticky bottom-0 bg-inherit">
                     <button
                       onClick={retryVTO}
                       disabled={vtoLoading}

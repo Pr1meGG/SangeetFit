@@ -95,17 +95,20 @@ assert(!skinSource.includes('data.data.task_status === "failed"'));
 console.log("PASS: skin task uses src_file_id and task_id");
 
 const vtoSource = readSource("src/app/api/vto/route.ts");
-for (const category of ["lehenga", "anarkali", "saree", "palazzo", "kurti", "gown", "suit", "sharara"]) {
-  assert(vtoSource.includes(`${category}: "auto"`), `category ${category} must map to auto`);
+// Per-outfit reference allowlist with garmentType scoping (no category collapse).
+for (const asset of ["lehenga_ethnic_hd.png", "user_saree.png", "kurta_set_hd.png", "western_dress_hd.png"]) {
+  assert(vtoSource.includes(`"${asset}"`), `reference asset ${asset} must be allowlisted`);
 }
+assert(vtoSource.includes('garmentTypes: ["lehenga-choli"]'));
+assert(vtoSource.includes('garmentTypes: ["saree"]'));
+assert(vtoSource.includes('garmentTypes: ["kurta-set"]'));
+assert(vtoSource.includes('garmentTypes: ["gown"]'));
+assert(!/fullbody_mock/.test(vtoSource.match(/const REFERENCE_ASSETS[\s\S]{0,600}};/)?.[0] ?? ""), "fullbody_mock.png must not be allowlisted as a garment reference");
 // VTO uses the separate full-body input, not the face selfie.
 assert(vtoSource.includes("parseDataUrl(fullBodyDataUrl)"));
 assert(!vtoSource.includes("selfieDataUrl"), "VTO must not reference the face selfie");
-assert(vtoSource.includes("GARMENT_REFERENCES[category]"));
-assert(vtoSource.includes('saree: { fileName: "user_saree.png"'));
-assert(vtoSource.includes('lehenga: { fileName: "lehenga_ethnic_hd.png"'));
-assert(vtoSource.includes('kurti: { fileName: "kurta_set_hd.png"'));
-assert(vtoSource.includes('gown: { fileName: "western_dress_hd.png"'));
+assert(vtoSource.includes("Try-on is not supported for this outfit yet"));
+assert(vtoSource.includes('outfit.youcamCategory'));
 assert(vtoSource.includes('mode: "live"'));
 assert(vtoSource.includes("/task/cloth-v4/${taskId}"));
 assert(vtoSource.includes('data.data.task_status === "error"'));
@@ -119,24 +122,30 @@ assert(vtoSource.includes("never fall back to a sample"), "live mode must not fa
 console.log("PASS: VTO category, full-body source, and live contract");
 
 const pageSource = readSource("src/app/page.tsx");
-assert(pageSource.includes("body: JSON.stringify({ fullBodyDataUrl: src, garmentId, category })"));
+assert(pageSource.includes("garmentId: outfit.id"));
+assert(pageSource.includes("referenceAsset: outfit.tryOnReference"));
+assert(pageSource.includes("vtoSupported: outfit.vtoSupported"));
+assert(pageSource.includes("displayImage: outfit.imageUrl"));
 assert(!pageSource.includes("selfieDataUrl, garmentId"), "frontend must not send the face selfie to VTO");
 assert(pageSource.includes("src={vtoModal.resultUrl}"));
 assert(pageSource.includes('mode: data.mode || "mock"'));
+// Unsupported pieces are blocked client-side too, and honest in the card UI.
+assert(pageSource.includes("if (!outfit.vtoSupported || !outfit.tryOnReference)"));
+assert(pageSource.includes("Try-on not available"));
 // Client-side validation for the full-body photo.
 assert(pageSource.includes('file.type.startsWith("image/")'));
 assert(pageSource.includes("10 * 1024 * 1024"));
 // Outfit change preserves the full-body input (kept in state, not read directly).
 assert(pageSource.includes("fullBodyDataUrl"));
-console.log("PASS: frontend forwards full-body and renders live URLs");
+console.log("PASS: frontend forwards per-outfit fields and renders live URLs");
 
 const skinMockSource = skinSource.match(/MOCK_MODE[\s\S]{0,240}mode: "mock"/)?.[0] ?? "";
-const vtoMockSource = vtoSource.match(/MOCK_MODE[\s\S]{0,1800}mode: "mock"/)?.[0] ?? "";
+const vtoMockSource = vtoSource.match(/MOCK_MODE[\s\S]{0,900}mode: "mock"/)?.[0] ?? "";
 assert(skinMockSource.includes('skin_color: "#b9947c"'));
-assert(vtoMockSource.includes('resultUrl: mockUrl'));
+assert(vtoMockSource.includes("mockUrl"));
 assert(vtoMockSource.includes('mode: "mock"'));
-// Mock mode uses the clearly-identified bundled sample full-body source.
-assert(vtoMockSource.includes("fullbody_mock.png"), "mock mode identifies fullbody_mock.png as the sample source");
+// Mock placeholder aligns with the catalog preview (outfit-specific display image).
+assert(vtoMockSource.includes("displayImage"), "mock result echoes outfit-specific display image");
 assert(/mock/i.test(vtoMockSource), "mock results are clearly labelled");
 console.log("PASS: mock behavior preserved");
 

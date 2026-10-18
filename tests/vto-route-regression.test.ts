@@ -46,14 +46,26 @@ assert(
   "FAIL: live mode must reject missing credentials with a clear config error, not a silent mock fallback"
 );
 assert(
-  vtoRouteSource.includes('const MOCK_RESULT: Record<string, string>'),
-  "FAIL: mock category-to-image mapping missing"
+  vtoRouteSource.includes("mockUrl"),
+  "FAIL: mock resultUrl should use the outfit-specific mockUrl"
 );
 assert(
-  vtoRouteSource.includes('resultUrl: mockUrl'),
-  "FAIL: mock resultUrl should use category-mapped mockUrl"
+  vtoRouteSource.includes("displayImage: outfit.imageUrl"),
+  "FAIL: mock result must echo the outfit display image so placeholder matches preview"
 );
-console.log("PASS: mock mode guard and category-mapped resultUrl intact");
+assert(
+  vtoRouteSource.includes("REFERENCE_ASSETS"),
+  "FAIL: per-outfit reference allowlist missing"
+);
+assert(
+  vtoRouteSource.includes("Try-on is not supported for this outfit yet"),
+  "FAIL: no-substitute 400 error for unsupported outfits missing"
+);
+assert(
+  !vtoRouteSource.includes("GARMENT_REFERENCES"),
+  "FAIL: collapsed category -> reference map should be gone"
+);
+console.log("PASS: mock placeholder, reference allowlist, and no-substitute guard intact");
 
 // ── Test 3: submitTask returns data.data.task_id (contract preserved) ────────
 

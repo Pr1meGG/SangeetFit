@@ -18,30 +18,31 @@ const MOCK_MODE = process.env.MOCK_MODE === "true";
 interface VTORequest {
   fullBodyDataUrl?: string;
   garmentId: string;
-  category: string;
+  /** Exact reference asset filename from public/garment_test, one of REFERENCE_ASSETS. */
+  referenceAsset: string;
+  /** Frontend echo of outfit.vtoSupported — server still validates the reference. */
+  vtoSupported: boolean;
+  /** Outfit display thumbnail; used as the mock placeholder so mock result and catalog preview align. */
+  displayImage: string;
 }
 
-const GARMENT_REFERENCES: Record<string, { fileName: string; contentType: string }> = {
-  lehenga: { fileName: "lehenga_ethnic_hd.png", contentType: "image/png" },
-  anarkali: { fileName: "user_saree.png", contentType: "image/png" },
-  saree: { fileName: "user_saree.png", contentType: "image/png" },
-  palazzo: { fileName: "kurta_set_hd.png", contentType: "image/png" },
-  kurti: { fileName: "kurta_set_hd.png", contentType: "image/png" },
-  gown: { fileName: "western_dress_hd.png", contentType: "image/png" },
-  suit: { fileName: "western_dress_hd.png", contentType: "image/png" },
-  sharara: { fileName: "lehenga_ethnic_hd.png", contentType: "image/png" },
+/**
+ * Allowlist of reference assets that live in public/garment_test, with the
+ * garmentTypes each one may serve. A reference must VISUALLY correspond to
+ * the product — no category-level collapse, no garment substitution.
+ * Assets depicting a person (fullbody_mock.png) are intentionally excluded.
+ */
+const REFERENCE_ASSETS: Record<string, { contentType: string; garmentTypes: string[] }> = {
+  "lehenga_ethnic_hd.png": { contentType: "image/png", garmentTypes: ["lehenga-choli"] },
+  "user_saree.png": { contentType: "image/png", garmentTypes: ["saree"] },
+  "kurta_set_hd.png": { contentType: "image/png", garmentTypes: ["kurta-set"] },
+  "western_dress_hd.png": { contentType: "image/png", garmentTypes: ["gown"] },
 };
 
-const YOUCAM_CATEGORY_MAP: Record<string, "auto"> = {
-  lehenga: "auto",
-  anarkali: "auto",
-  saree: "auto",
-  palazzo: "auto",
-  kurti: "auto",
-  gown: "auto",
-  suit: "auto",
-  sharara: "auto",
-};
+async function getOutfit(garmentId: string) {
+  const { OUTFITS } = await import("@/data/outfits");
+  return OUTFITS.find(o => o.id === garmentId) || null;
+}
 
 async function submitTask(apiKey: string, srcFileId: string, refFileId: string, category: string): Promise<string> {
   const res = await fetch(`${YOUCAM_BASE}/task/cloth-v4`, {
@@ -94,16 +95,24 @@ async function pollTask(apiKey: string, taskId: string, timeout = 180000): Promi
 export async function POST(req: NextRequest) {
   try {
     const body: VTORequest = await req.json();
-    const { fullBodyDataUrl, garmentId, category } = body;
+    const { fullBodyDataUrl, garmentId, referenceAsset, vtoSupported, displayImage } = body;
 
-    // Validate garment before any image/external logic.
-    const garmentReference = GARMENT_REFERENCES[category];
-    if (!garmentReference) {
-      return NextResponse.json({ success: false, error: "Unknown garment" }, { status: 400 });
+    // Validate the outfit identity before any image/external logic.
+    const outfit = await getOutfit(garmentId);
+    if (!outfit) {
+      return NextResponse.json({ success: false, error: "Unknown outfit" }, { status: 400 });
     }
-    const youcamCategory = YOUCAM_CATEGORY_MAP[category];
-    if (!youcamCategory) {
-      return NextResponse.json({ success: false, error: "Invalid garment category" }, { status: 400 });
+
+    const reference = referenceAsset ? REFERENCE_ASSETS[referenceAsset] : null;
+    if (!reference) {
+      return NextResponse.json({ success: false, error: "Unknown garment reference" }, { status: 400 });
+    }
+    // Reference must be permitted for THIS garment type — no cross-garment substitution.
+    if (!reference.garmentTypes.includes(outfit.garmentType)) {
+      return NextResponse.json({ success: false, error: "Try-on is not supported for this outfit yet" }, { status: 400 });
+    }
+    if (!vtoSupported || outfit.tryOnReference !== referenceAsset) {
+      return NextResponse.json({ success: false, error: "Try-on is not supported for this outfit yet" }, { status: 400 });
     }
 
     const parsedFullBody = fullBodyDataUrl ? parseDataUrl(fullBodyDataUrl) : null;
@@ -115,23 +124,13 @@ export async function POST(req: NextRequest) {
     }
 
     if (MOCK_MODE) {
-      // Mock mode: the source is the bundled sample full-body photo
-      // (public/garment_test/fullbody_mock.png), and results are clearly labelled mock.
-      // Map outfit categories to existing mock result images
-      const MOCK_RESULT: Record<string, string> = {
-        lehenga: "/garment_test/lehenga_ethnic_hd.png",
-        anarkali: "/garment_test/user_saree.png",
-        saree: "/garment_test/user_saree.png",
-        palazzo: "/garment_test/kurta_set_hd.png",
-        kurti: "/garment_test/kurta_set_hd.png",
-        gown: "/garment_test/western_dress_hd.png",
-        suit: "/garment_test/western_dress_hd.png",
-        sharara: "/garment_test/lehenga_ethnic_hd.png",
-      };
-      const mockUrl = MOCK_RESULT[category] || "/garment_test/user_saree.png";
+      // Mock mode: results are placeholders — show the SAME display thumbnail the
+      // catalog preview uses, clearly labelled, so what you preview is what mock shows.
+      const mockUrl = displayImage && displayImage.startsWith("/outfits/") ? displayImage : outfit.imageUrl;
       return NextResponse.json({
         success: true,
         resultUrl: mockUrl,
+        displayImage: outfit.imageUrl,
         mode: "mock",
       });
     }
@@ -156,15 +155,15 @@ export async function POST(req: NextRequest) {
       fileName: parsedFullBody.contentType === "image/png" ? "fullbody.png" : "fullbody.jpg",
       contentType: parsedFullBody.contentType,
     });
-    const garmentBuffer = await fs.readFile(path.join(process.cwd(), "public", "garment_test", garmentReference.fileName));
+    const garmentBuffer = await fs.readFile(path.join(process.cwd(), "public", "garment_test", referenceAsset));
     const refFileId = await uploadYouCamFile({
       apiKey: YOUCAM_API_KEY,
       baseUrl: YOUCAM_BASE,
       buffer: garmentBuffer,
-      fileName: garmentReference.fileName,
-      contentType: garmentReference.contentType,
+      fileName: referenceAsset,
+      contentType: reference.contentType,
     });
-    const taskId = await submitTask(YOUCAM_API_KEY, srcFileId, refFileId, youcamCategory);
+    const taskId = await submitTask(YOUCAM_API_KEY, srcFileId, refFileId, outfit.youcamCategory);
     const resultUrl = await pollTask(YOUCAM_API_KEY, taskId);
 
     return NextResponse.json({ success: true, resultUrl, mode: "live" });
