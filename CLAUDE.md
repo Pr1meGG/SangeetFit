@@ -49,6 +49,30 @@ YouCam Clothes VTO (Virtual Try-On) application built with Next.js 14, TypeScrip
 - Avoid unnecessary agents, abstractions, dependencies and infrastructure.
 - Given my beginner-level implementation experience, explain significant architectural decisions and non-obvious trade-offs clearly, without overexplaining trivial syntax.
 
+## Multi-Agent Workflow
+
+For multi-step development, complex debugging, parallel work, or release preparation, use the `sangeetfit-workflow` skill (`.claude/skills/sangeetfit-workflow/SKILL.md`). It orchestrates the project's native subagents:
+
+| Agent | Role | Tools |
+|-------|------|-------|
+| `sf-scout` | Read-only investigation (code, APIs, evidence) | read-only |
+| `sf-builder` | Bounded implementation, smallest complete change | edit + run |
+| `sf-qa` | Local tests, tsc, build, report exact results | run-only |
+| `sf-reviewer` | Independent post-implementation review | read-only |
+| `sf-submission` | Hackathon docs, README, demo, pitch | docs-only |
+
+Durable rules: file ownership is disjoint per agent — never let multiple agents edit the same files concurrently; the primary session owns shared files, integration, verification, and final decisions. Max three concurrent spawned subagents (workflow rule; Claude Code has no supported config key for this). Playbook copyable prompts live in `docs/agent-workflow/PLAYBOOK.md`; durable facts in `PROJECT_STATE.md`, backlog in `TASK_BOARD.md`.
+
+## Safety and Approval Rules
+
+- Keep mock mode enabled for ordinary local development unless explicitly requested otherwise. No live YouCam API tasks, paid operations, deployments, or external side effects without explicit approval for that specific action.
+- No destructive Git operations, bulk restoration/deletion, or commits/pushes without explicit user approval.
+- Never print secrets, image contents, or sensitive personal data. Do not read `.env.local` values.
+- Do not repeat failed operations in loops; after a 429, stop and seek a lower-cost path.
+- Do not open individual images or build contact sheets repeatedly unless visual inspection is necessary.
+- Run appropriate tests and report actual results; never claim a command passed if it was not executed successfully.
+- Preserve user work. Stop when evidence is insufficient rather than guessing. Don't ask approval for every harmless local action — operate independently inside stated task boundaries.
+
 ## Skill Routing
 
 Route requests to the appropriate skill based on task type:
