@@ -9,6 +9,7 @@ import { X, CheckCircle, Shirt, ArrowLeft, Palette, Heart, Loader2, AlertCircle,
 import Navbar from "@/components/Navbar";
 import { OUTFITS, type Outfit, type Occasion } from "@/data/outfits";
 import { hueSimilarity } from "@/lib/color";
+import { compressImageForUpload } from "@/lib/image";
 
 const OCCASIONS: { id: Occasion; label: string }[] = [
   { id: "sangeet", label: "Sangeet" },
@@ -267,9 +268,9 @@ export default function Home() {
                 if (!file.type.startsWith("image/")) { setSkinError("Please upload an image file"); return; }
                 if (file.size > 10 * 1024 * 1024) { setSkinError("Image must be under 10MB"); return; }
                 setSkinError(null);
-                const reader = new FileReader();
-                reader.onload = (ev) => analyzeSkin(ev.target?.result as string);
-                reader.readAsDataURL(file);
+                compressImageForUpload(file, 1280, 1_500_000)
+                  .then(dataUrl => analyzeSkin(dataUrl))
+                  .catch(err => setSkinError((err as Error).message || "Could not process the image"));
               }} />
             </div>
 
@@ -510,13 +511,12 @@ export default function Home() {
                           if (!file.type.startsWith("image/")) { setFullBodyError("Please upload an image file"); return; }
                           if (file.size > 10 * 1024 * 1024) { setFullBodyError("Full-body photo must be under 10MB"); return; }
                           setFullBodyError(null);
-                          const reader = new FileReader();
-                          reader.onload = (ev) => {
-                            const dataUrl = ev.target?.result as string;
-                            setFullBodyDataUrl(dataUrl);
-                            if (vtoModal) runVTO(vtoModal.outfit.id, vtoModal.outfit.category, dataUrl);
-                          };
-                          reader.readAsDataURL(file);
+                          compressImageForUpload(file, 1600)
+                            .then(dataUrl => {
+                              setFullBodyDataUrl(dataUrl);
+                              if (vtoModal) runVTO(vtoModal.outfit.id, vtoModal.outfit.category, dataUrl);
+                            })
+                            .catch(err => setFullBodyError((err as Error).message || "Could not process the image"));
                         }}
                       />
                     </div>

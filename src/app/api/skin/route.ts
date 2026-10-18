@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { parseDataUrl, uploadYouCamFile } from "@/lib/youcam";
+
+// Route polls YouCam for up to 180s; allow 300s per official Vercel limits
+// (Fluid Compute: Hobby default+max = 300s; legacy non-Fluid Hobby caps at 60s).
+// NOTE: verify the deployed project's Fluid Compute setting (Functions settings)
+// in the Vercel dashboard before live VTO is enabled — if Fluid is off, the
+// 180s poll exceeds the 60s legacy limit and requests will be terminated.
+export const maxDuration = 300;
 
 const YOUCAM_API_KEY = process.env.YOUCAM_API_KEY || "";
 const YOUCAM_BASE = process.env.YOUCAM_BASE_URL || "https://yce-api-01.makeupar.com/s2s/v2.0";
@@ -63,12 +71,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "imageDataUrl is required" }, { status: 400 });
     }
 
-    if (MOCK_MODE || !YOUCAM_API_KEY) {
+    if (MOCK_MODE) {
       return NextResponse.json({
         success: true,
         skin_color: "#b9947c",
         mode: "mock",
       });
+    }
+
+    if (!YOUCAM_API_KEY) {
+      // Live mode explicitly requested but not configured — never substitute a mock value.
+      return NextResponse.json(
+        { success: false, error: "Live skin analysis is unavailable: YOUCAM_API_KEY is not configured on this deployment", mode: "live" },
+        { status: 503 },
+      );
     }
 
     const parsedImage = parseDataUrl(imageDataUrl);

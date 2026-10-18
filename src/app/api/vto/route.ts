@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import fs from "fs/promises";
 import path from "path";
 import { parseDataUrl, uploadYouCamFile } from "@/lib/youcam";
+
+// Route polls YouCam for up to 180s; allow 300s per official Vercel limits
+// (Fluid Compute: Hobby default+max = 300s; legacy non-Fluid Hobby caps at 60s).
+// NOTE: verify the deployed project's Fluid Compute setting (Functions settings)
+// in the Vercel dashboard before live VTO is enabled — if Fluid is off, the
+// 180s poll exceeds the 60s legacy limit and requests will be terminated.
+export const maxDuration = 300;
 
 const YOUCAM_API_KEY = process.env.YOUCAM_API_KEY || "";
 const YOUCAM_BASE = process.env.YOUCAM_BASE_URL || "https://yce-api-01.makeupar.com/s2s/v2.0";
@@ -106,7 +114,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Full-body photo must be under 10MB" }, { status: 400 });
     }
 
-    if (MOCK_MODE || !YOUCAM_API_KEY) {
+    if (MOCK_MODE) {
       // Mock mode: the source is the bundled sample full-body photo
       // (public/garment_test/fullbody_mock.png), and results are clearly labelled mock.
       // Map outfit categories to existing mock result images
@@ -131,6 +139,14 @@ export async function POST(req: NextRequest) {
     // Live mode requires a real full-body source — never fall back to a sample.
     if (!parsedFullBody) {
       return NextResponse.json({ success: false, error: "A full-body photo is required for virtual try-on" }, { status: 400 });
+    }
+
+    if (!YOUCAM_API_KEY) {
+      // Live mode explicitly requested but not configured — never substitute a mock image.
+      return NextResponse.json(
+        { success: false, error: "Live try-on is unavailable: YOUCAM_API_KEY is not configured on this deployment", mode: "live" },
+        { status: 503 },
+      );
     }
 
     const srcFileId = await uploadYouCamFile({

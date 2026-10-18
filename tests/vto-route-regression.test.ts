@@ -38,8 +38,12 @@ console.log("PASS: poll URL uses ${taskId} interpolation");
 // ── Test 2: Mock mode response shape (no network call needed) ────────────────
 
 assert(
-  vtoRouteSource.includes('MOCK_MODE || !YOUCAM_API_KEY'),
-  "FAIL: mock-mode guard missing"
+  /if \(MOCK_MODE\)/.test(vtoRouteSource),
+  "FAIL: mock-mode guard missing (mock must gate on MOCK_MODE only)"
+);
+assert(
+  vtoRouteSource.includes("Live try-on is unavailable: YOUCAM_API_KEY is not configured on this deployment"),
+  "FAIL: live mode must reject missing credentials with a clear config error, not a silent mock fallback"
 );
 assert(
   vtoRouteSource.includes('const MOCK_RESULT: Record<string, string>'),
