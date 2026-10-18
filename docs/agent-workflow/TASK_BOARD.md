@@ -13,7 +13,7 @@ Compact prioritized backlog. Update after material task-status changes. No item 
 | T6 | High | Record demo video | open | 1-3 minute video, end-to-end, explaining YouCam API, uploaded to YouTube. Follow `docs/submission/DEMO_SCRIPT.md`. Mandatory per Devpost rules. | T5 |
 | T7 | High | Five-real-user live validation | **unblocked — not started** | ≥5 distinct participants complete recorded live sessions per `docs/testing/REAL_USER_VALIDATION.md`; mock-only sessions excluded; failures recorded honestly; retest affected cases. Live VTO pathway verified for one source/reference pair (T4); budget/pricing + participant consent required before scheduling. | Budget/pricing confirmation; participant consent |
 | T8 | High | Release / submission checks | open | Final regression, build, docs, demo checks green; accurate mock-vs-live claims. No commit/push/deploy without explicit approval. | T4,T6,T7 |
-| T9 | Medium | Resolve legacy diagnostic documentation | open | `scripts/garment_test.py` and `demo_script_vto.md` reviewed; stale `/file/cloth-v3` contract and stale instructions corrected or labeled. | Schedule when picked up |
+| T9 | Medium | Resolve legacy diagnostic documentation | **done** | `scripts/garment_test.py` and `demo_script_vto.md` reviewed; stale `/file/cloth-v3` contract and stale instructions corrected or labeled. Verified committed: script's LEGACY-evaluation docstring in `eede4d1`; demo-script stale paths corrected in `1895863` with the one remaining `out/garment_test/` mention explicitly labeled legacy. | None |
 
 Notes
 - Planned order per `docs/PRODUCT_SPEC.md` §7: product definition → fix source-image flow → live VTO diagnostic (done, single case) → capture screenshots + demo → five real-user sessions → submission checks.
