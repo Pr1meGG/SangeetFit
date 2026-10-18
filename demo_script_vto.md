@@ -2,7 +2,7 @@
 # Project: Proof (pivoted from skin-analysis; skin noise > 3pt spread / weak 2pt shift → dead)
 # Goal: end-to-end clothes virtual try-on via YouCam Clothes VTO (docs.perfectcorp.com/reference/ai_clothes)
 # Tech: Next.js app + agent UI; backend: garment_test.py (POST /file/cloth-v3 → PUT → POST /task/cloth-v4 → poll)
-# Assets: out/garment_test/{user_fullbody.jpg, saree.png, kurta_set.png, lehenga_ethnic.png, western_dress.png}
+# Assets: public/garment_test/{fullbody_mock.png, user_saree.png, kurta_set_hd.png, lehenga_ethnic_hd.png, western_dress_hd.png}
 
 RUN TIME: ~2:30 | FORMAT: screen-record + voiceover | TARGET: hackathon judge / investor
 
@@ -14,18 +14,18 @@ VOICE: "Proof started as skin-analysis. Noise was too high — 3-point spread, 2
 KEY LINE (subtitle): Pivot reason in 2 lines — no speculation.
 
 0:15 - 1:15 | DEMO: UPLOAD → TRY-ON (60s)
-SCREEN: Next.js app split-pane. LEFT: user's full-body photo (out/garment_test/user_fullbody.jpg). RIGHT: garment picker (saree, kurta, lehenga, western). MIDDLE: result panel loading → rendered.
-ACTION: Drop user_fullbody.jpg → pick sari → click "Try On" → show loading spinner (poll loop, 3s intervals, ~10-30s real) → result image appears (out/garment_test/saree_result.png).
-VOICE: "Two inputs only: your full-body photo and a garment reference. One API call to YouCam Clothes VTO — file upload, submit task, poll until success. No manual masking, no 3D model. The agent orchestrates the upload-poll-render loop behind the UI."
+SCREEN: Next.js app split-pane. LEFT: user's full-body photo (public/garment_test/fullbody_mock.png). RIGHT: garment picker (saree, kurta, lehenga, western). MIDDLE: result panel loading → rendered.
+ACTION: Drop fullbody_mock.png → pick sari → click "Try On" → show loading spinner → mock result appears (the route returns the garment reference from `public/garment_test/`, labeled "mock").
+VOICE: "Two inputs only: your full-body photo and a garment reference. The app sends them to the YouCam Clothes VTO API — file upload, submit task, poll until success. In mock mode we show the garment reference as a placeholder; a live result requires a validated full-body source and API key."
 ON-SCREEN LABELS: "Source file" / "Garment ref" / "Task status: polling..." / "Result URL"
-NOTE: Show real result if cached; else describe "polled to success, saved to out/garment_test/"
+NOTE: In mock mode the VTO result is the garment reference image from `public/garment_test/` (e.g. `user_saree.png` for saree), not a live composite. This demo script reflects the mock journey; live VTO output is not yet verified.
 
 1:15 - 2:00 | MULTIPLE GARMENT TYPES (45s)
 SCREEN: Quick carousel / split-4 showing all 4 outputs side-by-side.
-- 0:00  saree (category: ethnic) — flowing drape, full-body
-- 0:10  kurta_set (category: full_body) — structured upper + lower
-- 0:20  lehenga_ethnic (category: full_body) — layered skirt + blouse
-- 0:30  western_dress (category: full_body) — fitted silhouette
+- 0:00  user_saree (category: saree) — flowing drape, full-body
+- 0:10  kurta_set_hd (category: kurti) — structured upper + lower
+- 0:20  lehenga_ethnic_hd (category: lehenga) — layered skirt + blouse
+- 0:30  western_dress_hd (category: gown) — fitted silhouette
 VOICE: "Same body, four garment categories — saree for ethnic, kurta and lehenga full-body, western dress. The API handles category tagging via garment_category param; no per-garment model needed. All from one full-body source."
 KEY LINE (lower-third): "One body → 4 garments → 1 API (YouCam /s2s/v2.0/task/cloth-v4)"
 
@@ -46,8 +46,9 @@ FINAL SLIDE: "Next: batch try-on | size-adjustment layer | mobile camera input"
 ---
 
 PRODUCTION NOTES (for recorder — not in video):
-- Assets pre-staged in out/garment_test/; cache results so demo never waits on real API.
-- If demo runs live: pre-run garment_test.py once per garment to populate results; show cached outputs.
+- Current app assets live under `public/garment_test/` (the four category garments + `fullbody_mock.png` sample). The VTO route reads these in mock mode; results are the garment reference, labeled "mock".
+- The `out/garment_test/` path is a **legacy diagnostic** directory from `scripts/garment_test.py` (the older Python tool that writes results there). It is not used by the current Next.js app; do not present it as the live workflow.
+- If demo runs live: do not pre-run `garment_test.py` as the current flow — it uses the legacy upload contract. Use the app's own `/api/vto` only with `MOCK_MODE=false` and a valid API key, and only after live VTO is verified.
 - Voiceover tone: direct, no fluff — matches ponytail mode (lazy/efficient; explain only what's asked).
 - No over-built animation: static splits + simple fade. Code snippet from real garment_test.py (line 31 submit_task, 42 poll).
 - Pivot context (noise-test.md) shown only once at 0:00 — explains why we're here, not history for history's sake.
