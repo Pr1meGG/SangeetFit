@@ -59,7 +59,7 @@ async function submitTask(apiKey: string, srcFileId: string, refFileId: string, 
   });
 
   if (!res.ok) {
-    throw new Error(`Submit failed: ${res.status} ${await res.text()}`);
+    throw new Error(`Task submission failed: ${res.status}`);
   }
 
   const data = await res.json();

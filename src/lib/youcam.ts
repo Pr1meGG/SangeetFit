@@ -88,7 +88,7 @@ export async function uploadYouCamFile(input: {
   });
 
   if (!binaryRes.ok) {
-    throw new Error(`Binary upload failed: ${binaryRes.status}`);
+    throw new Error(`Binary (signed PUT) upload failed: ${binaryRes.status}`);
   }
 
   return fileEntry.file_id;
