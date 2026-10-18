@@ -49,7 +49,7 @@ For **each** participant (≥5 total), complete all steps and record the evidenc
 | Skin-tone result | hex value (or failure reason) |
 | Outfit selected | outfit id |
 | Full-body source provided | yes / no (and consent) |
-| Genuine live Cloth V4 attempt | completed / failed (record stage & error, e.g. `error_pose`) |
+| Genuine live Cloth V4 attempt | completed / failed (record stage & sanitized error category, e.g. `error_pose`) |
 | VTO result displayed | yes / failed / N/A |
 | Save/Download | ok / failed |
 | WhatsApp share | ok / failed |
@@ -59,6 +59,8 @@ For **each** participant (≥5 total), complete all steps and record the evidenc
 | Would use again | yes / no / maybe |
 
 ### 2.3 Exact steps each participant completes
+
+> **Precondition status (2026-10-18):** the live pathway is verified for **one** source/reference pair via the single approved diagnostic recorded in `docs/agent-workflow/PROJECT_STATE.md` (full-body source + lehenga reference, `garment_category:"auto"`, `running → success`, ~12 s). This confirms feasibility only — the five-participant validation below remains open until five distinct live sessions are recorded. Never count a mock result as a live success.
 1. **Occasion selection** — choose a wedding function.
 2. **Genuine live Skin Tone Analysis** — upload a face selfie; a live (not mock) task must run.
 3. **Review recommendations** — review the harmony-sorted gallery and select an outfit.

@@ -62,6 +62,17 @@ Verified in this run. The face selfie (`selfieDataUrl`) is now used for **Skin T
 - **Live VTO remains unresolved (no live run).** The `error_pose` hypothesis is untested live; requires an approved paid diagnostic (T4).
 - TASK_BOARD reordered: product def → fix source flow (T3) → approve live VTO test (T4) → screenshots+video (T5/T6) → 5 real-user sessions (T7) → submission checks (T8).
 
+## Live Cloth V4 diagnostic — SUCCESSFUL, single case (2026-10-18)
+
+Exactly one approved live task, per user authorization. Sanitized record (no ids, no task URLs, no credentials):
+- Source: `public/garment_test/fullbody_mock.png` (1,906,097 bytes; full-body PNG).
+- Garment reference: `public/garment_test/lehenga_ethnic_hd.png` (~3.4 MB PNG).
+- `garment_category: "auto"`. Transitions observed: `running → running → running → success`, ~12 s total.
+- Result URL returned (host only: an S3 endpoint). **No retries, no extra tasks** — exactly one task submitted.
+- **Conclusion:** the live VTO pipeline works for this specific source/reference pair. Working hypothesis supported, not conclusively proven: The earlier `error_pose` failure occurred when the VTO flow used a face-crop selfie. A subsequent single live Cloth V4 task succeeded with a full-body source image and the intended garment reference. This supports using a full-body source for VTO, but does not independently establish the cause of the earlier failure.
+- **NOT claimed:** broad reliability, multi-garment behavior, five-user validation, or production readiness. V4 pricing and actual unit deduction remain unverified — check the YouCam console before scheduling further live tasks.
+- Executed via a one-shot `/tmp` script reusing the app's documented upload contract (POST /file → presigned PUT → POST /task/cloth-v4 → poll), consistent with `src/lib/youcam.ts` / `vto/route.ts`. Repo untouched; `MOCK_MODE` unchanged.
+
 ## Browser QA + screenshots (2026-10-18, Task 5)
 
 - Ran real browser QA via Playwright (Chrome) against a `MOCK_MODE=true` dev server on :3100.
