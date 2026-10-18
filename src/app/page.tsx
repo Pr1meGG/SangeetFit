@@ -27,6 +27,13 @@ interface SkinResult {
   error?: string;
 }
 
+interface VTOResult {
+  success: boolean;
+  resultUrl?: string;
+  mode?: string;
+  error?: string;
+}
+
 // Separate component to use useSearchParams() — wrapped in Suspense for prerendering
 function SearchParamHandler({
   onRestore,
@@ -57,6 +64,9 @@ export default function Home() {
   const [step, setStep] = useState<Step>(1);
   const [occasion, setOccasion] = useState<Occasion>("sangeet");
   const [skinColor, setSkinColor] = useState<string | null>(null);
+  const [selfieDataUrl, setSelfieDataUrl] = useState<string | null>(null);
+  const [fullBodyDataUrl, setFullBodyDataUrl] = useState<string | null>(null);
+  const [fullBodyError, setFullBodyError] = useState<string | null>(null);
   const [skinError, setSkinError] = useState<string | null>(null);
   const [skinLoading, setSkinLoading] = useState(false);
   const [vtoLoading, setVtoLoading] = useState(false);
@@ -66,6 +76,36 @@ export default function Home() {
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
   const [showShortlist, setShowShortlist] = useState(false);
 
+  const runVTO = useCallback(
+    async (garmentId: string, category: string, source?: string) => {
+      const src = source ?? fullBodyDataUrl ?? null;
+      if (!src) {
+        setVtoError("Please upload a full-body photo before trying on outfits.");
+        return;
+      }
+      setVtoLoading(true);
+      try {
+        const res = await fetch("/api/vto", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fullBodyDataUrl: src, garmentId, category }),
+        });
+        const data: VTOResult = await res.json();
+        if (data.success && typeof data.resultUrl === "string") {
+          const resultUrl = data.resultUrl;
+          setVtoModal(prev => prev ? { ...prev, resultUrl, mode: data.mode || "mock" } : null);
+        } else {
+          setVtoError(data.error || "VTO failed");
+        }
+      } catch (err: any) {
+        setVtoError(err.message || "VTO request failed");
+      } finally {
+        setVtoLoading(false);
+      }
+    },
+    [fullBodyDataUrl]
+  );
+
   const handleRestore = useCallback((params: { step?: Step; occasion?: Occasion; skin?: string; vto?: string }) => {
     if (params.occasion) setOccasion(params.occasion);
     if (params.skin) setSkinColor(params.skin);
@@ -74,10 +114,12 @@ export default function Home() {
       const outfit = OUTFITS.find(o => o.id === params.vto);
       if (outfit) {
         setVtoModal({ open: true, outfit, resultUrl: "", mode: "" });
-        setTimeout(() => runVTO(outfit.id, outfit.category), 100);
+        if (fullBodyDataUrl) {
+          setTimeout(() => runVTO(outfit.id, outfit.category), 100);
+        }
       }
     }
-  }, []);
+  }, [fullBodyDataUrl, runVTO]);
 
   const analyzeSkin = useCallback(async (dataUrl: string) => {
     setSkinError(null);
@@ -91,6 +133,7 @@ export default function Home() {
       const data: SkinResult = await res.json();
       if (!data.success || !data.skin_color) throw new Error(data.error || "Skin analysis failed");
       setSkinColor(data.skin_color);
+      setSelfieDataUrl(dataUrl);
     } catch (err: any) {
       setSkinError(err.message || "Skin analysis failed");
     } finally {
@@ -101,32 +144,10 @@ export default function Home() {
   const openVTO = useCallback((outfit: Outfit) => {
     setVtoModal({ open: true, outfit, resultUrl: "", mode: "" });
     setVtoError(null);
-    runVTO(outfit.id, outfit.category);
-  }, []);
+    setFullBodyError(null);
+    if (fullBodyDataUrl) runVTO(outfit.id, outfit.category);
+  }, [fullBodyDataUrl, runVTO]);
 
-  const runVTO = useCallback(
-    async (garmentId: string, category: string) => {
-      setVtoLoading(true);
-      try {
-        const res = await fetch("/api/vto", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: "user_skin", garmentId, category }),
-        });
-        const data = await res.json();
-        if (data.success && data.resultUrl) {
-      setVtoModal(prev => prev ? { ...prev, resultUrl: data.resultUrl, mode: data.mode || "mock" } : null);
-        } else {
-          setVtoError(data.error || "VTO failed");
-        }
-      } catch (err: any) {
-        setVtoError(err.message || "VTO request failed");
-      } finally {
-        setVtoLoading(false);
-      }
-    },
-    []
-  );
 
   const retryVTO = useCallback(() => {
     if (vtoModal) runVTO(vtoModal.outfit.id, vtoModal.outfit.category);
@@ -398,7 +419,7 @@ export default function Home() {
                   {!vtoLoading && !vtoError && vtoModal.resultUrl && (
                     <div className="space-y-3">
                       <img
-                        src={vtoModal.resultUrl.startsWith("/") ? vtoModal.resultUrl : ""}
+                        src={vtoModal.resultUrl}
                         alt={`Try-on result for ${vtoModal.outfit.name}`}
                         className="w-full rounded-lg bg-gray-900"
                         onError={(e) => {
@@ -432,14 +453,77 @@ export default function Home() {
                     </div>
                   )}
 
-                  {/* Initial state (before any request) */}
+                  {/* Full-body source (before any request with the current outfit is possible) */}
                   {!vtoLoading && !vtoError && !vtoModal.resultUrl && (
-                    <div className="py-8 text-center text-sm text-gray-500">
-                      Click below to start virtual try-on
+                    <div className="py-4 text-center">
+                      <p className="text-sm text-gray-400 mb-3">
+                        Start virtual try-on with a photo of yourself.
+                      </p>
+                      {fullBodyDataUrl ? (
+                        <div className="flex flex-col items-center gap-3">
+                          <img
+                            src={fullBodyDataUrl}
+                            alt="Your full-body photo"
+                            className="w-24 h-40 object-cover rounded-lg border border-violet-500/30"
+                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={retryVTO}
+                              className="px-4 py-2 text-xs border border-violet-500 text-violet-400 rounded hover:bg-violet-500/10 transition-colors"
+                            >
+                              Start try-on
+                            </button>
+                            <button
+                              onClick={() => (document.getElementById("fullbody-file") as HTMLInputElement)?.click()}
+                              className="px-4 py-2 text-xs border border-gray-700 text-gray-400 rounded hover:border-gray-500 transition-colors"
+                            >
+                              Replace photo
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div
+                            className="border-2 border-dashed border-gray-700 rounded-xl p-6 cursor-pointer hover:border-violet-500 transition-colors"
+                            onClick={() => (document.getElementById("fullbody-file") as HTMLInputElement)?.click()}
+                          >
+                            <Shirt className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+                            <p className="text-sm text-gray-400">Upload a full-body photo</p>
+                            <p className="text-xs text-gray-600 mt-1">Front-facing, standing, unobstructed. JPG/PNG under 10MB.</p>
+                          </div>
+                          {fullBodyError && (
+                            <p className="mt-2 text-xs text-red-400 flex items-center justify-center gap-1">
+                              <X className="w-3 h-3" /> {fullBodyError}
+                            </p>
+                          )}
+                        </>
+                      )}
+                      <input
+                        id="fullbody-file"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          e.target.value = "";
+                          if (!file) return;
+                          if (!file.type.startsWith("image/")) { setFullBodyError("Please upload an image file"); return; }
+                          if (file.size > 10 * 1024 * 1024) { setFullBodyError("Full-body photo must be under 10MB"); return; }
+                          setFullBodyError(null);
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            const dataUrl = ev.target?.result as string;
+                            setFullBodyDataUrl(dataUrl);
+                            if (vtoModal) runVTO(vtoModal.outfit.id, vtoModal.outfit.category, dataUrl);
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                      />
                     </div>
                   )}
 
                   {/* Actions */}
+                  {fullBodyDataUrl && (
                   <div className="flex items-center gap-2 mt-5 pt-4 border-t border-gray-800">
                     <button
                       onClick={retryVTO}
@@ -485,6 +569,7 @@ export default function Home() {
                       </>
                     )}
                   </div>
+                  )}
                   {copyStatus === "error" && (
                     <p className="text-xs text-red-400 mt-2 text-center">Failed to copy link — please copy manually.</p>
                   )}
