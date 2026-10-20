@@ -308,7 +308,6 @@ export default function Home() {
 
             {showFaceCamera ? (
               <FaceCameraCapture
-                showRetryHint={!!skinError}
                 onClose={() => setShowFaceCamera(false)}
                 onCapture={file => {
                   setShowFaceCamera(false);

@@ -5,6 +5,12 @@
 :root {
   --background: #0a0a0f;
   --foreground: #e0e0e0;
+  /* SangeetFit brand tokens (branding/brand-guidelines.md) */
+  --brand-marigold: #E4A33C;
+  --brand-sweep: #B4752F;
+  --brand-burgundy: #6B1E3A;
+  --brand-ivory: #F7F1E5;
+  --brand-charcoal: #1A1216;
 }
 
 * {
@@ -25,7 +31,7 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #a78bfa, #60a5fa);
+  background: linear-gradient(135deg, var(--brand-marigold), var(--brand-sweep));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -48,7 +54,7 @@ body {
 }
 
 .step-dot.active {
-  background: #a78bfa;
+  background: var(--brand-marigold);
   transform: scale(1.25);
 }
 
@@ -59,5 +65,110 @@ body {
 }
 
 .step-line.active {
-  background: #a78bfa;
+  background: var(--brand-marigold);
 }
+
+/* Other violet #a78bfa hits in page.tsx handled in place as pages are touched. */
+
+/* ── Capture (camera) semantic layer ─────────────────────────────
+   FaceCameraCapture consumes only these .cap-* classes; the future
+   UI revamp restyles here without touching component logic. */
+:root {
+  --cap-surface: rgba(26, 18, 22, 0.92);          /* brand-charcoal */
+  --cap-frame: var(--brand-ivory);
+  --cap-accent: var(--brand-marigold);
+  --cap-hint: var(--brand-ivory);
+  --cap-hint-ok: #7BC47F;
+  --cap-hint-warn: #E4A33C;
+  --cap-hint-bad: #E07A7A;
+}
+
+.cap-stage {
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: var(--cap-surface);
+  aspect-ratio: 3 / 4;
+}
+.cap-stage video { width: 100%; height: 100%; object-fit: cover; }
+
+.cap-flash {
+  position: absolute;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 90ms ease-in;
+}
+.cap-flash.active { opacity: 0.8; transition: none; }
+
+.cap-oval {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: 62%;
+  aspect-ratio: 0.78;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2.5px solid var(--cap-frame);
+  box-shadow: 0 0 0 9999px rgba(10, 10, 15, 0.55);
+  transition: border-color 200ms ease;
+  display: grid;
+}
+.cap-oval.ok { border-color: var(--cap-hint-ok); }
+.cap-oval.ok.oval-live { animation: cap-pulse 1.4s ease-in-out infinite; }
+@keyframes cap-pulse {
+  0%, 100% { box-shadow: 0 0 0 9999px rgba(10, 10, 15, 0.55); }
+  50% { box-shadow: 0 0 0 9999px rgba(123, 196, 127, 0.35); }
+}
+
+.cap-hint {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--cap-hint);
+}
+.cap-hint.ok { color: var(--cap-hint-ok); }
+.cap-hint.warn { color: var(--cap-hint-warn); }
+.cap-hint.bad { color: var(--cap-hint-bad); }
+
+.cap-card {
+  background: var(--cap-surface);
+  border: 1px solid rgba(247, 241, 229, 0.12);
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  color: rgba(247, 241, 229, 0.85);
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.cap-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--brand-marigold);
+  color: #1A1216;
+  padding: 0.6rem 1.1rem;
+  border-radius: 0.6rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: filter 150ms ease;
+}
+.cap-btn-primary:hover { filter: brightness(1.1); }
+.cap-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.cap-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.6rem;
+  font-size: 0.875rem;
+  border: 1px solid rgba(247, 241, 229, 0.2);
+  color: var(--brand-ivory);
+  transition: border-color 150ms ease;
+}
+.cap-btn-ghost:hover { border-color: var(--brand-marigold); }
+
+
