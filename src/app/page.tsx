@@ -10,6 +10,7 @@ import Navbar from "@/components/Navbar";
 import { OUTFITS, type Outfit, type Occasion, type Audience } from "@/data/outfits";
 import { hueSimilarity } from "@/lib/color";
 import { compressImageForUpload } from "@/lib/image";
+import { FaceCameraCapture } from "@/components/FaceCameraCapture";
 
 const OCCASIONS: { id: Occasion; label: string }[] = [
   { id: "sangeet", label: "Sangeet" },
@@ -89,6 +90,7 @@ export default function Home() {
   const [fullBodyDataUrl, setFullBodyDataUrl] = useState<string | null>(null);
   const [fullBodyError, setFullBodyError] = useState<string | null>(null);
   const [skinError, setSkinError] = useState<string | null>(null);
+  const [showFaceCamera, setShowFaceCamera] = useState(false);
   const [skinLoading, setSkinLoading] = useState(false);
   const [vtoLoading, setVtoLoading] = useState(false);
   const [vtoError, setVtoError] = useState<string | null>(null);
@@ -303,6 +305,25 @@ export default function Home() {
               <h2 className="font-semibold">Skin-tone analysis</h2>
             </div>
             <p className="text-sm text-gray-400 mb-4">Upload a front-facing selfie. YouCam returns a skin-tone hex we use to score colour harmony.</p>
+
+            {showFaceCamera ? (
+              <FaceCameraCapture
+                showRetryHint={!!skinError}
+                onClose={() => setShowFaceCamera(false)}
+                onCapture={file => {
+                  setShowFaceCamera(false);
+                  setSkinError(null);
+                  compressImageForUpload(file, 1280, 1_500_000)
+                    .then(dataUrl => analyzeSkin(dataUrl))
+                    .catch(err => setSkinError((err as Error).message || "Could not process the captured photo"));
+                }}
+              />
+            ) : null}
+
+            <button type="button" onClick={() => setShowFaceCamera(v => !v)}
+              className="mx-auto flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 transition-colors">
+              <Palette className="w-3 h-3" /> {showFaceCamera ? "Hide camera" : "Use camera instead"}
+            </button>
 
             <div className="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center hover:border-violet-500 transition-colors cursor-pointer"
                  onClick={() => (document.getElementById("selfie-file") as HTMLInputElement)?.click()}>
