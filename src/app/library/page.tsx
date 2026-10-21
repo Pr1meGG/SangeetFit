@@ -11,7 +11,7 @@ export default function GarmentLibrary() {
   const [query, setQuery] = useState("");
   const [audience, setAudience] = useState("all");
   const [occasion, setOccasion] = useState("all");
-  const [referencesOnly, setReferencesOnly] = useState(false);
+  const [referencesOnly, setReferencesOnly] = useState(true);
   const outfits = INDIAN_WEAR_LIBRARY.filter(outfit =>
     (audience === "all" || outfit.audience === audience) &&
     (occasion === "all" || outfit.occasionTags.includes(occasion as typeof outfit.occasion)) &&
@@ -26,14 +26,16 @@ export default function GarmentLibrary() {
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 py-6 sm:px-8 sm:py-10 space-y-7">
         <Link href="/" className="inline-flex gap-2 items-center min-h-11 text-sm text-[#6B1E3A] hover:underline py-2 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#6B1E3A]"><ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to your looks</Link>
-        <header className="space-y-4 max-w-3xl">
+        <header className="space-y-2 max-w-3xl">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6B1E3A]">SangeetFit collection</p>
-          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-[#6B1E3A]">Reference candidates.</h1>
-          <p className="text-[#78665E] leading-relaxed">These references are being evaluated. A wired reference is not proof of generated quality. Your main recommendations show only live-reviewed references or your own clothes.</p>
-          <p className="text-sm text-[#78665E]">{INDIAN_WEAR_LIBRARY.length} sourced photos · {candidateCount} matching try-on references. AI quality for these new references has not been tested. Browse-only pieces need a clearer photo.</p>
+          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-[#6B1E3A]">The celebration edit.</h1>
+          <p className="text-[#78665E] leading-relaxed">Browse without a photo. To try a look, add a clear head-to-toe photo and tap Generate.</p>
+          <p className="text-sm text-[#78665E]">{candidateCount} try-on references · Generated quality has not yet been reviewed.</p>
         </header>
 
-        <section aria-label="Filter garments" className="rounded-2xl border border-[#E8DED1] bg-[#F5EEE4] p-4 sm:p-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <details className="rounded-2xl border border-[#E8DED1] bg-[#F5EEE4] p-4 sm:p-5">
+          <summary className="cursor-pointer min-h-11 flex items-center font-medium text-[#6B1E3A]">Search and filter outfits</summary>
+          <div className="grid gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-4">
           <label className="space-y-2 text-sm text-[#78665E]">
             <span className="inline-flex gap-2 items-center"><Search className="w-4 h-4" aria-hidden="true" /> Search garments</span>
             <input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Saree, kurta, lehenga…" className={fieldClass} />
@@ -54,13 +56,14 @@ export default function GarmentLibrary() {
           <label className="flex items-center gap-3 text-sm text-[#78665E] min-h-11 cursor-pointer">
             <input type="checkbox" checked={referencesOnly} onChange={event => setReferencesOnly(event.target.checked)} className="w-5 h-5 accent-[#6B1E3A]" /> Try-on references only
           </label>
-        </section>
+          </div>
+        </details>
 
         <p role="status" className="text-sm text-[#78665E]">Showing {outfits.length} of {INDIAN_WEAR_LIBRARY.length} garments</p>
         {outfits.length === 0 ? (
           <div className="rounded-2xl border border-[#E8DED1] bg-white p-10 text-center space-y-4">
             <p>No garments match these filters.</p>
-            <button type="button" onClick={() => { setQuery(""); setAudience("all"); setOccasion("all"); setReferencesOnly(false); }} className="min-h-11 px-5 rounded-xl border border-[#6B1E3A] text-[#6B1E3A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B1E3A]">Clear filters</button>
+            <button type="button" onClick={() => { setQuery(""); setAudience("all"); setOccasion("all"); setReferencesOnly(true); }} className="min-h-11 px-5 rounded-xl border border-[#6B1E3A] text-[#6B1E3A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B1E3A]">Clear filters</button>
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -77,7 +80,7 @@ export default function GarmentLibrary() {
                   <p className="text-xs text-[#78665E]">{outfit.referenceNotes}</p>
                   <GarmentCredit source={outfit.source} />
                   {outfit.vtoSupported && outfit.tryOnStatus !== "blocked" && (
-                    <Link href={`/?step=3&occasion=${occasion === "all" ? outfit.occasion : occasion}&vto=${outfit.id}`} className="mt-auto min-h-12 text-center rounded-xl bg-[#6B1E3A] text-[#FBF7EF] font-medium text-sm px-4 py-3 hover:bg-[#54162D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B1E3A]">Try reference (unreviewed)</Link>
+                    <Link href={`/?step=3&occasion=${occasion === "all" ? outfit.occasion : occasion}&vto=${outfit.id}`} className="mt-auto min-h-12 text-center rounded-xl bg-[#6B1E3A] text-[#FBF7EF] font-medium text-sm px-4 py-3 hover:bg-[#54162D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B1E3A]">Try with your photo</Link>
                   )}
                 </div>
               </article>

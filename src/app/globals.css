@@ -200,7 +200,8 @@ a, button { touch-action: manipulation; }
   .sf-welcome { grid-template-columns: minmax(0,1fr) 105px; padding: 26px 0 24px; gap: 12px; min-height: 0; }
   .sf-welcome h1 { font-size: 36px; margin-bottom: 14px; }
   .sf-welcome-copy > p { font-size: 12px; line-height: 1.7; margin-bottom: 0; }
-  .sf-welcome-copy > .sf-button, .sf-welcome-foot { display: none; }
+  .sf-welcome-copy > .sf-button { margin-top: 14px; padding: 10px; gap: 6px; font-size: 12px; }
+  .sf-welcome-foot { display: none; }
   .sf-season { font-size: 10px; margin-bottom: 14px; gap: 6px; }
   .sf-season > span { font-size: 20px; }
   .sf-welcome-foot { margin-top: 14px; }
@@ -221,7 +222,7 @@ a, button { touch-action: manipulation; }
   .sf-home-footer > .sf-text-link { margin-left: 34px; }
   .sf-photo-attribution { flex-direction: column; gap: 0; }
   .sf-bottom-nav { position: fixed; z-index: 40; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; padding: 9px 12px max(9px,env(safe-area-inset-bottom)); background: #fffdf9f5; backdrop-filter: blur(16px); border-top: 1px solid var(--sf-line); }
-  .sf-bottom-nav > a, .sf-bottom-nav > button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; position: relative; min-width: 76px; min-height: 48px; color: #78665e; font-size: 10px; text-decoration: none; border-radius: 10px; }
+  .sf-bottom-nav > a, .sf-bottom-nav > button { display: flex; flex: 1; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 5px; position: relative; min-height: 48px; color: #78665e; font-size: 10px; text-decoration: none; border-radius: 10px; }
   .sf-bottom-nav [aria-current="page"] { color: var(--sf-burgundy); background: #f6e8e4; }
   .sf-bottom-nav button > span { position: absolute; top: 2px; right: 15px; border-radius: 50%; min-width: 16px; height: 16px; display: grid; place-items: center; color: #fff; background: var(--sf-burgundy); font-size: 9px; }
   .sf-personalize { grid-template-columns: 1fr; margin-top: 20px; gap: 28px; }

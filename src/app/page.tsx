@@ -249,8 +249,8 @@ export default function Home() {
               <div className="sf-welcome-copy">
                 <span className="sf-season"><span aria-hidden="true">✳</span> A celebration to dress for</span>
                 <h1>Your occasion.<br />Your kind of look.</h1>
-                <p>A little inspiration. A look that feels like you. Find an outfit for your next celebration and try it on your own photo.</p>
-                <a className="sf-button sf-button-primary" href="#occasions">Find my occasion look <ArrowRight size={18} /></a>
+                <p>A little inspiration. A look that feels like you. Browse celebration outfits now, then try one on your own photo when you’re ready.</p>
+                <Link className="sf-button sf-button-primary" href="/library">Explore outfits <ArrowRight size={18} /></Link>
                 <button className="sf-text-link" onClick={() => { setStep(3); setShowUpload(true); }}>Try my own clothes <ArrowRight size={17} /></button>
                 <span className="sf-welcome-foot"><Shirt size={16} /> Outfit ideas, made personal.</span>
               </div>
@@ -272,7 +272,7 @@ export default function Home() {
                 })}
               </div>
             </section>
-            <section className="sf-home-footer"><div><Sparkles size={20} /><p><strong>Just looking for inspiration?</strong><span>Explore the reference collection. No selfie needed.</span></p></div><Link href="/library" className="sf-text-link">Explore outfits <ArrowRight size={17} /></Link></section>
+            <section className="sf-home-footer"><div><Sparkles size={20} /><p><strong>Just looking for inspiration?</strong><span>Explore the reference collection. No selfie needed.</span></p></div><Link href="/library" className="sf-text-link">See full collection <ArrowRight size={17} /></Link></section>
             <div className="sf-photo-attribution"><GarmentCredit source={OUTFITS.find(o => o.id === "library-navy-gold-lehenga")?.source} /><GarmentCredit source={OUTFITS.find(o => o.id === "library-gold-silk-kurta")?.source} /></div>
           </>
         )}
@@ -339,7 +339,7 @@ export default function Home() {
           </section>
         )}
       </div>
-      {!showFaceCamera && <nav className="sf-bottom-nav" aria-label="App navigation"><button aria-current={step !== 3 || !showShortlist ? "page" : undefined} onClick={() => { setStep(1); setShowShortlist(false); }}><House size={20} />For you</button><button onClick={() => { setStep(3); setShowUpload(true); setShowShortlist(false); }}><Shirt size={20} />My clothes</button><button aria-current={step === 3 && showShortlist ? "page" : undefined} onClick={() => { setStep(3); setShowShortlist(true); setQuery(""); setAudience("all"); }}><Heart size={20} />Shortlist{shortlistCount > 0 && <span>{shortlistCount}</span>}</button></nav>}
+      {!showFaceCamera && <nav className="sf-bottom-nav" aria-label="App navigation"><button aria-current={step !== 3 || !showShortlist ? "page" : undefined} onClick={() => { setStep(1); setShowShortlist(false); }}><House size={20} />For you</button><Link href="/library"><Search size={20} />Explore</Link><button onClick={() => { setStep(3); setShowUpload(true); setShowShortlist(false); }}><Shirt size={20} />My clothes</button><button aria-current={step === 3 && showShortlist ? "page" : undefined} onClick={() => { setStep(3); setShowShortlist(true); setQuery(""); setAudience("all"); }}><Heart size={20} />Shortlist{shortlistCount > 0 && <span>{shortlistCount}</span>}</button></nav>}
       {step === 3 && vtoModal && (
         <div className="sf-modal-backdrop" onClick={closeVTO}>
           <section className="sf-tryon-dialog" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="tryon-title" tabIndex={-1} onClick={event => event.stopPropagation()}>

@@ -22,7 +22,22 @@ page.on("request", req => {
 });
 try {
   assert.deepEqual(await page.request.get(`${base}/api/mode`).then(r => r.json()), { mode: "mock" });
+  await page.setViewportSize({ width: 320, height: 700 });
+  await page.goto(base);
+  const browseLink = page.getByRole("link", { name: "Explore outfits" });
+  assert(await browseLink.isVisible(), "photo-free browsing must be visible on a narrow phone");
+  assert(await page.getByRole("navigation", { name: "App navigation" }).getByRole("link", { name: "Explore" }).isVisible());
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await browseLink.click();
+  await page.getByRole("heading", { name: "The celebration edit." }).waitFor();
+  assert.equal(await page.getByRole("article").count(), 8);
+  assert.equal(vtoRequests, 0, "browsing must not generate a task");
+  console.log("PASS: narrow-phone landing exposes photo-free browse; collection defaults to try-on references without a task");
+
+  await page.setViewportSize({ width: 375, height: 812 });
   await page.goto(`${base}/library`);
+  await page.getByText("Search and filter outfits").click();
+  await page.getByLabel("Try-on references only").uncheck();
   assert.equal(await page.getByRole("article").count(), 14);
   for (const article of await page.getByRole("article").all()) {
     const image = article.getByRole("img");
@@ -43,15 +58,13 @@ try {
   await page.getByRole("searchbox").fill("nonexistent-garment");
   await page.getByText("No garments match these filters.").waitFor();
   await page.getByRole("button", { name: "Clear filters" }).click();
-  assert.equal(await page.getByRole("article").count(), 14);
-  await page.getByLabel("Try-on references only").check();
   assert.equal(await page.getByRole("article").count(), 8);
   await page.getByRole("searchbox").fill("Navy");
   assert.equal(await page.getByRole("article").count(), 1);
   console.log("PASS: collection, occasion, reference and text filters combine; empty state resets");
 
   await page.getByLabel("Occasion", { exact: true }).selectOption("reception");
-  const tryLink = page.getByRole("link", { name: "Try reference (unreviewed)" });
+  const tryLink = page.getByRole("link", { name: "Try with your photo" });
   assert((await tryLink.getAttribute("href")).includes("occasion=reception"), "secondary occasion must survive a reference link");
   await tryLink.click();
   await page.getByText("Start virtual try-on with a photo of yourself.", { exact: true }).waitFor();
