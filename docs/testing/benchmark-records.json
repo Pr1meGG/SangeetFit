@@ -1,0 +1,18 @@
+{
+  "plannedCases": [
+    { "caseId": "upload-01", "participantId": "p01", "kind": "upload" },
+    { "caseId": "upload-02", "participantId": "p01", "kind": "upload" },
+    { "caseId": "catalogue-01", "participantId": "p01", "kind": "catalogue" },
+    { "caseId": "upload-03", "participantId": "p02", "kind": "upload" },
+    { "caseId": "upload-04", "participantId": "p02", "kind": "upload" },
+    { "caseId": "catalogue-02", "participantId": "p02", "kind": "catalogue" },
+    { "caseId": "upload-05", "participantId": "p03", "kind": "upload" },
+    { "caseId": "upload-06", "participantId": "p03", "kind": "upload" },
+    { "caseId": "upload-07", "participantId": "p04", "kind": "upload" },
+    { "caseId": "catalogue-03", "participantId": "p04", "kind": "catalogue" },
+    { "caseId": "upload-08", "participantId": "p05", "kind": "upload" },
+    { "caseId": "catalogue-04", "participantId": "p05", "kind": "catalogue" }
+  ],
+  "records": [],
+  "budget": { "availableUnits": 916, "vtoUnitCost": 2, "skinUnitCost": 20, "approved": false }
+}

@@ -1,3 +1,6 @@
+import { INDIAN_WEAR_LIBRARY } from "./indian-wear";
+import { enrichCatalogOutfit } from "../lib/styling";
+
 /**
  * Outfit catalog for SangeetFit — women's & men's Indian/western occasion styling.
  *
@@ -12,13 +15,24 @@
 export type Occasion = "sangeet" | "mehendi" | "haldi" | "wedding" | "reception";
 export type Audience = "women" | "men" | "unisex";
 export type Collection = "indian" | "western" | "indo-western";
+export type StyleLevel = "minimal" | "festive" | "statement";
+export type TryOnStatus = "candidate" | "live-reviewed" | "blocked";
+
+export interface VerifiedSeller {
+  name: string;
+  url: string;
+  exactItemVerified: true;
+  verifiedAt: string;
+  imagePermissionVerifiedAt: string;
+}
 
 /** Real garment reference assets available in public/garment_test. */
-export const TRY_ON_REFERENCES = [
+export const TRY_ON_REFERENCES: readonly string[] = [
   "lehenga_ethnic_hd.png",
   "user_saree.png",
   "kurta_set_hd.png",
   "western_dress_hd.png",
+  ...INDIAN_WEAR_LIBRARY.filter(outfit => outfit.vtoSupported).map(outfit => outfit.tryOnReference!),
 ] as const;
 
 export type TryOnReference = (typeof TRY_ON_REFERENCES)[number] | null;
@@ -30,6 +44,11 @@ export interface Outfit {
   collection: Collection;
   garmentType: string;
   occasion: Occasion;
+  occasionTags: Occasion[];
+  styleLevel: StyleLevel;
+  tryOnStatus: TryOnStatus;
+  seller?: VerifiedSeller;
+  origin?: "catalogue" | "upload";
   primaryColor: string;
   secondaryColor: string;
   imageUrl: string;
@@ -37,9 +56,28 @@ export interface Outfit {
   tryOnReference: TryOnReference;
   youcamCategory: "auto";
   vtoSupported: boolean;
+  source?: {
+    title: string;
+    url: string;
+    author: string;
+    license: string;
+    licenseUrl: string;
+    originalUrl: string;
+    downloadedUrl: string;
+    retrievedAt: string;
+    changes: string;
+    sha256: string;
+    width: number;
+    height: number;
+  };
+  referenceStatus?: "candidate" | "browse-only";
+  referenceNotes?: string;
 }
 
-export const OUTFITS: Outfit[] = [
+export type RawOutfit = Omit<Outfit, "occasionTags" | "styleLevel" | "tryOnStatus"> &
+  Partial<Pick<Outfit, "occasionTags" | "styleLevel" | "tryOnStatus">>;
+
+const CATALOG: RawOutfit[] = [
   // ── Women's · Sangeet ─────────────────────────────────────────────────
   {
     id: "sangeet-01",
@@ -323,7 +361,10 @@ export const OUTFITS: Outfit[] = [
     youcamCategory: "auto",
     vtoSupported: false,
   },
+  ...INDIAN_WEAR_LIBRARY,
 ];
+
+export const OUTFITS: Outfit[] = CATALOG.map(enrichCatalogOutfit);
 
 export function getOutfitById(id: string): Outfit | undefined {
   return OUTFITS.find(o => o.id === id);

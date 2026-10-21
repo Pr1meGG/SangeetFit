@@ -21,6 +21,7 @@ import { strict as assert } from "node:assert";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseVtoInput } from "../src/lib/vto-input.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
@@ -42,7 +43,9 @@ console.log("PASS: /api/skin consumes only the face selfie (imageDataUrl)");
 // ── 2. /api/vto is full-body-only, never the face selfie ─────────────────────
 
 const vtoSource = readSource("src/app/api/vto/route.ts");
-assert(vtoSource.includes("fullBodyDataUrl"), "vto route must read fullBodyDataUrl");
+const validPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=";
+const input = parseVtoInput({ fullBodyDataUrl: validPng, garmentImageDataUrl: validPng, garmentCategory: "upper_body" });
+assert(input.fullBody?.buffer.equals(Buffer.from(validPng.split(",")[1], "base64")), "VTO validation must consume the dedicated full-body source");
 assert(
   !vtoSource.includes("imageDataUrl"),
   "vto route must never accept or fall back to the face selfie field"
@@ -68,14 +71,14 @@ assert(
 );
 
 // runVTO posts the full-body source; the body must not contain the selfie field.
-const vtoFetchBody = pageSource.match(/body: JSON.stringify\(\{[\s\S]*?fullBodyDataUrl[\s\S]*?\}\);/);
-assert(vtoFetchBody, "runVTO must POST a body containing fullBodyDataUrl");
+const vtoRunner = pageSource.slice(pageSource.indexOf("const runVTO"), pageSource.indexOf("const handleRestore"));
+assert(vtoRunner.includes("fullBodyDataUrl: src") && vtoRunner.includes("body: JSON.stringify(payload)"), "runVTO must POST the explicit full-body source");
 assert(
-  !vtoFetchBody[0].includes("imageDataUrl"),
+  !vtoRunner.includes("imageDataUrl: dataUrl") && !vtoRunner.includes("selfieDataUrl"),
   "runVTO body must not include the face-selfie field"
 );
 assert(
-  /const src = source \?\? fullBodyDataUrl \?\? null;/.test(pageSource),
+  vtoRunner.includes("const src = fullBodyDataUrl;"),
   "runVTO must source from fullBodyDataUrl only (no selfie fallback)"
 );
 console.log("PASS: frontend routes selfie -> /api/skin and full-body -> /api/vto");

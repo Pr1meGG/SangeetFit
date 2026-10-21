@@ -8,19 +8,19 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { OUTFITS, TRY_ON_REFERENCES } from "../src/data/outfits.ts";
+import { INDIAN_WEAR_LIBRARY } from "../src/data/indian-wear.ts";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outfitsDir = path.join(projectRoot, "public", "outfits");
 const garmentTestDir = path.join(projectRoot, "public", "garment_test");
-
-const outfitFiles = fs.readdirSync(outfitsDir);
 
 // ── Ids unique; displayImage exists on disk ───────────────────────────────────
 const ids = new Set<string>();
 for (const o of OUTFITS) {
   assert(!ids.has(o.id), `duplicate outfit id ${o.id}`);
   ids.add(o.id);
-  assert(outfitFiles.some(f => o.imageUrl === `/outfits/${f}`), `displayImage missing on disk: ${o.imageUrl}`);
+  assert(o.imageUrl.startsWith("/outfits/") || o.imageUrl.startsWith("/garment_test/library/"), `unexpected asset path: ${o.imageUrl}`);
+  assert(fs.existsSync(path.join(projectRoot, "public", o.imageUrl)), `displayImage missing on disk: ${o.imageUrl}`);
 }
 console.log(`PASS: ${OUTFITS.length} outfits, unique ids, all displayImages exist`);
 
@@ -50,6 +50,7 @@ const VISUAL_WHITELIST: Record<string, string> = {
   "mehendi-01": "user_saree.png",        // cream/beige saree
   "mehendi-02": "kurta_set_hd.png",      // pink women's kurta set
   "reception-03": "western_dress_hd.png", // black western gown
+  ...Object.fromEntries(INDIAN_WEAR_LIBRARY.filter(o => o.vtoSupported).map(o => [o.id, o.tryOnReference!])),
 };
 for (const o of OUTFITS) {
   if (o.vtoSupported) {
@@ -66,10 +67,12 @@ assert(haldi01.garmentType !== "lehenga" || haldi01.vtoSupported === false,
   "yellow chaniya must not inherit the maroon lehenga reference");
 console.log("PASS: visual whitelist exact; yellow chaniya honest");
 
-// ── Men's items never map to women's/garment references ───────────────────────
+// ── Men's items never map to the original women's references ─────────────────
+const originalWomenReferences = new Set(["lehenga_ethnic_hd.png", "user_saree.png", "kurta_set_hd.png", "western_dress_hd.png"]);
 for (const o of OUTFITS.filter(o => o.audience === "men")) {
-  assert(o.tryOnReference === null && !o.vtoSupported,
-    `${o.id}: men's item must not map to any existing reference (women's assets)`);
+  assert(!o.tryOnReference || !originalWomenReferences.has(o.tryOnReference),
+    `${o.id}: men's item must not map to women's assets`);
+  if (o.vtoSupported) assert.equal(o.imageUrl, `/garment_test/${o.tryOnReference}`);
 }
 console.log("PASS: no men's item uses women's reference assets");
 
@@ -87,13 +90,13 @@ const vtoSource = fs.readFileSync(path.join(projectRoot, "src/app/api/vto/route.
 assert(vtoSource.includes("REFERENCE_ASSETS"), "per-asset allowlist missing");
 assert(vtoSource.includes('garmentTypes.includes(outfit.garmentType)'), "reference must be scoped to garmentType");
 assert(vtoSource.includes("Try-on is not supported for this outfit yet"), "no-substitute 400 missing");
-assert(vtoSource.includes("!vtoSupported || outfit.tryOnReference !== referenceAsset"), "server must re-derive support from the catalog, not trust the client");
+assert(vtoSource.includes("!input.vtoSupported || !outfit.vtoSupported || outfit.tryOnReference !== input.referenceAsset"), "server must re-derive support from the catalog, not trust the client");
 assert(vtoSource.includes("Unknown garment reference"), "invalid reference rejected");
 assert(vtoSource.includes('mode: "live"'), "live mode label missing");
 console.log("PASS: route validates per identity and never substitutes");
 
 // ── Mock contract: displayImage echo + mode "mock" preserved ──────────────────
-const mockBlock = vtoSource.match(/if \(MOCK_MODE\)[\s\S]{0,900}mode: "mock"/)?.[0] ?? "";
+const mockBlock = vtoSource.split("if (MOCK_MODE)")[1]?.split("// Live mode")[0] ?? "";
 assert(mockBlock.includes("displayImage: outfit.imageUrl"), "mock result must echo outfit displayImage");
 assert(mockBlock.includes('mode: "mock"'), "mock label missing");
 assert(mockBlock.includes('resultUrl: mockUrl'), "mock result path changed");

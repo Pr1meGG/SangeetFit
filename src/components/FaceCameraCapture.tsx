@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Camera, RefreshCw, Check, Sun, AlertTriangle } from "lucide-react";
 
 const GUIDE = [
@@ -20,14 +20,15 @@ const HINTS = {
 } as const;
 
 type HintKey = keyof typeof HINTS;
-type Phase = "loading-model" | "live" | "static" | "confirm" | "error";
+type Phase = "starting" | "loading-model" | "live" | "static" | "capturing" | "confirm" | "error";
 
 interface Detected {
-  boundingBox: { origin: { x: number; y: number }; width: number; height: number };
+  boundingBox?: { originX: number; originY: number; width: number; height: number };
 }
 
 interface FaceDetectorLike {
-  detect(video: HTMLVideoElement): Detected[] | null;
+  detectForVideo(video: HTMLVideoElement, timestamp: number): { detections: Detected[] };
+  close(): void;
 }
 
 interface FaceCameraCaptureProps {
@@ -37,187 +38,216 @@ interface FaceCameraCaptureProps {
 
 export function FaceCameraCapture({ onCapture, onClose }: FaceCameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const detectorRef = useRef<FaceDetectorLike | null>(null);
-  const timerRef = useRef<number>(0);
-  const [phase, setPhase] = useState<Phase>("loading-model");
+  const stopRef = useRef<() => void>(() => {});
+  const sessionRef = useRef(0);
+  const [attempt, setAttempt] = useState(0);
+  const [phase, setPhase] = useState<Phase>("starting");
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [hint, setHint] = useState<HintKey>("none");
-  const [flash, setFlash] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-
-  const start = useCallback(async () => {
-    setCameraError(null);
-    setPhase("loading-model");
-    setHint("none");
-    setPreview(null);
-    window.clearTimeout(timerRef.current);
-    streamRef.current?.getTracks().forEach(t => t.stop());
-    try {
-      if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error("Camera is not supported in this browser");
-      }
-      if (!window.isSecureContext) {
-        throw new Error("Camera needs a secure (https) connection — open the preview URL on your phone.");
-      }
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 1280 } },
-        audio: false,
-      });
-      streamRef.current = stream;
-      if (!videoRef.current) return;
-      videoRef.current.srcObject = stream;
-      await videoRef.current.play().catch(() => undefined);
-      await startDetector();
-      setPhase(detectorRef.current ? "live" : "static");
-      if (detectorRef.current) scheduleDetect();
-    } catch (err) {
-      const name = (err as DOMException)?.name;
-      setCameraError(
-        name === "NotAllowedError"
-          ? "Camera permission denied. Allow access in the address bar, or upload a photo instead."
-          : (err as Error).message || "Camera could not be started.",
-      );
-      setPhase("error");
-    }
-  }, []);
+  const [photo, setPhoto] = useState<{ preview: string; file: File } | null>(null);
 
   useEffect(() => {
+    const session = ++sessionRef.current;
+    const video = videoRef.current;
+    let stopped = false;
+    let stream: MediaStream | null = null;
+    let detector: FaceDetectorLike | null = null;
+    let timer = 0;
+    let lastVideoTime = -1;
+    const sample = document.createElement("canvas");
+    sample.width = sample.height = 32;
+    const sampleContext = sample.getContext("2d", { willReadFrequently: true });
+
+    const stop = () => {
+      stopped = true;
+      window.clearTimeout(timer);
+      stream?.getTracks().forEach(track => track.stop());
+      stream = null;
+      detector?.close();
+      detector = null;
+      if (video) video.srcObject = null;
+    };
+    stopRef.current = stop;
+    setCameraError(null);
+    setPhase("starting");
+    setHint("none");
+    setPhoto(null);
+
+    function runDetect() {
+      if (stopped || !video) return;
+      if (video.videoWidth && video.currentTime !== lastVideoTime) {
+        lastVideoTime = video.currentTime;
+        let next: HintKey = "none";
+        try {
+          const box = detector?.detectForVideo(video, performance.now()).detections[0]?.boundingBox;
+          if (box) {
+            // Match the object-cover crop that the user sees in the portrait stage.
+            const rect = video.getBoundingClientRect();
+            const scale = Math.max(rect.width / video.videoWidth, rect.height / video.videoHeight);
+            const faceCx = ((box.originX + box.width / 2) * scale - (video.videoWidth * scale - rect.width) / 2) / rect.width;
+            const faceCy = ((box.originY + box.height / 2) * scale - (video.videoHeight * scale - rect.height) / 2) / rect.height;
+            const faceSize = box.width * scale / rect.width;
+            if (faceSize < 0.3) next = "far";
+            else if (faceSize > 0.62) next = "near";
+            else if (Math.abs(faceCx - 0.5) > 0.18 || Math.abs(faceCy - 0.42) > 0.2) next = "off";
+            else next = "ok";
+          }
+        } catch {
+          detector?.close();
+          detector = null;
+          setPhase("static");
+        }
+        if (sampleContext && sampledBrightness(video, sampleContext) < 42) next = "dark";
+        setHint(next);
+      }
+      timer = window.setTimeout(runDetect, 200);
+    }
+
+    async function start() {
+      try {
+        if (!navigator.mediaDevices?.getUserMedia) {
+          throw new Error("Camera is not supported in this browser");
+        }
+        if (!window.isSecureContext) {
+          throw new Error("Camera needs a secure (https) connection — open the preview URL on your phone.");
+        }
+        const acquiredStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 1280 } },
+          audio: false,
+        });
+        if (stopped || !video) {
+          acquiredStream.getTracks().forEach(track => track.stop());
+          return;
+        }
+        // Keep ownership local so a late permission response cannot outlive this session.
+        stream = acquiredStream;
+        video.srcObject = stream;
+        await video.play();
+        if (stopped) return;
+        setPhase("loading-model");
+        runDetect();
+        try {
+          // ponytail: pinned CDN import avoids a new bundle dependency; capture
+          // remains available while tracking loads or when the CDN is unreachable.
+          const cdnUrl = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs";
+          const tasksVision = (await import(/* webpackIgnore: true */ cdnUrl)) as {
+            FaceDetector: { createFromOptions: (fileset: unknown, options: object) => Promise<FaceDetectorLike> };
+            FilesetResolver: { forVisionTasks: (path: string) => Promise<unknown> };
+          };
+          if (stopped) return;
+          const fileset = await tasksVision.FilesetResolver.forVisionTasks(
+            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm",
+          );
+          if (stopped) return;
+          const loaded = await tasksVision.FaceDetector.createFromOptions(fileset, {
+            baseOptions: {
+              modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite",
+            },
+            runningMode: "VIDEO",
+          });
+          if (stopped) { loaded.close(); return; }
+          detector = loaded;
+          setPhase("live");
+        } catch {
+          if (!stopped) setPhase("static");
+        }
+      } catch (err) {
+        if (stopped) return;
+        stop();
+        const name = (err as DOMException)?.name;
+        setCameraError(
+          name === "NotAllowedError"
+            ? "Camera permission denied. Allow access in the address bar, or upload a photo instead."
+            : (err as Error).message || "Camera could not be started.",
+        );
+        setPhase("error");
+      }
+    }
     void start();
     return () => {
-      window.clearTimeout(timerRef.current);
-      streamRef.current?.getTracks().forEach(t => t.stop());
+      if (sessionRef.current === session) sessionRef.current++;
+      stop();
     };
-  }, [start]);
-
-  async function startDetector() {
-    if (detectorRef.current) return;
-    try {
-      // ponytail: runtime CDN import keeps the ~1MB tasks-vision wasm/model out
-      // of the npm bundle; falls back to static oval when CDN is unreachable.
-      const cdnUrl = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs";
-      const tasksVision = (await import(/* webpackIgnore: true */ /* @vite-ignore */ cdnUrl)) as unknown as {
-        FaceDetector: new (options: object) => FaceDetectorLike;
-        FilesetResolver: { forVisionTasks: (path: string) => Promise<{ faceDetector: (o: object) => Promise<FaceDetectorLike> }> };
-      };
-      const fileset = await tasksVision.FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm",
-      );
-      const detector = await fileset.faceDetector({
-        baseOptions: {
-          modelAssetPath:
-            "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite",
-          delegate: "GPU",
-        },
-        runningMode: "VIDEO",
-      });
-      detectorRef.current = detector;
-    } catch {
-      detectorRef.current = null; // static oval + brightness fallback
-    }
-  }
-
-  function scheduleDetect() {
-    timerRef.current = window.setTimeout(runDetect, 200);
-  }
-
-  const runDetect = useCallback(() => {
-    const video = videoRef.current;
-    const detector = detectorRef.current;
-    if (!video?.videoWidth || !detector) return;
-    let next: HintKey = "none";
-    try {
-      const dets = detector.detect(video) ?? [];
-      const box = dets[0]?.boundingBox;
-      if (!box) {
-        next = "none";
-      } else {
-        const faceCx = (box.origin.x + box.width / 2) / video.videoWidth;
-        const faceCy = (box.origin.y + box.height / 2) / video.videoHeight;
-        const faceSize = box.width / video.videoWidth;
-        if (faceSize < 0.3) next = "far";
-        else if (faceSize > 0.62) next = "near";
-        else if (Math.abs(faceCx - 0.5) > 0.18 || Math.abs(faceCy - 0.42) > 0.2) next = "off";
-        else next = "ok";
-      }
-      if (next !== "ok" && sampledBrightness(video) < 42) next = "dark";
-    } catch {
-      next = "none";
-    }
-    setHint(next);
-    scheduleDetect();
-  }, []);
+  }, [attempt]);
 
   const capture = () => {
     const video = videoRef.current;
-    if (!video?.videoWidth) return;
+    if (!video?.videoWidth || !canCapture) return;
+    const session = sessionRef.current;
     const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    const rect = video.getBoundingClientRect();
+    const scale = Math.max(rect.width / video.videoWidth, rect.height / video.videoHeight);
+    canvas.width = Math.round(rect.width / scale);
+    canvas.height = Math.round(rect.height / scale);
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    ctx.drawImage(video, 0, 0);
+    ctx.drawImage(video, (video.videoWidth - canvas.width) / 2, (video.videoHeight - canvas.height) / 2,
+      canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+    setPhase("capturing");
+    stopRef.current();
+    const preview = canvas.toDataURL("image/jpeg", 0.9);
     canvas.toBlob(
       blob => {
-        if (!blob) return;
-        setFlash(true);
-        window.setTimeout(() => setFlash(false), 120);
-        setPreview(canvas.toDataURL("image/jpeg", 0.9));
+        if (sessionRef.current !== session) return;
+        if (!blob) {
+          setCameraError("Could not capture this photo. Please retry or upload a photo instead.");
+          setPhase("error");
+          return;
+        }
+        setPhoto({ preview, file: new File([blob], `selfie-${Date.now()}.jpg`, { type: "image/jpeg" }) });
         setPhase("confirm");
-        window.clearTimeout(timerRef.current);
-        streamRef.current?.getTracks().forEach(t => t.stop());
       },
       "image/jpeg",
       0.9,
     );
   };
 
-  const confirm = () => {
-    if (!preview) return;
-    fetch(preview)
-      .then(r => r.blob())
-      .then(b => onCapture(new File([b], `selfie-${Date.now()}.jpg`, { type: "image/jpeg" })));
-  };
+  const canCapture = phase === "live" || phase === "static" || phase === "loading-model";
+  const retry = () => { stopRef.current(); setAttempt(value => value + 1); };
+  const close = () => { stopRef.current(); onClose(); };
 
   return (
     <div className="space-y-4">
       <div className="cap-stage max-w-xs mx-auto">
-        <video ref={videoRef} playsInline muted />
-        {flash && <div className="cap-flash active" />}
-        {phase === "confirm" && preview && (
-          <img src={preview} alt="Captured selfie preview" className="absolute inset-0 w-full h-full object-cover" />
+        <video ref={videoRef} playsInline muted aria-label="Live selfie camera" />
+        {phase === "confirm" && photo && (
+          <img src={photo.preview} alt="Captured selfie preview" className="absolute inset-0 w-full h-full object-cover" />
         )}
-        {(phase === "live" || phase === "static") && (
+        {canCapture && (
           <>
             <div className={`cap-oval ${hint === "ok" ? "ok oval-live" : ""} ${phase === "static" ? "dashed" : ""}`} />
-            <p className={`cap-hint absolute inset-x-3 bottom-3 ${HINTS[hint].tone}`}>
-              {phase === "static"
+            <p role="status" className={`cap-hint absolute inset-x-3 bottom-3 ${HINTS[hint].tone}`}>
+              {hint === "dark" ? HINTS.dark.text : phase === "loading-model"
+                ? "Center your face while tracking loads — you can capture now"
+                : phase === "static"
                 ? "Live face tracking unavailable — center your face in the oval"
                 : HINTS[hint].text}
             </p>
           </>
         )}
-        {phase === "loading-model" && !cameraError && (
-          <p className="absolute inset-0 grid place-items-center text-xs text-gray-400">Starting camera…</p>
+        {(phase === "starting" || phase === "capturing") && !cameraError && (
+          <p role="status" className="absolute inset-0 grid place-items-center text-xs text-gray-400">
+            {phase === "capturing" ? "Preparing photo…" : "Starting camera…"}
+          </p>
         )}
         {cameraError && (
           <div className="absolute inset-0 grid place-items-center p-4 text-center">
-            <p className="text-xs cap-hint bad flex items-start gap-1 text-left">
+            <p role="alert" className="text-xs cap-hint bad flex items-start gap-1 text-left">
               <AlertTriangle className="w-3 h-3 shrink-0 mt-0.5" /> {cameraError}
             </p>
           </div>
         )}
       </div>
 
-      {phase === "confirm" && preview ? (
-        <div className="flex items-center justify-center gap-3">
-          <button onClick={confirm} className="cap-btn-primary">
+      {phase === "confirm" && photo ? (
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <button type="button" onClick={() => onCapture(photo.file)} className="cap-btn-primary">
             <Check className="w-4 h-4" /> Use this photo
           </button>
-          <button onClick={() => void start()} className="cap-btn-ghost">
+          <button type="button" onClick={retry} className="cap-btn-ghost">
             <RefreshCw className="w-4 h-4" /> Retake
           </button>
-          <button onClick={onClose} className="text-sm text-gray-500 hover:text-gray-300">Cancel</button>
+          <button type="button" onClick={close} className="min-h-11 text-sm text-gray-400 hover:text-gray-300">Cancel</button>
         </div>
       ) : (
         <>
@@ -229,14 +259,14 @@ export function FaceCameraCapture({ onCapture, onClose }: FaceCameraCaptureProps
               </div>
             ))}
           </div>
-          <div className="flex items-center justify-center gap-3">
-            <button onClick={capture} disabled={phase !== "live" && phase !== "static"} className="cap-btn-primary">
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <button type="button" onClick={capture} disabled={!canCapture} className="cap-btn-primary">
               <Camera className="w-4 h-4" /> {phase === "static" ? "Capture anyway" : "Capture selfie"}
             </button>
-            <button onClick={() => void start()} className="cap-btn-ghost">
+            <button type="button" onClick={retry} disabled={phase === "starting" || phase === "capturing"} className="cap-btn-ghost">
               <RefreshCw className="w-4 h-4" /> Retry
             </button>
-            <button onClick={onClose} className="text-sm text-gray-500 hover:text-gray-300">Cancel</button>
+            <button type="button" onClick={close} className="min-h-11 text-sm text-gray-400 hover:text-gray-300">Cancel</button>
           </div>
         </>
       )}
@@ -244,12 +274,7 @@ export function FaceCameraCapture({ onCapture, onClose }: FaceCameraCaptureProps
   );
 }
 
-function sampledBrightness(video: HTMLVideoElement): number {
-  const sample = document.createElement("canvas");
-  sample.width = 32;
-  sample.height = 32;
-  const ctx = sample.getContext("2d", { willReadFrequently: true });
-  if (!ctx || !video.videoWidth) return 0;
+function sampledBrightness(video: HTMLVideoElement, ctx: CanvasRenderingContext2D): number {
   ctx.drawImage(video, 0, 0, 32, 32);
   const px = ctx.getImageData(0, 0, 32, 32).data;
   let sum = 0;

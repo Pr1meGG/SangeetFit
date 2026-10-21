@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 // Reports the app's operating mode so UI badges are truthful. No secrets returned.
 // Mirrors the env logic in src/app/api/vto/route.ts and src/app/api/skin/route.ts.
 const YOUCAM_API_KEY = process.env.YOUCAM_API_KEY || "";

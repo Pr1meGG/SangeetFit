@@ -1,9 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+
+export const viewport: Viewport = { themeColor: "#FBF7EF", viewportFit: "cover" };
 
 export const metadata: Metadata = {
   title: "SangeetFit — Indian Wedding Outfit Styling",
-  description: "Occasion-curated outfit gallery with skin-tone harmony scoring and virtual try-on, powered by the YouCam API.",
+  description: "Find outfit inspiration for your next celebration and explore personal virtual try-on with SangeetFit.",
+  icons: {
+    icon: [{ url: "/brand/app-icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/brand/app-icon.svg" }],
+  },
 };
 
 export default function RootLayout({
@@ -13,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-[#0a0a0f] text-gray-100">
+      <body className="min-h-screen">
         {children}
       </body>
     </html>

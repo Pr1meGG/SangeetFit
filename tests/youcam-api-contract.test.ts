@@ -3,6 +3,10 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseDataUrl, uploadYouCamFile } from "../src/lib/youcam.ts";
+import { parseVtoInput, parseVtoImage } from "../src/lib/vto-input.ts";
+import { OUTFITS } from "../src/data/outfits.ts";
+
+const validPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -105,10 +109,13 @@ assert(vtoSource.includes('garmentTypes: ["kurta-set"]'));
 assert(vtoSource.includes('garmentTypes: ["gown"]'));
 assert(!/fullbody_mock/.test(vtoSource.match(/const REFERENCE_ASSETS[\s\S]{0,600}};/)?.[0] ?? ""), "fullbody_mock.png must not be allowlisted as a garment reference");
 // VTO uses the separate full-body input, not the face selfie.
-assert(vtoSource.includes("parseDataUrl(fullBodyDataUrl)"));
+const supported = OUTFITS.find(outfit => outfit.vtoSupported && outfit.tryOnReference)!;
+const parsedVto = parseVtoInput({ fullBodyDataUrl: validPng, garmentId: supported.id, referenceAsset: supported.tryOnReference, vtoSupported: true });
+assert.equal(parsedVto.kind, "catalogue");
+assert(parsedVto.fullBody?.buffer.equals(Buffer.from(validPng.split(",")[1], "base64")));
 assert(!vtoSource.includes("selfieDataUrl"), "VTO must not reference the face selfie");
 assert(vtoSource.includes("Try-on is not supported for this outfit yet"));
-assert(vtoSource.includes('outfit.youcamCategory'));
+assert(vtoSource.includes('garment_category: category'), "Cloth V4 request must use the documented category field");
 assert(vtoSource.includes('mode: "live"'));
 assert(vtoSource.includes("/task/cloth-v4/${taskId}"));
 assert(vtoSource.includes('data.data.task_status === "error"'));
@@ -116,7 +123,7 @@ assert(!vtoSource.includes("/file/cloth-v3"));
 assert(!vtoSource.includes("format:"));
 // Missing/invalid live VTO source is rejected before any external request.
 assert(vtoSource.includes('A full-body photo is required for virtual try-on'), "live mode must reject missing full-body source");
-assert(vtoSource.includes("Full-body photo must be a valid JPG or PNG image"), "invalid full-body source rejected");
+assert.throws(() => parseVtoImage("data:image/png;base64,aGVsbG8=", "Full-body photo"), /Full-body photo must be a valid JPG or PNG image/);
 // Do not reuse the face selfie and do not silently fall back to a sample in live mode.
 assert(vtoSource.includes("never fall back to a sample"), "live mode must not fall back to a sample");
 console.log("PASS: VTO category, full-body source, and live contract");
@@ -127,11 +134,11 @@ assert(pageSource.includes("referenceAsset: outfit.tryOnReference"));
 assert(pageSource.includes("vtoSupported: outfit.vtoSupported"));
 assert(pageSource.includes("displayImage: outfit.imageUrl"));
 assert(!pageSource.includes("selfieDataUrl, garmentId"), "frontend must not send the face selfie to VTO");
-assert(pageSource.includes("src={vtoModal.resultUrl}"));
-assert(pageSource.includes('mode: data.mode || "mock"'));
-// Unsupported pieces are blocked client-side too, and honest in the card UI.
-assert(pageSource.includes("if (!outfit.vtoSupported || !outfit.tryOnReference)"));
-assert(pageSource.includes("Try-on not available"));
+assert(pageSource.includes("vtoModal.resultUrl"));
+assert(pageSource.includes('data.mode !== "live" && data.mode !== "mock"'), "unknown result modes must be rejected, not silently labelled mock");
+// Candidate references do not appear as primary recommendations; own uploads remain valid.
+assert(pageSource.includes("!outfit.vtoSupported || !outfit.tryOnReference"));
+assert(pageSource.includes("Generate try-on"), "generation must remain an explicit user action");
 // Client-side validation for the full-body photo.
 assert(pageSource.includes('file.type.startsWith("image/")'));
 assert(pageSource.includes("10 * 1024 * 1024"));
@@ -140,14 +147,21 @@ assert(pageSource.includes("fullBodyDataUrl"));
 console.log("PASS: frontend forwards per-outfit fields and renders live URLs");
 
 const skinMockSource = skinSource.match(/MOCK_MODE[\s\S]{0,240}mode: "mock"/)?.[0] ?? "";
-const vtoMockSource = vtoSource.match(/MOCK_MODE[\s\S]{0,900}mode: "mock"/)?.[0] ?? "";
 assert(skinMockSource.includes('skin_color: "#b9947c"'));
-assert(vtoMockSource.includes("mockUrl"));
-assert(vtoMockSource.includes('mode: "mock"'));
-// Mock placeholder aligns with the catalog preview (outfit-specific display image).
-assert(vtoMockSource.includes("displayImage"), "mock result echoes outfit-specific display image");
-assert(/mock/i.test(vtoMockSource), "mock results are clearly labelled");
-console.log("PASS: mock behavior preserved");
+void (async () => {
+  process.env.MOCK_MODE = "true";
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => { throw new Error("Mock must not call the network"); }) as typeof fetch;
+  try {
+    const { POST } = await import("../src/app/api/vto/route.ts");
+    const response = await POST(new Request("http://localhost/api/vto", { method: "POST", body: JSON.stringify({
+      garmentId: supported.id, referenceAsset: supported.tryOnReference, vtoSupported: true, displayImage: "https://example.test/unrelated.png",
+    }) }) as never);
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { success: true, resultUrl: supported.imageUrl, displayImage: supported.imageUrl, mode: "mock" });
+    console.log("PASS: mock placeholder comes from server catalogue, not client displayImage, with zero network calls");
+  } finally { globalThis.fetch = originalFetch; }
+})().catch(error => { console.error(error); process.exit(1); });
 
 for (const source of [skinSource, vtoSource, pageSource]) {
   assert(!source.includes("console.log"));

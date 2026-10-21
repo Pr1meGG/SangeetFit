@@ -1,5 +1,9 @@
 export type FetchLike = typeof fetch;
 
+export class YouCamHttpError extends Error {
+  constructor(message: string, readonly status: number) { super(message); }
+}
+
 export interface ParsedDataUrl {
   contentType: string;
   buffer: Buffer;
@@ -29,10 +33,13 @@ export async function uploadYouCamFile(input: {
   fileName: string;
   contentType: string;
   fetchImpl?: FetchLike;
+  signal?: AbortSignal;
 }): Promise<string> {
   const fetchImpl = input.fetchImpl ?? fetch;
+  input.signal?.throwIfAborted();
   const uploadRes = await fetchImpl(`${input.baseUrl}/file`, {
     method: "POST",
+    signal: input.signal,
     headers: {
       Authorization: `Bearer ${input.apiKey}`,
       "Content-Type": "application/json",
@@ -47,7 +54,7 @@ export async function uploadYouCamFile(input: {
   });
 
   if (!uploadRes.ok) {
-    throw new Error(`Upload metadata failed: ${uploadRes.status}`);
+    throw new YouCamHttpError(`Upload metadata failed: ${uploadRes.status}`, uploadRes.status);
   }
 
   const uploadData = await uploadRes.json() as unknown;
@@ -81,14 +88,16 @@ export async function uploadYouCamFile(input: {
     uploadHeaders[header] = String(value);
   }
 
+  input.signal?.throwIfAborted();
   const binaryRes = await fetchImpl(uploadRequest.url, {
     method: uploadRequest.method,
+    signal: input.signal,
     headers: uploadHeaders,
     body: new Uint8Array(input.buffer),
   });
 
   if (!binaryRes.ok) {
-    throw new Error(`Binary (signed PUT) upload failed: ${binaryRes.status}`);
+    throw new YouCamHttpError(`Binary (signed PUT) upload failed: ${binaryRes.status}`, binaryRes.status);
   }
 
   return fileEntry.file_id;
