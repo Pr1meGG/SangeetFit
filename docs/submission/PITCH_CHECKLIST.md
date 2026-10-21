@@ -8,7 +8,7 @@ Updated 21 October 2026. Unchecked gates are pending, not achieved. The approved
 
 The core combines user-confirmed occasion/style/colour metadata with a personal YouCam Cloth V4 preview. It uses a separate full-body source and garment reference, with upload → task → polling. Optional skin-tone analysis uses a separate face selfie. Neither metadata ranking nor skin analysis proves fit, facial preservation or colour suitability.
 
-Current collection has 14 credited photographs and eight new wired candidates, with four legacy mappings. No candidate has been promoted to live-reviewed primary recommendations. No exact seller products or retailer image permissions have been established. **View at seller** appears only for verified exact products; there is no checkout.
+The collection defaults to 26 original AI-generated model/outfit concepts, with five women's and five men's choices under each of five occasion filters; suitable looks can appear in more than one occasion. Fourteen credited sourced photos remain in the archive, eight wired as candidate references, alongside four legacy mappings. Browsing needs no person photo, but personal VTO does. No candidate has been promoted to live-reviewed primary recommendations. No exact seller products or retailer image permissions have been established. **View at seller** appears only for verified exact products; there is no checkout.
 
 Historical approved Cloth V4 successes cover one sample-person/maroon-lehenga pair. They prove limited pipeline operation, not own-garment reliability or broadly retained identity. The planned twelve-case benchmark has no outcomes. Mock references must be explicitly identified in screenshots and video. The wardrobe stays in the page session; top-and-bottom combinations are future work.
 
@@ -35,7 +35,7 @@ Recheck the [official rules](https://youcam-api-skin-ai-ecommerce.devpost.com/ru
 - [ ] Settle the application code licence before public distribution; README no longer claims MIT without a LICENSE file.
 - [ ] Working testable app URL/build and any necessary judge instructions/credentials through an appropriate private channel.
 - [ ] Finalize the [English description draft](DEVPOST_DRAFT.md) with actual evidence, consumer value, YouCam integrations and honest limitations.
-- [ ] Final screenshots: occasion home; own-garment photo/metadata; explained recommendation; explicit Generate/photo consent; actual live result if approved; two-look comparison; chosen/saved look. Label any mock segment.
+- [ ] Final screenshots: occasion home and photo-free model-led collection; own-garment photo/metadata; explained recommendation; explicit Generate/photo consent; actual live result if approved; two-look comparison; chosen/saved look. Label concepts and any mock segment.
 - [ ] Genuine 1–3 minute end-to-end video following [DEMO_SCRIPT](DEMO_SCRIPT.md), showing the intended device and APIs used.
 - [ ] Publish video and submit only with the user's separate approval; add final video URL to README/Devpost.
 - [ ] Document significant improvements during the hackathon if applicable.

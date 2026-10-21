@@ -8,9 +8,9 @@ Choosing what to wear across Sangeet, Mehendi, Haldi, a wedding and a reception 
 
 ## What it does
 
-Users choose an occasion and add photos of their own upper-body garments or complete outfits. They confirm each garment's colour, style and occasion tags. SangeetFit ranks matching items using those stated details and explains each recommendation in plain language; it does not claim to infer style or physical fit from the photo.
+Users can browse a model-led celebration collection without uploading a photo, then choose an occasion and add photos of their own upper-body garments or complete outfits. They confirm each garment's colour, style and occasion tags. SangeetFit ranks matching items using those stated details and explains each recommendation in plain language; it does not claim to infer style or physical fit from the photo. The collection's AI-generated concepts are inspiration and unreviewed try-on candidates, not seller products or personal results.
 
-To preview an outfit, the user supplies a separate full-body photo, sees where live photo processing will occur, and explicitly presses **Generate try-on**. They can compare two recent results from the same source photo, inspect the original and result, choose a favourite and save or open an image. Opening, comparing or revisiting a result does not start another generation task. The wardrobe, photos and choices are kept only in the current page session and may disappear on refresh. A credited reference collection offers optional inspiration; seller links appear only for verified exact products.
+To preview an outfit on themselves, the user supplies a separate full-body photo, sees where live photo processing will occur, and explicitly presses **Generate try-on**. They can compare two recent results from the same source photo, inspect the original and result, choose a favourite and save or open an image. Opening, comparing or revisiting a result does not start another generation task. The wardrobe, photos and choices are kept only in the current page session and may disappear on refresh. Fourteen credited sourced photos remain available in the archive, including browse-only images; seller links appear only for verified exact products.
 
 ## How we built it
 

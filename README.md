@@ -1,6 +1,6 @@
 # SangeetFit
 
-Choose between celebration outfits you already own, try them on your photo, compare two looks and save your favourite. A credited reference collection offers optional inspiration. Built for the YouCam API hackathon with Next.js 14, TypeScript and Tailwind CSS.
+Choose between celebration outfits you already own, try them on your photo, compare two looks and save your favourite. Browse a model-led collection without a photo for optional inspiration. Built for the YouCam API hackathon with Next.js 14, TypeScript and Tailwind CSS.
 
 ## Current experience
 
@@ -18,7 +18,7 @@ Catalogue outfit sharing restores the selected outfit and occasion, not personal
 |---|---|---|
 | Own clothes | JPEG/PNG preprocessing, confirmed metadata, validated two-image VTO request | Uploaded-garment live quality not established |
 | Recommendations | Occasion/audience filtering; declared style, explicit colour, stable order; reasons | Metadata policy, not learned suitability or sizing |
-| Catalogue | 14 credited photos, eight new exact reference candidates; four legacy mappings | **Zero live-reviewed primary references**; no verified seller collection |
+| Catalogue | 26 original AI model/outfit concepts across five occasions, plus 14 credited archive photos (eight wired candidates) and four legacy mappings; photo-free browsing | **Zero live-reviewed primary references**; concepts are not personal results or seller products |
 | Try-on | YouCam Cloth V4 upload → submit → poll; explicit action; one client request pending; no automatic retry | Prior approved successes cover one sample-person/maroon-lehenga pair only |
 | Compare/save | Two session results, source version/mode, originals/zoom/choice, save/open | No permanent wardrobe; actual-device save behaviour pending |
 | Optional skin | Separate selfie → skin-tone-analysis API; mock sample visibly labelled | Separate evidence; not a VTO-quality substitute |
@@ -87,7 +87,7 @@ Browser/API regression fixtures are synthetic or local test assets. No tests aut
 - `src/components/WardrobeUpload.tsx`, `LookComparison.tsx`: session clothes and result decisions.
 - `src/lib/styling.ts`: deterministic recommendations and eligibility; `vto-input.ts`: server image/mode validation.
 - `src/app/api/vto/route.ts`: catalogue/uploaded references; serialized JSON must be **under 4,000,000 bytes**.
-- `src/data/outfits.ts`, `indian-wear.json`: identity, references, styling and provenance.
+- `src/data/outfits.ts`, `editorial.ts`, `indian-wear.json`: identity, references, styling and provenance.
 - [Photo credits/licences](docs/garment-library/README.md) and [source feasibility](docs/garment-library/SOURCE_FEASIBILITY.md). Photo licences are separate from code licensing; no retailer partnership or blanket image permission is implied.
 
 ## Release and submission

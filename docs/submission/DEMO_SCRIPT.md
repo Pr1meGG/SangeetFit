@@ -4,9 +4,11 @@ Updated 21 October 2026. Recording plan only; no video or current live quality e
 
 ## 0:00–0:20 — The decision
 
-**Screen:** warm festive occasion home; select Sangeet.
+**Screen:** warm festive occasion home; select Sangeet and briefly browse the model-led collection without uploading a photo.
 
-**Voiceover:** “A wedding has several functions, and changing outfits repeatedly takes time. SangeetFit helps you decide which celebration outfit to wear from clothes you already own.”
+**Voiceover:** “A wedding has several functions, and changing outfits repeatedly takes time. You can browse celebration ideas without a photo, then use SangeetFit to decide between clothes you already own.”
+
+The collection contains AI-generated outfit concepts and sourced references. Show their candidate labels; browsing is not a personal try-on. A personal generated result still needs a suitable person photo.
 
 ## 0:20–0:50 — Your clothes and explainable recommendations
 
@@ -40,7 +42,7 @@ If sources differ, show the warning; do not imply fair same-source comparison. E
 
 **Voiceover:** “Built with Next.js, TypeScript and YouCam, SangeetFit connects recommendations with a personal preview. AI can alter details, so this is a visual aid, not a sizing or face-preservation guarantee. Our live-quality scorecard and test coverage are reported honestly.”
 
-Show only recorded benchmark values/sample sizes. If still pending, label them pending. The owned-clothes decision is the main story. Show **View at seller** only if an actual exact-item listing and image permission have been verified. Otherwise omit commerce footage; no seller collection is currently verified. Session clothes and results disappear on refresh; do not imply a permanent wardrobe. Top-and-bottom combinations are future work.
+Show only recorded benchmark values/sample sizes. If still pending, label them pending. The owned-clothes decision is the main story; the model-led collection is optional inspiration until its exact references pass live review. Show **View at seller** only if an actual exact-item listing and image permission have been verified. Otherwise omit commerce footage; no seller collection is currently verified. Session clothes and results disappear on refresh; do not imply a permanent wardrobe. Top-and-bottom combinations are future work.
 
 ## Recording gate and fallback
 
