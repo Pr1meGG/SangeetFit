@@ -9,9 +9,14 @@ import { OUTFITS, TRY_ON_REFERENCES } from "../src/data/outfits.ts";
 import { isPrimaryEligible } from "../src/lib/styling.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-assert.equal(EDITORIAL_LOOKS.length, 5);
-assert.equal(EDITORIAL_LOOKS.filter(look => look.audience === "women").length, 3);
-assert.equal(EDITORIAL_LOOKS.filter(look => look.audience === "men").length, 2);
+assert.equal(EDITORIAL_LOOKS.length, 26);
+assert.equal(new Set(EDITORIAL_LOOKS.map(look => look.id)).size, EDITORIAL_LOOKS.length);
+assert.equal(new Set(EDITORIAL_LOOKS.map(look => look.tryOnReference)).size, EDITORIAL_LOOKS.length);
+for (const occasion of ["sangeet", "mehendi", "haldi", "wedding", "reception"] as const) {
+  for (const audience of ["women", "men"] as const) {
+    assert.equal(EDITORIAL_LOOKS.filter(look => look.audience === audience && look.occasionTags.includes(occasion)).length, 5, `${occasion} ${audience}: exactly five model-led looks`);
+  }
+}
 for (const look of EDITORIAL_LOOKS) {
   assert(look.generatedConcept && !look.source && !look.seller);
   assert.equal(look.tryOnStatus, "candidate");
@@ -25,4 +30,4 @@ for (const look of EDITORIAL_LOOKS) {
   assert(bytes.subarray(0, 3).equals(Buffer.from([255, 216, 255])), `${look.id}: JPEG expected`);
   assert.equal(createHash("sha256").update(bytes).digest("hex"), look.generatedConcept.sha256);
 }
-console.log("PASS: five original AI concepts, exact display/reference images, hashes and candidate-only status");
+console.log("PASS: 26 original AI concepts fill five looks per occasion and audience with exact images, hashes and candidate-only status");

@@ -30,8 +30,15 @@ try {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await browseLink.click();
   await page.getByRole("heading", { name: "The celebration edit." }).waitFor();
-  assert.equal(await page.getByRole("article").count(), 5);
-  assert.equal(await page.getByText("AI outfit concept", { exact: true }).count(), 5);
+  const occasions = page.getByRole("group", { name: "Choose occasion" });
+  const collections = page.getByRole("group", { name: "Choose collection" });
+  assert(await occasions.getByRole("button", { name: "Sangeet" }).isVisible(), "occasion choices must be visible on a narrow phone");
+  assert(await collections.getByRole("button", { name: "Women’s wear" }).isVisible(), "audience choices must be visible on a narrow phone");
+  const receptionBounds = await occasions.getByRole("button", { name: "Reception" }).boundingBox();
+  assert(receptionBounds && receptionBounds.x >= 0 && receptionBounds.x + receptionBounds.width <= 320, "all occasions must be visible without horizontal swiping on a narrow phone");
+  assert.equal(await page.getByRole("article").count(), 26);
+  assert.equal(await page.getByText("AI outfit concept", { exact: true }).count(), 26);
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   assert.equal(vtoRequests, 0, "browsing must not generate a task");
   await page.getByRole("article").first().getByRole("link", { name: "Try with your photo" }).click();
   await page.getByText("AI outfit concept · no retail listing", { exact: true }).waitFor();
@@ -40,14 +47,27 @@ try {
 
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto(`${base}/library`);
+  for (const event of ["Sangeet", "Mehendi", "Haldi", "Wedding", "Reception"]) {
+    await page.getByRole("group", { name: "Choose occasion" }).getByRole("button", { name: event }).click();
+    for (const collection of ["Women’s wear", "Men’s wear"]) {
+      await page.getByRole("group", { name: "Choose collection" }).getByRole("button", { name: collection, exact: true }).click();
+      const visibleLooks = await page.getByRole("article").count();
+      assert(visibleLooks >= 5, `${event} ${collection} needs at least five distinct model-led looks`);
+      assert.equal(await page.getByText("AI outfit concept", { exact: true }).count(), visibleLooks, "archive photos must not pad model-led coverage");
+      assert.equal(await page.getByRole("link", { name: "Try with your photo" }).count(), visibleLooks);
+    }
+  }
+  assert.equal(vtoRequests, 0, "occasion browsing must not generate tasks");
+  await page.getByRole("group", { name: "Choose occasion" }).getByRole("button", { name: "All occasions" }).click();
+  await page.getByRole("group", { name: "Choose collection" }).getByRole("button", { name: "Everyone" }).click();
   await page.getByText("Search and filter outfits").click();
   await page.getByRole("searchbox").fill("saree");
   assert((await page.getByRole("article").count()) > 0, "search must find matching sourced references even when the archive is hidden");
   await page.getByRole("searchbox").fill("");
   await page.getByLabel("Include 14 sourced reference photos").check();
-  assert.equal(await page.getByRole("article").count(), 13);
+  assert.equal(await page.getByRole("article").count(), 34);
   await page.getByLabel("Try-on references only").uncheck();
-  assert.equal(await page.getByRole("article").count(), 19);
+  assert.equal(await page.getByRole("article").count(), 40);
   for (const article of await page.getByRole("article").all()) {
     const image = article.getByRole("img");
     await image.scrollIntoViewIfNeeded();
@@ -56,24 +76,24 @@ try {
     assert.equal(await article.getByRole("link").filter({ hasText: /CC0|CC BY-SA|Public domain/ }).count(), await article.getByText("AI outfit concept", { exact: true }).count() ? 0 : 1);
   }
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-  console.log("PASS: five concepts and 14 sourced photos decode, retain honest labels/credits and fit mobile layout");
+  console.log("PASS: 26 concepts and 14 sourced photos decode, retain honest labels/credits and fit mobile layout");
 
-  await page.getByLabel("Collection", { exact: true }).selectOption("men");
-  assert.equal(await page.getByRole("article").count(), 8);
-  await page.getByLabel("Occasion", { exact: true }).selectOption("sangeet");
-  assert.equal(await page.getByRole("article").count(), 5);
+  await page.getByRole("group", { name: "Choose collection" }).getByRole("button", { name: "Men’s wear", exact: true }).click();
+  assert.equal(await page.getByRole("article").count(), 19);
+  await page.getByRole("group", { name: "Choose occasion" }).getByRole("button", { name: "Sangeet" }).click();
+  assert.equal(await page.getByRole("article").count(), 9);
   await page.getByLabel("Try-on references only").check();
-  assert.equal(await page.getByRole("article").count(), 4);
+  assert.equal(await page.getByRole("article").count(), 8);
   await page.getByRole("searchbox").fill("nonexistent-garment");
   await page.getByText("No garments match these filters.").waitFor();
   await page.getByRole("button", { name: "Clear filters" }).click();
-  assert.equal(await page.getByRole("article").count(), 5);
+  assert.equal(await page.getByRole("article").count(), 26);
   await page.getByLabel("Include 14 sourced reference photos").check();
   await page.getByRole("searchbox").fill("Midnight");
   assert.equal(await page.getByRole("article").count(), 1);
   console.log("PASS: collection, occasion, reference and text filters combine; empty state resets");
 
-  await page.getByLabel("Occasion", { exact: true }).selectOption("reception");
+  await page.getByRole("group", { name: "Choose occasion" }).getByRole("button", { name: "Reception" }).click();
   const tryLink = page.getByRole("link", { name: "Try with your photo" });
   assert((await tryLink.getAttribute("href")).includes("occasion=reception"), "secondary occasion must survive a reference link");
   await tryLink.click();

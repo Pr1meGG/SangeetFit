@@ -32,29 +32,35 @@ export default function GarmentLibrary() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6B1E3A]">SangeetFit collection</p>
           <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-[#6B1E3A]">The celebration edit.</h1>
           <p className="text-[#78665E] leading-relaxed">Browse without a photo. To try a look, add a clear head-to-toe photo and tap Generate.</p>
-          <p className="text-sm text-[#78665E]">Five original AI outfit concepts. Try-on quality is still unreviewed; older sourced references are available in filters.</p>
+          <p className="text-sm text-[#78665E]">Browse {EDITORIAL_LOOKS.length} original AI outfit concepts. Try-on quality is still unreviewed; older sourced references are available in filters.</p>
         </header>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-[#6B1E3A]">Occasion</p>
+            <div role="group" aria-label="Choose occasion" className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
+              {["all", "sangeet", "mehendi", "haldi", "wedding", "reception"].map(value => (
+                <button key={value} type="button" aria-pressed={occasion === value} onClick={() => setOccasion(value)} className={`min-h-11 rounded-full border px-2 py-2 text-xs font-medium sm:px-4 sm:text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B1E3A] ${occasion === value ? "border-[#6B1E3A] bg-[#6B1E3A] text-white" : "border-[#E8DED1] bg-white text-[#6B1E3A]"}`}>{value === "all" ? "All occasions" : value.charAt(0).toUpperCase() + value.slice(1)}</button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-[#6B1E3A]">For whom</p>
+            <div role="group" aria-label="Choose collection" className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
+              {[["all", "Everyone"], ["women", "Women’s wear"], ["men", "Men’s wear"]].map(([value, label]) => (
+                <button key={value} type="button" aria-pressed={audience === value} onClick={() => setAudience(value)} className={`min-h-11 rounded-full border px-2 py-2 text-xs font-medium sm:px-4 sm:text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B1E3A] ${audience === value ? "border-[#6B1E3A] bg-[#6B1E3A] text-white" : "border-[#E8DED1] bg-white text-[#6B1E3A]"}`}>{label}</button>
+              ))}
+            </div>
+          </div>
+        </div>
 
         <details className="rounded-2xl border border-[#E8DED1] bg-[#F5EEE4] p-4 sm:p-5">
           <summary className="cursor-pointer min-h-11 flex items-center font-medium text-[#6B1E3A]">Search and filter outfits</summary>
-          <div className="grid gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-3">
           <label className="space-y-2 text-sm text-[#78665E]">
             <span className="inline-flex gap-2 items-center"><Search className="w-4 h-4" aria-hidden="true" /> Search garments</span>
             <input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Saree, kurta, lehenga…" className={fieldClass} />
           </label>
-          <div className="space-y-2 text-sm text-[#78665E]">
-            <label htmlFor="library-collection" className="block">Collection</label>
-            <select id="library-collection" value={audience} onChange={event => setAudience(event.target.value)} className={fieldClass}>
-              <option value="all">All styles</option><option value="women">Women&apos;s wear</option><option value="men">Men&apos;s wear</option>
-            </select>
-          </div>
-          <div className="space-y-2 text-sm text-[#78665E]">
-            <label htmlFor="library-occasion" className="block">Occasion</label>
-            <select id="library-occasion" value={occasion} onChange={event => setOccasion(event.target.value)} className={fieldClass}>
-              <option value="all">All occasions</option>
-              {["sangeet", "mehendi", "haldi", "wedding", "reception"].map(value => <option key={value} value={value}>{value.charAt(0).toUpperCase() + value.slice(1)}</option>)}
-            </select>
-          </div>
           {showArchive && <label className="flex items-center gap-3 text-sm text-[#78665E] min-h-11 cursor-pointer">
             <input type="checkbox" checked={referencesOnly} onChange={event => setReferencesOnly(event.target.checked)} className="w-5 h-5 accent-[#6B1E3A]" /> Try-on references only
           </label>}
