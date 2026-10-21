@@ -120,6 +120,22 @@ a, button { touch-action: manipulation; }
 .sf-gallery-heading h1 { font-size: clamp(34px,4vw,48px); margin-bottom: 12px; }
 .sf-gallery-heading p { max-width: 620px; font-size: 14px; }
 .sf-gallery-heading > button { flex-shrink: 0; }
+.sf-week-board { margin: 0 0 32px; padding: 26px; border: 1px solid #e6d7c9; border-radius: 20px; background: #f7eee2; }
+.sf-week-board-heading { display: flex; justify-content: space-between; align-items: start; gap: 18px; margin-bottom: 20px; }
+.sf-week-board-heading h2 { font-size: 30px; margin-bottom: 5px; }
+.sf-week-board-heading p { max-width: 670px; font-size: 13px; }
+.sf-week-board-count { white-space: nowrap; border-radius: 20px; background: #fffaf2; color: var(--sf-burgundy); padding: 9px 12px; font-size: 12px; }
+.sf-week-board-grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; }
+.sf-week-board-card { min-width: 0; overflow: hidden; border: 1px solid var(--sf-line); border-radius: 13px; background: #fffdf8; }
+.sf-week-board-image { height: 150px; display: grid; place-items: center; color: #b48a70; background: #eee4d6; }
+.sf-week-board-image img { width: 100%; height: 100%; object-fit: contain; }
+.sf-week-board-card-body { display: flex; flex-direction: column; gap: 7px; padding: 12px; }
+.sf-week-board-event { color: var(--sf-burgundy); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
+.sf-week-board-card strong { min-height: 38px; font-size: 13px; line-height: 1.45; }
+.sf-week-board-source { min-height: 30px; color: var(--sf-muted); font-size: 10px; line-height: 1.4; }
+.sf-week-board-card select { width: 100%; min-width: 0; min-height: 44px; padding: 9px; border: 1px solid var(--sf-line); border-radius: 8px; background: #fff; color: var(--sf-ink); font-size: 12px; }
+.sf-week-board-action { display: inline-flex; align-items: center; justify-content: space-between; min-height: 44px; color: var(--sf-burgundy); font-size: 12px; font-weight: 600; text-align: left; }
+.sf-week-board-note { margin-top: 12px; font-size: 11px; }
 .sf-occasion-tabs { display: flex; flex-wrap: wrap; gap: 10px; padding-bottom: 24px; }
 .sf-chip { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 9px 20px; border: 1px solid var(--sf-line); border-radius: 24px; color: #6e5b52; background: #fffdf8; font-size: 13px; }
 .sf-chip:hover { border-color: #ac7b7d; }
@@ -195,6 +211,7 @@ a, button { touch-action: manipulation; }
 .sf-dialog-actions .sf-button-primary { flex: 1; }
 .sf-dialog-actions p { flex: 0 0 100%; font-size: 10px; color: var(--sf-muted); text-align: center; margin-top: 3px; }
 @media (max-width: 1000px) { .sf-main { padding-inline: 28px; } .sf-welcome { gap: 24px; } .sf-collage { height: 380px; } .sf-collage-main { height: 340px; } .sf-collage-small { height: 220px; } .sf-outfit-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } .sf-personalize { gap: 40px; } .sf-occasions { gap: 10px; } .sf-occasion { padding-inline: 12px; } .sf-small-note { display: none; } }
+@media (max-width: 1000px) { .sf-week-board-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }
 @media (max-width: 640px) {
   .sf-main { padding: 0 20px 100px; }
   .sf-welcome { grid-template-columns: minmax(0,1fr) 105px; padding: 26px 0 24px; gap: 12px; min-height: 0; }
@@ -237,6 +254,13 @@ a, button { touch-action: manipulation; }
   .sf-gallery-heading h1 { font-size: 37px; }
   .sf-gallery-heading p { font-size: 13px; }
   .sf-gallery-heading > button { padding: 9px 14px; font-size: 12px; }
+  .sf-week-board { padding: 16px; margin-bottom: 24px; }
+  .sf-week-board-heading { flex-direction: column; gap: 8px; }
+  .sf-week-board-heading h2 { font-size: 27px; }
+  .sf-week-board-grid { grid-template-columns: 1fr; }
+  .sf-week-board-card { display: grid; grid-template-columns: 96px minmax(0,1fr); }
+  .sf-week-board-image { height: 100%; min-height: 150px; }
+  .sf-week-board-card strong, .sf-week-board-source { min-height: 0; }
   .sf-occasion-tabs { gap: 6px; padding-bottom: 18px; }
   .sf-chip { padding: 9px 13px; font-size: 12px; }
   .sf-gallery-toolbar { flex-direction: column; align-items: stretch; gap: 12px; }

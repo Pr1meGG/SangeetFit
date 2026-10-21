@@ -1,16 +1,16 @@
 # SangeetFit — Product specification
 
-Updated 20 October 2026. This document describes the approved product and current software contracts. Implementation presence is not evidence of live image quality; verification results belong in [PROJECT_STATE](agent-workflow/PROJECT_STATE.md).
+Updated 21 October 2026. This document describes the approved product and current software contracts. Implementation presence is not evidence of live image quality; verification results belong in [PROJECT_STATE](agent-workflow/PROJECT_STATE.md).
 
 ## Product promise
 
-Choose an outfit for an occasion from your own clothes or a curated collection, preview it on yourself, compare two looks and save your choice. When an exact seller product has been verified, optionally open its original listing.
+Plan outfits across five wedding celebrations from your own clothes or optional inspiration, rewear a favourite where it suits the event, preview uncertain choices on yourself, compare two looks and save your choice. When an exact seller product has been verified, optionally open its original listing.
 
 The audience is ordinary wedding guests and bridal-party members. This is a personal dressing companion. Checkout, accounts, inventory, retailer scraping, face swapping and additional AI providers are outside this release.
 
 ## Experience
 
-1. Choose Sangeet, Mehendi, Haldi, Wedding or Reception. Skin-tone analysis is optional and uses a separate face selfie.
+1. Open a session-only five-event plan for Sangeet, Mehendi, Haldi, Wedding and Reception. Choose an owned garment or a clearly labelled candidate inspiration reference per event; the same garment may be chosen again. Planning does not create an API task. Skin-tone analysis is optional and uses a separate face selfie.
 2. Add a garment photograph and confirm its name, category, main colour, style level and occasion tags; or browse the reference collection.
 3. Recommendations filter by occasion/audience and rank declared style preference, explicit colour match, then stable curated order. Reasons describe actual metadata. User uploads can always be tried manually outside their tags.
 4. Open an outfit, review a separate front-facing full-body photo with a clearly visible face, understand live-provider processing, then explicitly press **Generate try-on**. Browsing, uploading, opening, comparing and image reload must never start generation.

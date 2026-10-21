@@ -4,15 +4,15 @@ Updated 21 October 2026. Recording plan only; no video or current live quality e
 
 ## 0:00–0:20 — The decision
 
-**Screen:** warm festive occasion home; select Sangeet and briefly browse the model-led collection without uploading a photo.
+**Screen:** “Five moments. One wardrobe.” home → open the empty five-event board and show its occasion slots and labelled inspiration options, without uploading a person photo.
 
-**Voiceover:** “A wedding has several functions, and changing outfits repeatedly takes time. You can browse celebration ideas without a photo, then use SangeetFit to decide between clothes you already own.”
+**Voiceover:** “A wedding has five different moments, but I don’t need five new outfits. I can plan what I already own, rewear a favourite, and use inspiration only where I need another idea.”
 
-The collection contains AI-generated outfit concepts and sourced references. Show their candidate labels; browsing is not a personal try-on. A personal generated result still needs a suitable person photo.
+The board contains AI-generated outfit concepts as clearly labelled candidates. Show their unreviewed labels; planning is not a personal try-on. A personal generated result still needs a suitable person photo.
 
 ## 0:20–0:50 — Your clothes and explainable recommendations
 
-**Screen:** Add two owned outfits → confirm each garment photo, reference category, main colour, style and occasion tags → show the recommendation reason.
+**Screen:** Add two owned outfits → confirm each garment photo, reference category, main colour, style and occasion tags → assign one across two functions on the board → show the recommendation reason.
 
 **Voiceover:** “I’m adding my own garment. I confirm these details myself; we aren’t pretending to analyse the photo for style. Recommendations use the occasion, my style preference and chosen colour. Every reason states the tags it actually matches.”
 

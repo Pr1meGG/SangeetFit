@@ -40,7 +40,7 @@ const noNewTasks = async (count, message) => {
 try {
   assert.deepEqual(await page.request.get(`${base}/api/mode`).then(r => r.json()), { mode: "mock" }, "this suite must only use an isolated mock server");
   await page.goto(base);
-  await page.getByRole("heading", { name: /Your occasion/ }).waitFor();
+  await page.getByRole("heading", { name: /Five moments/ }).waitFor();
   const photos = await page.evaluate(() => {
     const image = (width, height, color, mime) => {
       const canvas = Object.assign(document.createElement("canvas"), { width, height });
@@ -63,9 +63,23 @@ try {
   assert.equal(await page.locator(".sf-outfit-card").count(), 0, "unreviewed references must not masquerade as recommendations");
   assert.equal(skinRequests, 0);
   await noNewTasks(0, "browse and optional-analysis skip submit nothing");
+  const board = page.getByRole("region", { name: "Five moments. One wardrobe." });
+  for (const width of [320, 375, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `planner overflows at ${width}`);
+  }
+  await page.setViewportSize({ width: 375, height: 812 });
+  await board.getByLabel("Outfit for Sangeet").selectOption({ index: 1 });
+  await board.getByText("AI inspiration · try-on unreviewed").waitFor();
+  await board.locator("article").first().getByRole("button", { name: "Try on this look" }).click();
+  await page.getByRole("dialog", { name: "Make this look yours." }).getByText(/Candidate reference: generated garment quality/).waitFor();
+  await noNewTasks(0, "planning and opening candidate inspiration must not generate");
+  await page.getByRole("button", { name: "Close try-on" }).click();
+  await page.getByRole("button", { name: "Reception", exact: true }).click();
 
-  const addOutfit = async (name, category, photo) => {
-    await page.getByRole("button", { name: "Add my outfit", exact: true }).click();
+  const addOutfit = async (name, category, photo, fromBoard = false) => {
+    if (fromBoard) await board.locator("article").last().getByRole("button", { name: "Add my clothes" }).click();
+    else await page.getByRole("button", { name: "Add my outfit", exact: true }).click();
     const form = page.getByRole("form", { name: "Add your own outfit" });
     assert(await form.getByRole("checkbox", { name: "reception", exact: true }).isChecked(), "current occasion must default on");
     await form.getByLabel("Outfit name", { exact: true }).fill(name);
@@ -75,7 +89,11 @@ try {
     await form.getByRole("button", { name: "Add to my clothes", exact: true }).click();
     await page.getByRole("heading", { name, exact: true }).waitFor();
   };
-  await addOutfit("My burgundy kurta", "upper_body", photos.garment);
+  await addOutfit("My burgundy kurta", "upper_body", photos.garment, true);
+  const receptionChoice = await board.getByLabel("Outfit for Reception").inputValue();
+  assert(receptionChoice, "uploading from an empty event assigns the new outfit there");
+  await board.getByLabel("Outfit for Sangeet").selectOption({ label: "My burgundy kurta" });
+  assert.equal(await board.getByText(/Worn again/).count(), 2, "one owned garment can be planned for two events");
   await noNewTasks(0, "adding a garment only saves session metadata");
   assert.match(await page.locator(".sf-recommendation-reason").innerText(), /reception/i);
   await page.getByRole("button", { name: "Add My burgundy kurta to shortlist", exact: true }).click();
@@ -85,6 +103,7 @@ try {
   await page.getByRole("heading", { name: "Keep a look you love." }).waitFor();
   await page.getByRole("button", { name: "Shortlist (0)", exact: true }).click();
   await addOutfit("My gold outfit", "full_body", photos.alternate);
+  assert.equal(await board.getByLabel("Outfit for Reception").inputValue(), receptionChoice, "adding another garment must not replace a planned look");
   await page.getByRole("searchbox", { name: "Search outfit ideas" }).fill("burgundy");
   assert.equal(await page.locator(".sf-outfit-card").count(), 1);
   await page.getByRole("searchbox", { name: "Search outfit ideas" }).fill("");
@@ -228,4 +247,12 @@ try {
   await noNewTasks(7, "429 stops automatic and manual retry in this session");
   assert.deepEqual(errors, []);
   console.log("PASS: optional skin path, stale response recovery, expired-image reload and 429 stop without extra tasks or browser errors");
+
+  await page.getByRole("button", { name: "Close try-on" }).click();
+  await page.getByText("All my clothes (2)").click();
+  await page.getByRole("button", { name: "Remove garment My burgundy kurta" }).click();
+  assert.equal(await board.getByLabel("Outfit for Sangeet").inputValue(), "");
+  assert.equal(await board.getByLabel("Outfit for Reception").inputValue(), "");
+  await noNewTasks(7, "removing a planned garment clears its slots without generating");
+  console.log("PASS: five-event board assigns candidate inspiration, reuses owned clothes and clears removed garments without tasks");
 } finally { await browser.close(); }
