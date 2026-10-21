@@ -1,6 +1,6 @@
 # Offline VTO engineering benchmark
 
-Targets are acceptance goals, not achieved results. The checked-in [benchmark-records.json](benchmark-records.json) predeclares **16 distinct men's catalogue looks on one person** and contains **zero outcomes**. `p01` is a reserved pseudonym, not proof of consent or a received photo. This sweep tests candidate reference behaviour for one source image; it does not validate uploaded own clothes, independent usability or reliability across people. Never store names, photos, signed result URLs, credentials or medical information in evidence.
+Targets are acceptance goals, not achieved results. The checked-in [benchmark-records.json](benchmark-records.json) predeclares **16 distinct men's catalogue looks on one person** and now contains **two live pilot outcomes**. `p01` is a pseudonym for the consenting pilot tester. Both images rendered; the participant rated face and garment fidelity 5/5 for each. Displayed-result timings remain unknown. This sweep tests candidate reference behaviour for one source image; it does not validate uploaded own clothes, independent usability or reliability across people. Never store names, photos, signed result URLs, credentials or medical information in evidence.
 
 ## Run without provider requests
 
@@ -62,9 +62,9 @@ A pass is one-person engineering evidence only. It cannot be called a five-user 
 
 Enter `availableUnits`, `vtoUnitCost` and `skinUnitCost` only after checking the actual account and current applicable pricing. Unknown values stay null. The report reserves 25%, caps development at 40 VTO and 5 optional skin tasks and calculates an affordable mix prioritizing VTO. `approved` defaults false; setting it true is only metadata and never submits a task. Every live batch still needs specific authorization. Stop on 429; do not retry blindly.
 
-**Read-only snapshot, 21 October 2026:** the signed-in [YouCam dashboard](https://yce.perfectcorp.com/api-console/en/) displayed **916 units**. The official [unit calculator](https://yce.perfectcorp.com/ai-api/unit-calculator) displayed **2 units/call** for AI Clothes Virtual Try-On V4.0 and **20 units/call** for the optional Facial Color Tones Analyzer V1.0. No task, top-up or account setting change was made.
+**21 October pilot:** immediately before the approved batch, both the signed-in [YouCam dashboard](https://yce.perfectcorp.com/api-console/en/) and the configured key's read-only [unit API](https://docs.perfectcorp.com/reference/unit_system/paths/~1s2s~1v1.0~1client~1credit/get) reported **914 units**. The signed-in [unit calculator](https://yce.perfectcorp.com/ai-api/unit-calculator) showed **2 units/call** for Clothes V4.0. After exactly two successful live tasks, the unit API reported **910**: a four-unit deduction. No top-up or account setting change was made. The optional facial colour analyzer's 20-unit cost comes from the earlier same-day calculator snapshot and was not used in this pilot.
 
-At that snapshot, reserve is **229 units** and development allowance **687 units**. The two-task pilot would use **4 units**; 16 planned VTO tasks would use **32 units**. `plannedVtoUnits` and `plannedVtoFits` calculate the full sweep, but neither is approval to spend. Recheck balance, pricing and API-key-to-project mapping before the pilot; actual task deductions were not inspected.
+At the current 910-unit balance, the 25% reserve is **228 units** (rounded up), leaving 682 development units. The first two VTO tasks used **4 units**; the remaining 14 would use 28 more at the current quoted rate but are not approved. The route returned live result URLs in 13.7 and 20.7 seconds; full Generate-to-displayed-image latency was not timed, so `durationMs` stays null. `plannedVtoUnits` and `plannedVtoFits` calculate feasibility, never authorization.
 
 ## Separate product validation
 
