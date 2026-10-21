@@ -1,10 +1,10 @@
 # SangeetFit — one-person men's reference validation
 
-Updated 21 October 2026. **No participant photo or new live result has been received or recorded.** This is an engineering sweep of the current men's catalogue, not independent usability evidence or proof of broad face retention. Own-garment quality remains a separate, untested gate. Mock navigation never counts as live image-quality evidence.
+Updated 21 October 2026. **One full-body source candidate has been selected locally; no photo has been sent to YouCam and no new live result is recorded.** This is an engineering sweep of the current men's catalogue, not independent usability evidence or proof of broad face retention. Own-garment quality remains a separate, untested gate. Mock navigation never counts as live image-quality evidence.
 
 ## Preconditions
 
-- One tester is planned under reserved pseudonym `p01`. No other participant or photo is authorized. The reserved ID is not a record of consent.
+- One tester is planned under reserved pseudonym `p01`. The reserved ID and photo receipt are not consent for provider processing.
 - Obtain one suitable JPG/PNG full-body photo with a clear, unobstructed face, one person, front-facing pose and the intended clothing area visible. A separate selfie is not needed for Cloth V4; optional skin analysis is outside this sweep. Keep the original and generated images outside GitHub, public demos and benchmark JSON. A local path is preferable to attaching a private photo to chat.
 - Confirm informed consent for sending the full-body photo to YouCam. The app retains it only in the page session; provider processing and retention are separate. The [YouCam API privacy policy](https://www.perfectcorp.com/fr/perfectbeauty/youcam/privacy-policy-api) describes photo and possible face-derived data processing. Do not imply a local-only VTO.
 - Preflight the exact source photo and 16 server-owned garment IDs listed in [benchmark-records.json](benchmark-records.json). The first two are `concept-emerald-kurta` and `concept-sapphire-sherwani`. Recheck the running app says **Live AI**, the intended API project, remaining credits and current Cloth V4 cost. Preserve 25% of units. Do not read or publish API keys.
