@@ -203,6 +203,14 @@ a, button { touch-action: manipulation; }
 .sf-action-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 .sf-result-image { aspect-ratio: 3/4; background: #eee8de; border-radius: 13px; overflow: hidden; }
 .sf-result-image img { width: 100%; height: 100%; object-fit: contain; }
+.sf-before-after { position: relative; width: 100%; height: 100%; }
+.sf-before-after img { position: absolute; inset: 0; }
+.sf-before-after-label { position: absolute; top: 10px; padding: 5px 8px; border-radius: 6px; background: #211c1cbb; color: white; font-size: 11px; pointer-events: none; }
+.sf-before-after-label.is-before { left: 10px; }
+.sf-before-after-label.is-after { right: 10px; }
+.sf-before-after-divider { position: absolute; top: 0; bottom: 0; width: 2px; background: white; box-shadow: 0 0 4px #211c1c99; pointer-events: none; }
+.sf-before-after input[type="range"] { position: absolute; left: 5%; bottom: 8px; width: 90%; height: 44px; accent-color: var(--sf-burgundy); cursor: ew-resize; }
+.sf-before-after input[type="range"]:focus-visible { outline: 3px solid var(--sf-burgundy); outline-offset: 2px; }
 .sf-result-status { display: flex; align-items: center; gap: 7px; color: #8b5c1e; font-size: 12px; line-height: 1.5; margin-top: 14px; }
 .sf-result-status svg { flex-shrink: 0; }
 .sf-result-status.is-live { color: #456241; }
