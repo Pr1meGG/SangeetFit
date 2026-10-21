@@ -1,143 +1,63 @@
-# SangeetFit — Product Specification
+# SangeetFit — Product specification
 
-**Status:** Authoritative product definition (v1). This is the **intended** product. Steps marked *implemented* / *verified* are confirmed in the current working tree; everything else is the target to build. A feature is marked verified only where direct code/test evidence exists.
+Updated 20 October 2026. This document describes the approved product and current software contracts. Implementation presence is not evidence of live image quality; verification results belong in [PROJECT_STATE](agent-workflow/PROJECT_STATE.md).
 
-> See `docs/agent-workflow/PROJECT_STATE.md` for verified project facts and prior results that are not re-checked.
+## Product promise
 
----
+Choose an outfit for an occasion from your own clothes or a curated collection, preview it on yourself, compare two looks and save your choice. When an exact seller product has been verified, optionally open its original listing.
 
-## 1. One-sentence pitch
+The audience is ordinary wedding guests and bridal-party members. This is a personal dressing companion. Checkout, accounts, inventory, retailer scraping, face swapping and additional AI providers are outside this release.
 
-SangeetFit is an occasion-curated outfit gallery with skin-tone harmony scoring and virtual try-on for Indian weddings.
+## Experience
 
----
+1. Choose Sangeet, Mehendi, Haldi, Wedding or Reception. Skin-tone analysis is optional and uses a separate face selfie.
+2. Add a garment photograph and confirm its name, category, main colour, style level and occasion tags; or browse the reference collection.
+3. Recommendations filter by occasion/audience and rank declared style preference, explicit colour match, then stable curated order. Reasons describe actual metadata. User uploads can always be tried manually outside their tags.
+4. Open an outfit, review a separate front-facing full-body photo with a clearly visible face, understand live-provider processing, then explicitly press **Generate try-on**. Browsing, uploading, opening, comparing and image reload must never start generation.
+5. View the whole result, toggle the original, retain two recent session looks, compare/zoom, choose a favourite and save/open its image. Results identify garment, live/mock mode and source-photo version; different source photos receive a comparison warning.
+6. Catalogue outfit links share the selection and occasion, not a personal result. Own uploads have no public restore link. Refresh/leaving clears page-session clothes/results/choice. Provider-generated links can expire.
 
-## 2. Problem & target users
+## Contracts and quality gates
 
-Indian weddings span 5+ functions — sangeet, mehendi, haldi, wedding, reception — each with distinct outfit expectations. Guests must browse, match colours to their skin tone, and imagine a garment on their own body — tedious and error-prone.
+### Images and VTO
 
-Target users:
-- Guests and bridal-party members attending multi-day Indian weddings.
-- Anyone who wants to preview outfits styled to their skin tone before buying/renting.
-- Users who want to share a shortlisted look with friends or family.
+Face selfie goes only to `/api/skin`. Person full-body image is the source for `/api/vto`; garment image is its reference. No person fixture or face selfie silently replaces the user's source.
 
----
+`POST /api/vto` accepts one of two mutually exclusive JSON modes:
 
-## 3. Intended user journey
+```ts
+// Catalogue: server resolves identity and exact local reference.
+{ fullBodyDataUrl, garmentId, referenceAsset, vtoSupported, displayImage? }
+// Own garment: image bytes inside JPEG/PNG data URLs, never paths or remote URLs.
+{ fullBodyDataUrl, garmentImageDataUrl, garmentCategory: "upper_body" | "full_body" }
+```
 
-The finished product follows one linear journey. Screens are described with their primary action, transitions, and loading/error/empty states.
+Catalogue `displayImage` is not trusted as a reference. Unknown identity, mismatched reference, unsupported mapping, malformed image and mixed modes are rejected before provider work. Uploaded mode requires both images even in mock mode. Successful responses retain `{success:true,resultUrl,mode}`; catalogue mock responses also identify the server-owned display image.
 
-### Step 0 — Home / Occasion selection
-- **Screen:** grid of 5 occasion buttons (Sangeet, Mehendi, Haldi, Wedding, Reception), each with an icon.
-- **Primary action:** pick an occasion.
-- **Transition:** selecting an occasion advances to Step 1.
-- **States:** static; no data loading.
-- **Status:** ✅ *Implemented & verified* (`src/app/page.tsx:220-240`).
+The serialized JSON body must be **under 4,000,000 bytes**, with both images counted. Client preprocessing decodes actual JPEG/PNG, applies browser orientation through re-encoding, strips source metadata, preserves aspect ratio, flattens alpha onto white and never upscales. Separate person/garment budgets leave room for JSON. Server independently checks byte format, bounded dimensions and payload size. These checks do not establish sufficient face detail or garment suitability.
 
-### Step 1 — Skin Tone Analysis (face selfie)
-- **Screen:** dashed upload dropzone + "Upload a front-facing selfie" guidance.
-- **Primary action:** upload a close-up face selfie (JPG/PNG, ≤10 MB) → POST `/api/skin`.
-- **Loading:** "Analyzing with YouCam API…".
-- **Success:** shows a detected skin-tone swatch + hex + **personalized color palette** (intended; palette band not yet built) + Continue to gallery.
-- **Error:** inline red message; user can retry by re-uploading.
-- **Back:** arrow returns to occasion.
-- **Purpose of this image: skin-tone analysis only. It must NOT be reused as the VTO full-body source.**
-- **Status:** skin-analysis flow ✅ *implemented & verified* (mock returns `#b9947c`; live path exists). Personalized color palette ❌ *not implemented*.
+Full-outfit references should show a complete front-facing worn look; upper-body references should clearly show a single garment. Folded clothes, collages, cropped/obstructed details and side poses are not established as reliable. One request may be in flight, stale responses must not overwrite newer selection state, and there is no automatic regeneration. Stop after 429; further attempts need an approved diagnostic batch.
 
-### Step 2 — Curated outfit gallery
-- **Screen:** grid of outfits filtered by occasion, sorted by colour-harmony score against the detected skin tone (0–100% badge). Heart toggle per card + a Shortlist filter.
-- **Primary action:** click an outfit card to open virtual try-on.
-- **States:** sorted list; no explicit empty-state needed since each occasion seeds 2 outfits.
-- **Back:** arrow returns to Step 1.
-- **Status:** ✅ *Implemented & verified* (sorting, harmony scoring, shortlist all work).
+### Recommendation and catalogue metadata
 
-### Step 3 — Virtual Try-On (garment + full-body source)
-- **Screen:** VTO modal showing the selected garment + result panel.
-- **Primary action (intended):** if a suitable **full-body photo is not already available, ask the user for one here**, with clear photo guidance and consent. Then submit full-body source + garment reference to Cloth V4.
-- **Loading:** spinner + "This may take 30–90 seconds".
-- **Success:** display the actual generated result.
-- **Failure:** meaningful recovery options (retry with a better full-body photo, or use a sample image).
-- **Full-body input: ❌ NOT YET IMPLEMENTED.** Today the app reuses the face selfie as the VTO source — see Image-Input Architecture below.
-- **Live Cloth V4 rendering: ❌ unresolved** (previous live attempt returned `error_pose`; not re-verified). Mock mode returns the source garment image, not a composite.
+`Outfit` adds `occasionTags[]`, `styleLevel: minimal|festive|statement`, `tryOnStatus: candidate|live-reviewed|blocked`, optional `origin: catalogue|upload` and separately verified seller metadata. `occasion` remains for existing IDs/links; original references are preserved.
 
-### Step 4 — Save / download / share
-- **Screen:** action bar in the VTO modal.
-- **Save/Download:** download anchor for the result image.
-- **WhatsApp:** opens a `wa.me` share link.
-- **Share/Copy link:** copies a `?step&occasion&skin&vto` URL that restores the look for another visitor.
-- **Status:** ✅ *implemented & verified* (all three controls functional in mock mode).
+- **Candidate:** a matching reference is wired; visual output quality is untested.
+- **Live-reviewed:** exact reference, provenance/permission and at least one visual garment-output review are required for primary catalogue recommendations.
+- **Blocked:** no acceptable mapping; not a primary recommendation.
 
----
+All current wired references remain candidates; no catalogue item is promoted merely because a task returned success. Candidate testing is separated from the primary recommendations. A new session can therefore show no primary catalogue choices and should clearly offer **Add my outfit**, rather than recommend disabled cards.
 
-## 4. Image-input architecture
+Own garments use user-confirmed tags and can participate without pretending to be reviewed catalogue references. Explicit colour preference is an exact metadata colour match, not skin suitability. No fit/suitability percentages or generated-image-analysis claims.
 
-### 4.1 The current problem (confirmed)
-The web app stores exactly **one image** — the face selfie set during skin analysis (`page.tsx:129`). That same `selfieDataUrl` is reused as the VTO `src_file_id` (`page.tsx:84`, `vto/route.ts:130-136`). **There is no end-user full-body photo input anywhere in the active flow.** `src/components/UploadPanel.tsx` and `GarmentPicker.tsx` are orphaned (not imported). `public/garment_test/fullbody_mock.png` is referenced only by the legacy `scripts/garment_test.py` and the orphaned components — never by the running app.
+Seller actions require an exact-item HTTPS URL, named seller and recorded product/image-permission verification dates. Image attribution URLs are not seller links. No verified seller products or seller partnerships currently exist.
 
-### 4.2 Intended architecture
-Two distinct images, two distinct purposes:
+## Evidence and release acceptance
 
-| Image | Purpose | When requested | When sent |
-|-------|---------|----------------|-----------|
-| **Face selfie** | Skin Tone Analysis | Step 1 | `POST /api/skin` → `/task/skin-tone-analysis` (`src_file_id`) |
-| **Full-body photo** | VTO source | Step 3 | `POST /api/vto` → `/task/cloth-v4` (`src_file_id`) |
+[Milestones](plans/2026-10-20-personal-stylist-milestones.md), [benchmark protocol](testing/BENCHMARKS.md) and [five-person validation](testing/REAL_USER_VALIDATION.md) define the gates. The checked-in benchmark contains proposed cases and no outcomes.
 
-- The face selfie must **never** be used as the Cloth V4 source.
-- The full-body photo is requested **only at Step 3**, and only when VTO is initiated, with clear photo guidance (full-body, frontal, natural pose) and consent.
+Prior approved Cloth V4 tasks succeeded for one sample-person/maroon-lehenga pair, including one through a deployed preview. The output was not independently visually scored, so this proves a pipeline case, not identity preservation or broad reliability. Prior skin success is separate optional integration evidence.
 
-### 4.3 Mock-mode sample-image behavior (separate from real-user behavior)
-- **Mock mode:** a bundled sample photo (`/garment_test/fullbody_mock.png` or similar) is used as the full-body source. This is for local/demo/CI only and is clearly labeled mock.
-- **Real-user live mode:** the app requests and sends the user's own full-body photo with consent; no sample image is substituted silently.
+Release needs fresh offline/API/browser checks, TypeScript, lint, production build, mobile overflow/keyboard checks, real Android Chrome/iPhone Safari evidence, budget reserve and accessible judging access. Physical-device/participant/live-quality checks remain pending; no current claim of guaranteed face retention, physical fit or production readiness.
 
-### 4.4 Consent, image handling, validation, failure states
-- **Consent:** explicit consent required before uploading a user's photo (face selfie at Step 1, full-body at Step 3).
-- **Validation:** client-side — file must be `image/*`, ≤10 MB (existing check at `page.tsx:259-260`); server-side via `parseDataUrl` (accepts JPEG/PNG).
-- **Failure states:** upload error → inline message + retry; engine failure (e.g. `error_pose`) → recovery options: retry with a different/better full-body photo, or use a sample image (mock). Never silently fall back to mock in a live session.
-
-### 4.5 Status of the `error_pose` diagnosis
-Treated as a **strong hypothesis, not a proven root cause.** The face selfie being sent as a full-body VTO source is the leading candidate, but no live run has yet compared a real full-body image against the face selfie. The `format:"json"` field the legacy Python script sends is an open contract question, not a confirmed cause. A separate, approved live diagnostic is required to confirm (see Task 3).
-
----
-
-## 5. Acceptance-criteria matrix
-
-Each row lists the acceptance criterion, the implementation path, current status (*verified / mock-only / failed / unknown*), evidence, and the next bounded task.
-
-| # | Step | Acceptance criterion | Implementation path | Status | Evidence | Next task / deps |
-|---|------|----------------------|---------------------|--------|----------|-------------------|
-| 1 | Occasion selection | 5 occasions render; clicking advances | `src/app/page.tsx:220-240` | **verified** | tsc/build pass; sf-scout map | none |
-| 2 | Skin Tone Analysis | Face selfie triggers `/api/skin`; mock returns `#b9947c`; live path upload→submit→poll | `src/app/api/skin/route.ts` | **verified (mock) / live=reported** | curl mock response; contract tests | live re-verify with key |
-| 3 | Recommendation logic | Outfits filtered by occasion + sorted by hue harmony (0–100%) | `src/app/page.tsx:182-193`, `src/lib/color.ts` | **verified** | code + build | none |
-| 4 | Garment reference mapping | Each category maps to correct `/garment_test/` asset | `src/app/api/vto/route.ts:16-25` | **verified** (mapping), **mock-only** (results) | contract test asserts filenames | none |
-| 5 | Full-body VTO input | Full-body photo captured (or sample) and sent as Cloth V4 source | **not implemented** (no input in active UI) | **failed/unknown** | `UploadPanel.tsx` orphaned; only face selfie reused | **T2** (this spec → fix source flow) |
-| 6 | Live Cloth V4 result rendering | Submit full-body + garment → poll → display `results.url` | `src/app/api/vto/route.ts:115-148` | **mock-only / live failed** (`error_pose`) | code path exists; no live success | **T3** (approved live diagnostic) |
-| 7 | Loading / error / retry | Spinner, error + retry for VTO; progress while processing | `src/app/page.tsx:379-453` | **verified (mock)** | code walkthrough | add full-body retry guidance |
-| 8 | Save / download / share | Download anchor, WhatsApp link, copy-link + URL restore work | `src/app/page.tsx:456-503`, `:38-115` | **verified (mock)** | code + hand-check | none |
-| 9 | Responsive layout | Grids collapse to 2-up on mobile; modal scrolls | `src/app/page.tsx:223,321,365` | **verified** (static) | Tailwind `md:` breakpoints | device/browser test |
-| 10 | Privacy & photo handling | Consent; images not logged; keys server-side | `src/app/api/*`, `src/lib/youcam.ts` | **verified** (no logs, server-side keys) | contract test asserts no `console.log`, no API key in client | add explicit consent UI |
-
-**Bold status = not yet meeting the criterion.** A feature is not marked verified merely because a mock exists.
-
----
-
-## 6. Cost & budget guardrails
-
-- Skin Tone task cost was previously documented as **20 units** — an estimate; actual billing must not be assumed from it.
-- **Cloth V4 task cost is currently unknown.** Do not assume V4 costs the same as V2/V3.
-- Five real-user live sessions could require **at least five Skin Tone executions**, plus **VTO executions and likely retries**.
-- **Verify available budget before scheduling the five live validation sessions.**
-- No API calls, retries, polling of old tasks, credit checks, or spending occur in this documentation task.
-
----
-
-## 7. Submission realism
-
-Previously reported screenshot findings (recorded; not a deliverable):
-- Four screenshots were reported into `docs/submission/screenshots/`.
-- Three of four were **byte-identical** (same MD5 `5c8917e8...`), so they do not constitute distinct UI-state evidence. Only `02-skin-analysis-upload.png` differed.
-- **Genuine screenshot capture remains outstanding** — re-capture with browser tooling is required (Task T7, blocked on browser automation).
-
-Official hackathon requirements (source: `https://youcam-api-skin-ai-ecommerce.devpost.com/rules`):
-- Working application, repository access, descriptive project submission, and a **publicly available 1–3 minute demonstration video** showing the app functioning and explaining the YouCam API.
-- **Deadline: November 2, 2026, 11:45 AM ET (10:15 PM IST).**
-- Do not invent completed deliverables; invalid screenshots are not treated as complete.
+Rules/deadline/access requirements must be rechecked against the [official hackathon rules](https://youcam-api-skin-ai-ecommerce.devpost.com/rules) before submission. Working targets are 1 November submission, 2 November buffer, and availability through 20 November; these are not fresh organizer verification.

@@ -1,184 +1,44 @@
-# SangeetFit — Pitch & Submission Checklist
+# SangeetFit — Pitch and release checklist
 
-> **Project:** SangeetFit — occasion-curated outfit gallery with skin-tone harmony scoring and virtual try-on
-> **Event:** YouCam API Hackathon
-> **Stack:** Next.js 14, TypeScript, Tailwind CSS, YouCam S2S v2.0 API
+Updated 21 October 2026. Unchecked gates are pending, not achieved. The approved [milestones](../plans/2026-10-20-personal-stylist-milestones.md) supersede earlier colour-harmony/mandatory-selfie pitches.
 
----
+## Consumer value and integration
 
-## 1. Pitch summary
+**Pitch:** Choose what to wear for a celebration from clothes you already own, see two personal try-ons, compare them and save your choice. Permitted references are optional inspiration.
 
-### Problem
-Indian weddings have 5+ distinct functions (sangeet, mehendi, haldi, wedding, reception). Finding occasion-appropriate outfits that harmonise with your skin tone requires browsing across multiple sources and imagining how garments look on you — tedious and error-prone.
+The core combines user-confirmed occasion/style/colour metadata with a personal YouCam Cloth V4 preview. It uses a separate full-body source and garment reference, with upload → task → polling. Optional skin-tone analysis uses a separate face selfie. Neither metadata ranking nor skin analysis proves fit, facial preservation or colour suitability.
 
-### Solution
-A single 3-step flow: pick the occasion, upload a selfie for skin-tone analysis, and browse styled outfits sorted by colour-harmony score. One-click virtual try-on, download, and sharing via WhatsApp or share link.
+Current collection has 14 credited photographs and eight new wired candidates, with four legacy mappings. No candidate has been promoted to live-reviewed primary recommendations. No exact seller products or retailer image permissions have been established. **View at seller** appears only for verified exact products; there is no checkout.
 
-### Differentiation
-- **Occasion-aware**: Filters and sorts by wedding function, not a flat catalogue
-- **Colour-harmony scoring**: HSL hue-similarity engine ranks outfits by how well they complement the user's detected skin tone
-- **URL state sharing**: Recipient sees the exact outfit + skin tone on open, no account needed
-- **Purpose-built for Indian weddings**: 10 SVGs across 5 occasions, designed for Indian silhouettes (lehenga, anarkali, saree, sharara, kurta, gown)
+Historical approved Cloth V4 successes cover one sample-person/maroon-lehenga pair. They prove limited pipeline operation, not own-garment reliability or broadly retained identity. The planned twelve-case benchmark has no outcomes. Mock references must be explicitly identified in screenshots and video. The wardrobe stays in the page session; top-and-bottom combinations are future work.
 
----
+## Core release gate
 
-## 2. Technology summary
+- [x] Record the 21 October balance/pricing snapshot: 916 units; V4 2/call; optional colour analysis 20/call; reserve 229. Recheck before spending; no live batch approved.
+- [ ] Approve and run the six-task pilot: two people, each with an owned upper-body garment, owned full outfit and permitted reference; ≥5/6 rendered with identity and garment both ≥4/5 or restrict inputs before expansion.
+- [ ] Complete the fixed twelve-case quality benchmark across five consenting people: eight owned and four permitted-reference attempts, at least two looks each. Reuse the pilot cases; keep failures. Gates: ≥11/12 rendered and identity ≥4/5; ≥10/12 garment and both ≥4/5; median successful render ≤60s; zero duplicate tasks.
+- [ ] Observe ≥4/5 independent completion and recommendation understanding/choice; keep usability evidence separate from image ratings.
+- [ ] Select only references with established image rights, exact identity and recorded visual output review for primary recommendations. Two accurate permitted alternatives suffice for the demo; twelve active references are a stretch target.
+- [ ] Fresh offline suites, TypeScript, lint, mock production build and browser checks pass on final source.
+- [ ] Confirm no horizontal overflow, ≥44px key controls and keyboard dialog flow.
+- [ ] Test actual Android Chrome and iPhone Safari; label unavailable coverage honestly.
+- [ ] Verify image save/open, expired links, source replacement and zero-task comparison/reopening.
+- [ ] If seller actions exist, recheck every exact item and image permission; otherwise leave absent.
+- [ ] Verify judge access, API budget protections and availability without relying on a developer's authenticated browser.
+- [ ] Freeze features before recording final assets.
 
-| Area | Detail |
-|------|--------|
-| Frontend | Next.js 14 (App Router), TypeScript, Tailwind CSS |
-| YouCam skin | `POST /api/skin` -> upload file -> submit skin-tone-analysis task -> poll -> return hex |
-| YouCam VTO | `POST /api/vto` -> upload selfie + garment file -> submit cloth-v4 task -> poll -> return result URL |
-| Colour engine | HSL hue-similarity angular distance (0-1 score, client-side) |
-| Sharing | WhatsApp via `wa.me` URL, copy-link with `?step&occasion&skin&vto` params |
-| Icons / UI | Lucide React, glassmorphism design tokens, canvas-confetti |
-| Build | `npm run dev`, `npm run build`, `npm start` |
+## Submission package
 
----
+Recheck the [official rules](https://youcam-api-skin-ai-ecommerce.devpost.com/rules) and submission form for the current requirements, exact recipient for private repository sharing, deadline/timezone, video visibility and judging access. Earlier rule notes are historical; do not infer access from a working localhost URL.
 
-## 3. Current limitations (honest)
+- [ ] Repository URL with all source/assets/setup instructions; public with appropriate licensing or explicitly shared as the official rules specify.
+- [ ] Settle the application code licence before public distribution; README no longer claims MIT without a LICENSE file.
+- [ ] Working testable app URL/build and any necessary judge instructions/credentials through an appropriate private channel.
+- [ ] Finalize the [English description draft](DEVPOST_DRAFT.md) with actual evidence, consumer value, YouCam integrations and honest limitations.
+- [ ] Final screenshots: occasion home; own-garment photo/metadata; explained recommendation; explicit Generate/photo consent; actual live result if approved; two-look comparison; chosen/saved look. Label any mock segment.
+- [ ] Genuine 1–3 minute end-to-end video following [DEMO_SCRIPT](DEMO_SCRIPT.md), showing the intended device and APIs used.
+- [ ] Publish video and submit only with the user's separate approval; add final video URL to README/Devpost.
+- [ ] Document significant improvements during the hackathon if applicable.
+- [ ] Keep working access and credit contingency through the judging period; verify official end date.
 
-| Limitation | Impact |
-|------------|--------|
-| **Live VTO is unresolved** | The code path implements the full YouCam cloth-v4 contract, but earlier runs returned `error_pose`. The mock VTO returns the source garment image, not a composite. Highest priority post-submission. |
-| **Skin-tone mock is hardcoded** | Returns `#b9947c`. Live API works with valid credentials. |
-| **Small outfit catalog** | 10 outfits (2 per occasion). Expandable via data file. |
-| **No auth/user accounts** | No persistence across sessions beyond URL sharing. |
-| **No sizing/recommendation engine** | Colour harmony only — no body type, size, or style preference matching. |
-
----
-
-## 4. README readiness checklist
-
-- [ ] One-sentence pitch present and clear
-- [ ] Problem/target users section written
-- [ ] Journey explanation (3-step flow + VTO + sharing)
-- [ ] Technologies table present
-- [ ] Mock vs live feature table present with honest status
-- [ ] Setup commands documented (`npm install`, `npm run dev`, `npm run build`)
-- [ ] Environment variable names documented (no secrets)
-- [ ] Current limitations section present
-- [ ] Screenshots placeholder ("Coming soon")
-- [ ] Demo video placeholder ("Coming soon")
-- [ ] Project structure tree present
-- [ ] License file referenced
-
----
-
-## 5. Setup reproducibility checklist
-
-- [ ] `git clone <repo>` succeeds
-- [ ] `npm install` completes without errors
-- [ ] `npm run dev` starts on localhost:3000
-- [ ] App renders occasion grid on first load
-- [ ] Selfie upload triggers skin analysis (mock returns in <1s)
-- [ ] Gallery renders 2 outfits for each of 5 occasions
-- [ ] Harmony score shown on each gallery card
-- [ ] Heart toggle adds/removes from shortlist
-- [ ] Shortlist filter works
-- [ ] VTO modal opens on outfit card click
-- [ ] "Re-render" button works
-- [ ] Download button triggers save dialog
-- [ ] WhatsApp share opens correct `wa.me` URL
-- [ ] Copy link copies valid URL with query params
-- [ ] Restored URL loads correct state (step + occasion + skin + vto)
-- [ ] `npm run build` completes without errors (or note any failures for prerelease)
-- [ ] `npm run lint` completes without errors
-
----
-
-## 6. Demo video / screenshot checklist
-
-### Required screenshots (placeholders)
-
-| Screenshot | Status | Notes |
-|------------|--------|-------|
-| Occasion selection grid | Coming soon | 5 occasion buttons |
-| Skin-tone upload + result | Coming soon | Upload area + detected swatch |
-| Curated gallery with harmony scores | Coming soon | Sorted grid with percentage badges |
-| VTO modal with result | Coming soon | Modal with garment + mock result |
-| Share link / WhatsApp | Coming soon | wa.me URL or copied link |
-| Shortlist view | Coming soon | Filtered favourites |
-| Mobile responsive view | Coming soon | Narrow screen layout |
-
-### Required video
-
-| Item | Status | Notes |
-|------|--------|-------|
-| Demo recording (2-3 min) | Coming soon | Follow `docs/submission/DEMO_SCRIPT.md` |
-| Upload to video platform | Coming soon | YouTube unlisted or Vimeo |
-| Link added to README | Coming soon | At demo video section |
-| Subtitles or captions | Optional | Recommended for accessibility |
-
----
-
-## 7. Build check items
-
-- [ ] `npm run build` completes (production build)
-- [ ] `npm start` serves the built app on localhost:3000
-- [ ] All 3 steps render correctly in production mode
-- [ ] VTO modal opens/closes without console errors
-- [ ] No 404s for outfit SVGs or garment images
-- [ ] No unhandled promise rejections in console
-- [ ] File upload validation works (type + size check)
-- [ ] URL share restore works in production build
-- [ ] Lighthouse / performance is reasonable for a hackathon project
-
----
-
-## 8. Submission requirements (verified from official source)
-
-> **Source:** Official Devpost rules page at https://youcam-api-skin-ai-ecommerce.devpost.com/rules
->
-> **Hackathon Platform:** Devpost (not Hackster, not Lablab)
->
-> All items below marked "Verified from source" were extracted directly from the official rules page (fetched 2026-10-18).
-
-### Mandatory submission requirements
-
-- [ ] **Code repository URL provided** (Verified from source) — Must provide a URL to the code repository for judging and testing. The repository must contain all necessary source code, assets, and instructions for the project to be functional. The repository can be **public (with relevant licensing) OR private and shared with `support+hackathon@devpost.com`**.
-- [ ] **Text description of features and consumer value** (Verified from source) — Must explain features, functionality and demonstrate clear consumer or eCommerce value.
-- [ ] **Screenshots included** (Verified from source) — "Must include screenshots of the project."
-- [ ] **Demo video (1-3 minutes)** (Verified from source) — Must show the experience end-to-end. Must explain which YouCam API(s) are used. Must include footage showing the project functioning on the device for which it was built. Must be uploaded to **YouTube (highly preferred)**, Vimeo, or Youku and be publicly visible. Judges are not required to watch beyond three minutes.
-- [ ] **Integrates at least one YouCam API** (Verified from source) — "Entrants must create a working application that integrates at least one Perfect Corp. YouCam API and demonstrate clear consumer or eCommerce value."
-- [ ] **Exit interview if chosen as winner** (Verified from source) — "Must participate in an exit interview if chosen as winner."
-- [ ] **Blog article consent** (Verified from source) — "Must agree to be included in a blog article."
-- [ ] **Original work / no IP infringement** (Verified from source) — Submission must be original work, solely owned by Entrant, and must not violate third-party intellectual property rights.
-- [ ] **Project is functional and installable** (Verified from source) — Must be capable of being successfully installed and running consistently on the platform for which it is intended, and must function as depicted in the video and/or text description.
-- [ ] **Testing access provided** (Verified from source) — Must provide access to working Project (a link to a website, functioning demo, or test build). If private, include login credentials. Must be available free of charge without restriction for testing/evaluation until Judging Period ends.
-- [ ] **All materials in English** (Verified from source) — All submission materials must be in English, or provide an English translation.
-- [ ] **Significant update for existing projects** (Verified from source) — If the project existed before the Submission Period (Sep 29, 2026), it must have been significantly updated after that date, and the Entrant must explain what was updated.
-
-### Recommended / optional items
-
-- [ ] **Repository is public** (Could not verify as mandatory — assumption corrected) — The official rules say "public (with relevant licensing) OR private and shared with support+hackathon@devpost.com." Public is NOT strictly mandatory.
-- [ ] **YouTube upload for video** (Verified from source — "highly preferred") — YouTube is strongly recommended but Vimeo or Youku are also accepted.
-- [ ] **YouCam API key is NOT committed** (Could not verify as explicit requirement — standard security practice) — No explicit rule prohibits committing API keys, but it is standard security best practice, and `.env.local` is already gitignored.
-
-### Previously listed items now mapped to verified requirements
-
-- [x] **README includes setup instructions** — Covered by the "repository must contain instructions required for the project to be functional" requirement.
-- [x] **README includes demo video link** — The video link must be provided on the Devpost submission form. Having it in README is best practice but not explicitly required by rules.
-- [x] **Project demonstrates YouCam API integration** — Covered by the "integrate at least one YouCam API" requirement.
-- [x] **Submission includes explanation of how the API is used** — Covered by text description and demo video requirements.
-- [x] **No proprietary assets leaked** — Covered by the "must not include third-party trademarks or copyrighted music or other material unless the Entrant has permission" rule and IP requirements.
-
-### Key gaps identified
-
-1. **Demo video not yet recorded** — This is a hard mandatory requirement. The existing placeholder will disqualify the submission.
-2. **Screenshots not captured** — "Must include screenshots of the project" is mandatory, not optional. The checklist currently has "Coming soon" for all screenshots.
-3. **Testing access URL not confirmed** — The submission form requires a working demo URL or test build. The app runs on localhost — a deployed instance or clear testing instructions for a local setup must be provided.
-4. **"Significantly updated" explanation needed** — If the project started before Sep 29, 2026 (the PRD dates suggest it did), a statement explaining what was significantly updated during the submission period will be required.
-5. **VTO integration is only partially functional** — The skin-tone API is verified, but VTO returns `error_pose` in live mode. The mock fallback works but the submission must accurately describe the current state.
-
----
-
-## 9. Post-submission todo (highest-priority items)
-
-1. **Debug live VTO `error_pose`** — root-cause the failed cloth-v4 task
-2. **Record demo video** following `docs/submission/DEMO_SCRIPT.md`
-3. **Take screenshots** across all app states
-4. **Add screenshots and video link** to README
-5. **Expand outfit catalog** with more occasions and categories
-6. **Add outfit rental/purchase links** if applicable
-7. **Consider user accounts** for session persistence across devices
+Working schedule: 30–31 October freeze, 1 November submission, 2 November buffer; current roadmap assumes judging availability through 20 November. No external submission, video publication or deployment is authorized by this checklist.

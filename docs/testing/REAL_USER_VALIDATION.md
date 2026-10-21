@@ -1,118 +1,59 @@
-# SangeetFit — Five-Real-User Live Validation Protocol
+# SangeetFit — Five-person validation protocol
 
-**Purpose:** Validate the finished SangeetFit end-to-end journey with at least **five distinct real participants** on a running application. This protocol also defines the internal smoke test to run **before** recruiting participants.
+Updated 21 October 2026. **No participant session or new live attempt is recorded by this document.** Skin analysis is optional; genuine live VTO is required for VTO evidence. Mock sessions may test navigation but never count as live image-quality validation.
 
-> No user sessions are run during this documentation task. Budget must be verified (see §6) before scheduling.
+## Preconditions
 
----
+- Review current working-tree state and preserve user work. Run the offline suites, TypeScript, lint, mock production build and relevant browser regressions before recruiting.
+- Recheck available credits and applicable pricing before each batch; the 21 October snapshot is 916 units, Cloth V4 2 units/call and optional facial colour analysis 20 units/call. Preserve 25% of available units. Each capped live batch needs explicit approval; this protocol does not grant it.
+- Fix the test cases and photo/reference selections before the batch. Existing case IDs reserve pseudonyms only; they do not establish consent or actual participants.
+- Get informed permission to send person and garment images to YouCam. Explain that app-session retention differs from the provider's handling, that AI can change face/garment details, and that evidence will not publish photos or signed result URLs.
+- Review original inputs manually for clear face, full-body pose and appropriate garment references. The app's byte validation does not prove suitability.
 
-## 1. Precondition — internal smoke test (run first, before recruiting)
+## Two separate evidence sets
 
-Run this yourself (developer) before any participant is involved. Every item must pass.
+### Input readiness — 21 October
 
-- [ ] `git status --short --branch` reviewed; pre-existing changes preserved.
-- [ ] Dev server or built app runs (`npm run dev` or `npm run build && npm start`).
-- [ ] Live mode is confirmed (valid API key + budget); mock is a fallback only.
-- [ ] Occasion selection renders all 5 occasions.
-- [ ] Face selfie upload triggers `/api/skin`; returns a hex + `mode`.
-- [ ] Gallery renders and sorts by harmony score.
-- [ ] Full-body photo input (post-T2) requests a photo with consent + guidance.
-- [ ] `/api/vto` submits and (live) returns a result `url`, or fails with a recorded stage/error.
-- [ ] Save/Download, WhatsApp share, Copy-link + URL restore each work.
-- [ ] No secrets (API keys, task IDs) are logged; no `console.log` of credentials.
-- [ ] `git diff --check` clean.
+Participant and personal-photo preparation is deferred at the user's request. These are reserved slots, not recruited or consenting people. Keep original photos and the private mapping from case IDs to inputs outside GitHub.
 
-If smoke items fail, fix them and retest **before** recruiting participants. Do not run user sessions on a broken build.
+| Participant slot | Planned cases | Input roles | Status |
+|---|---|---|---|
+| p01 | upload-01, upload-02, catalogue-01 | Owned upper-body, owned full outfit, permitted reference; same person photo | Deferred; first pilot tranche |
+| p02 | upload-03, upload-04, catalogue-02 | Owned upper-body, owned full outfit, permitted reference; same person photo | Deferred; first pilot tranche |
+| p03 | upload-05, upload-06 | Two owned garments; same person photo | Deferred |
+| p04 | upload-07, catalogue-03 | Owned garment and permitted reference; same person photo | Deferred |
+| p05 | upload-08, catalogue-04 | Owned garment and permitted reference; same person photo | Deferred |
 
----
+Documented candidate shortlist: `library-coral-embroidered-kurta` (CC0 frontal upper garment), `library-ivory-button-kurta` (public-domain frontal upper garment), and `library-ivory-nehru-ensemble` (public-domain frontal full outfit). Metadata/provenance were audited; no new image inspection or live fidelity review was performed. Choose two exact references after participant preferences and input suitability are known. See [source register](../garment-library/SOURCE_FEASIBILITY.md). This shortlist does not promote candidates or approve tasks.
 
-## 2. Participant protocol (5+ distinct users)
+**VTO quality:** predeclare 12 cases across five consenting people: eight owned garments and four permitted references, with at least two looks per person. Cases assigned to `p01` and `p02` form the six-task pilot; each person supplies one upper-body and one full-outfit owned reference, plus one permitted reference. The pilot passes only if at least five of six results render and both identity and garment are rated ≥4/5. These six cases count in the twelve-case scorecard. Record one output per case, including failed tasks, render failures, elapsed time and task-submission count in [benchmark-records.json](benchmark-records.json). See [BENCHMARKS](BENCHMARKS.md) for exact record fields, ratings, denominators and report commands. Do not remove failures or overwrite an outcome with a successful retry.
 
-For **each** participant (≥5 total), complete all steps and record the evidence in the table below.
+**Usability:** recruit five distinct consenting participants. With photos ready, each independently chooses a celebration occasion, understands a recommendation reason, generates two looks, compares them and saves/opens a choice. Reuse predeclared quality outputs for the usability study; the pilot participants' third results are additional quality evidence. Do not spend twice merely to maintain two spreadsheets. Any additional tasks count against the approved batch and total budget.
 
-### 2.1 Consent (required first)
-- Obtain **informed consent** for use of their photo and for testing.
-- Explain: photo(s) uploaded to the YouCam API for skin-tone analysis and virtual try-on, may be stored by the API provider, will not be published in test evidence.
-- Record that consent was obtained (yes/no) — do not store the raw photo in evidence.
+Skin analysis is recorded separately as skipped, live success, live failure or mock. Skipping it does not invalidate live VTO evidence. A mock garment result is a reference placeholder, not a generated person.
 
-### 2.2 Per-participant record
+## Participant procedure
 
-| Field | Value (record for each) |
-|-------|-------------------------|
-| Participant label | P1, P2, P3, P4, P5 (pseudonymous; no names) |
-| Date | YYYY-MM-DD |
-| Device / browser | e.g. "iPhone / Safari", "Windows / Chrome" |
-| API mode | live OR mock (mock-only sessions do NOT count as live validation) |
-| Consent obtained | yes / no |
-| Occasion selected | sangeet / mehendi / haldi / wedding / reception |
-| Genuine live Skin Tone Analysis | completed / failed / skipped (record stage) |
-| Skin-tone result | hex value (or failure reason) |
-| Outfit selected | outfit id |
-| Full-body source provided | yes / no (and consent) |
-| Genuine live Cloth V4 attempt | completed / failed (record stage & sanitized error category, e.g. `error_pose`) |
-| VTO result displayed | yes / failed / N/A |
-| Save/Download | ok / failed |
-| WhatsApp share | ok / failed |
-| Copy-link + URL restore | ok / failed |
-| Completion time | mm:ss |
-| Usability observations | free text |
-| Would use again | yes / no / maybe |
+1. Record pseudonym, consent, date, device/browser and actual mode. Do not retain names or raw photos in evidence.
+2. Start timing with photos ready. Select an occasion and add an owned garment or choose a candidate explicitly labelled for testing. Confirm metadata is user/editor supplied, not image-analysis output.
+3. Ask the participant to explain why the outfit was recommended. Record their words without coaching.
+4. Provide/review the person photo; press **Generate** once. Record upload/submit/poll/render failure stage when applicable. A timeout does not authorize a new task.
+5. For a rendered live result, have the participant rate identity and compare garment fidelity against the reference. A successful API status alone is not a visual pass.
+6. Generate the second predeclared look within the approved cap, preferably using the same person photo. Confirm comparison/original toggles/reopening send zero tasks.
+7. Choose a look; try save/open, zoom and applicable catalogue outfit sharing. Mark device download or share limitations honestly. Do not send messages to other people as part of testing without explicit authorization.
+8. Record independent completion, time to first Generate, reason understanding/preferred choice, failures and whether they would use it again.
 
-### 2.3 Exact steps each participant completes
+Use this empty template; rows must be actual observations:
 
-> **Precondition status (2026-10-18):** the live pathway is verified for **one** source/reference pair via the single approved diagnostic recorded in `docs/agent-workflow/PROJECT_STATE.md` (full-body source + lehenga reference, `garment_category:"auto"`, `running → success`, ~12 s). This confirms feasibility only — the five-participant validation below remains open until five distinct live sessions are recorded. Never count a mock result as a live success.
-1. **Occasion selection** — choose a wedding function.
-2. **Genuine live Skin Tone Analysis** — upload a face selfie; a live (not mock) task must run.
-3. **Review recommendations** — review the harmony-sorted gallery and select an outfit.
-4. **Provide a full-body source image** (post-T2) with consent; if the feature is not yet live, record the stage as blocked.
-5. **Genuine live Cloth V4 attempt** — must be live; a mock result does not count.
-6. **Verify result** — confirm the returned image renders, or record the exact failure stage.
-7. **Save / download / share** — exercise all three and record results.
+| Participant | Date | Device/browser | Consent | Live VTO case IDs | Skin mode/outcome | First Generate seconds | Independent completion | Reason understood / choice made | Save/open | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
 
-### 2.4 Acceptance rule
-- At least **five distinct participants** complete recorded sessions.
-- **Mock-only sessions do NOT count as live API validation** — a session is only "live-validated" if the skin and VTO calls ran in live mode.
-- A failure is recorded **as a failure**, never hidden by silently switching to mock.
-- Fix critical defects and **retest the affected cases**.
-- Keep evidence free of raw photos, credentials, API keys, task IDs, and unnecessary personal info. Use only the pseudonymous labels above; never store the actual image in evidence.
+## Acceptance and follow-up
 
----
+- Quality targets: rendered task success ≥11/12; identity rating ≥4 for ≥11/12; garment rating ≥4 for ≥10/12; both ≥4 for ≥10/12; successful displayed-result median ≤60s; zero duplicate submissions. Missing outcomes/ratings keep affected gates pending. No result counts as failure.
+- Usability targets: ≥4/5 independent completions, ≥4/5 understanding the reason and choosing a preference; median first-Generate time ≤60s with photos ready.
+- Actual Android Chrome and iPhone Safari checks are separate evidence requirements. Desktop emulation is not proof of phone camera or save/share behaviour.
+- Stop on 429. Record failures and fix critical defects. Retests are new approved evidence; retain the original batch rather than editing failures away.
+- Update the project state/task board only with executed outcomes. Report the sample size, device coverage, failure count and limits rather than calling the product universally reliable.
 
-## 3. Evidence storage
-
-Collate per-participant results into a table like this (example — replace with real data):
-
-```
-| Label | Date | Device | Mode | Skin | VTO | Result | Save | WA | Share | Time | Would use again |
-|-------|------|--------|------|------|-----|--------|------|----|-------|------|-----------------|
-| P1 | 2026-10-20 | iPhone/Safari | live | #b9947c | error_pose | failed-stage-6 | ... | ... |
-```
-
-- Keep **no raw photos, no API keys, no task IDs, no personal info** in stored evidence.
-- Record the mode truthfully; a mock row is labeled mock and excluded from live-validation counts.
-
----
-
-## 4. Definitions & exclusions
-
-- **Live validation:** the skin and VTO API tasks ran in live mode against the YouCam API (not mock). Requires a valid API key and budget.
-- **Mock-only session:** one where either call fell back to mock — does not count toward the five live-validated participants.
-- **Failure stage:** identify exactly where it stopped (upload / submit / poll / render) and the error string (e.g. `error_pose`), so retests target the right layer.
-
----
-
-## 5. Post-validation
-
-- Tally: how many distinct participants, how many truly live-validated.
-- Fix critical defects and **retest affected cases** before any submission claim.
-- Update `docs/agent-workflow/TASK_BOARD.md` and `PROJECT_STATE.md` with evidence-backed outcomes.
-- Do **not** mark the product "live-verified" unless at least five distinct live sessions completed successfully.
-
----
-
-## 6. Budget & API safeguards
-
-- Skin Tone task cost previously documented as **20 units** — an estimate; actual billing must not be assumed from it.
-- **Cloth V4 task cost is unknown.** Do not assume it equals V2/V3.
-- Five live sessions could require **≥5 Skin Tone executions**, plus **VTO executions and likely retries** (each failure may consume a task).
-- **Verify available budget before scheduling.** Do not spend or make API calls during this protocol's documentation phase.
+The balance/pricing snapshot is recorded in [BENCHMARKS](BENCHMARKS.md). No participant outcome or phone result exists yet; the user deferred participant/photo preparation on 21 October.

@@ -1,187 +1,107 @@
 # SangeetFit
 
-**Occasion-curated outfit gallery with skin-tone harmony scoring and virtual try-on for Indian weddings.**
+Choose between celebration outfits you already own, try them on your photo, compare two looks and save your favourite. A credited reference collection offers optional inspiration. Built for the YouCam API hackathon with Next.js 14, TypeScript and Tailwind CSS.
 
-> Built for the YouCam API Hackathon.
+## Current experience
 
----
+1. Choose Sangeet, Mehendi, Haldi, Wedding or Reception. Skin-tone analysis is optional and uses a separate face selfie.
+2. Upload a garment photo and confirm its name, upper-body/full-outfit category, colour, style level and occasion tags. Clothes stay in the current page session.
+3. See recommendations explained by actual occasion/style/colour metadata. Skin colour does not prohibit outfits or produce suitability percentages. You can also try an owned garment outside its suggested occasions.
+4. Open a look, consent to live-provider photo processing, add a full-body person photo and press **Generate try-on**. Uploading, browsing and opening do not generate tasks.
+5. Compare the two recent results, view originals, zoom, choose a look and save/open the image. Different source-photo versions are labelled. Reopening/comparing/reloading an image creates no new task.
 
-## One-sentence pitch
+Catalogue outfit sharing restores the selected outfit and occasion, not personal photos or results. Uploaded clothes do not get public links. Refreshing/leaving can clear clothes, photos, results and choices. Provider links may expire; opening/downloading must be checked on real phones. Top-and-bottom combinations and a permanent wardrobe are future work.
 
-SangeetFit is an occasion-curated outfit gallery with skin-tone harmony scoring and virtual try-on for Indian weddings.
+## Honest implementation status
 
----
+| Area | Implemented behaviour | Evidence limit |
+|---|---|---|
+| Own clothes | JPEG/PNG preprocessing, confirmed metadata, validated two-image VTO request | Uploaded-garment live quality not established |
+| Recommendations | Occasion/audience filtering; declared style, explicit colour, stable order; reasons | Metadata policy, not learned suitability or sizing |
+| Catalogue | 14 credited photos, eight new exact reference candidates; four legacy mappings | **Zero live-reviewed primary references**; no verified seller collection |
+| Try-on | YouCam Cloth V4 upload → submit → poll; explicit action; one client request pending; no automatic retry | Prior approved successes cover one sample-person/maroon-lehenga pair only |
+| Compare/save | Two session results, source version/mode, originals/zoom/choice, save/open | No permanent wardrobe; actual-device save behaviour pending |
+| Optional skin | Separate selfie → skin-tone-analysis API; mock sample visibly labelled | Separate evidence; not a VTO-quality substitute |
+| Seller action | Exact verified HTTPS product-link metadata supported | No current products/permissions established, so no seller buttons shown |
 
-## The problem
+Primary recommendations require a matching photographic reference, provenance/permission and a visual live-output review. A wired candidate is not a reviewed result. A fresh session therefore offers **Add my outfit**, with candidate browsing separately at `/library`; unsupported cards do not fill the recommendations.
 
-Indian weddings span 5+ functions — sangeet, mehendi, haldi, wedding, reception — each with distinct outfit expectations. Finding what suits you across all of them is a manual, time-consuming process of browsing, matching colours to your skin tone, and imagining how a garment looks on you.
+Mock VTO returns the garment reference and explicitly says it is **not a generated image of you**. Live mode without a key returns a configuration error; it never substitutes mock output. Face retention, garment fidelity, physical fit and production reliability are not guaranteed. The live-quality benchmark currently contains **zero outcomes**.
 
-### Who it's for
+## Run locally
 
-- Wedding guests and bridal party members attending multi-day Indian weddings
-- Anyone who wants to preview outfits styled to their skin tone before buying or renting
-- Users who want to share shortlisted outfits with friends or family for a second opinion
+Use Node 20.20+ or a supported newer Node runtime. Install dependencies, then force mock mode for ordinary development:
 
----
-
-## The journey
-
-1. **Select occasion** — pick the wedding function you're attending (sangeet, mehendi, haldi, wedding, reception)
-2. **Skin-tone analysis** — upload a front-facing selfie; the YouCam API returns a skin-tone hex colour
-3. **Curated gallery** — outfits filtered by occasion, sorted by colour-harmony score against your skin tone
-4. **Virtual try-on** — one-click VTO on any outfit with download, WhatsApp sharing, and copy-link sharing
-
-Shortlisted outfits can be toggled via a heart icon and filtered to a shortlist view. Shared links restore the exact outfit and skin tone for the recipient.
-
----
-
-## Technologies
-
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 14 (App Router) |
-| Language | TypeScript |
-| Styling | Tailwind CSS + glassmorphism design tokens |
-| Icons | Lucide React |
-| Visual flair | canvas-confetti |
-| API | YouCam S2S v2.0 — skin-tone analysis (`/task/skin-tone-analysis`) and clothes VTO (`/task/cloth-v4`) |
-| Colour engine | HSL hue-similarity scoring (pure math, no assertion about personal suitability) |
-
----
-
-## Feature status: mock vs live
-
-| Feature | Mock mode | Live (verified) | Notes |
-|---------|-----------|----------------|-------|
-| Occasion selection | Works | Works | UI-only; no API dependency |
-| Skin-tone analysis | Returns `#b9947c` | Verified working | Live flow: upload file → submit task → poll until success |
-| Colour-harmony sorting | Works | Works | Pure client-side HSL math; no API needed |
-| Virtual try-on (VTO) | Returns source garment image as "result" | **Unresolved** | Live flow exists in code but previously returned `error_pose` |
-| Gallery shortlist (favourites) | Works | Works | Client-side state |
-| WhatsApp sharing | Works | Works | Opens `wa.me` URL |
-| Copy-link sharing | Works | Works | Restores occasion + skin + outfit from URL params |
-| Download VTO result | Works | Works | Direct anchor download |
-| URL state restoration | Works | Works | `?step&occasion&skin&vto` query params |
-
-**Current limitations (honest):**
-- **Live VTO is unresolved.** The code path exists and the API contract is implemented, but previous attempts returned `error_pose`. No further debugging has been completed.
-- **Mock VTO returns the source garment image** as its "result" — it is not a try-on composite. The user sees the garment reference image, not their photo wearing it.
-- **Skin-tone analysis mock** returns a hardcoded `#b9947c` hex. The live API path is verified working with valid credentials.
-- **No actual YouCam credentials** are committed or shipped. Users must provide their own `YOUCAM_API_KEY`.
-- **10 outfits only** (2 per occasion). Expandable via the `src/data/outfits.ts` data file.
-
----
-
-## How to run
-
-```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
+```sh
+npm ci
+MOCK_MODE=true npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [localhost:3000](http://localhost:3000). Development uses `.next-dev`; production uses `.next`, allowing a separate local mock production server without cache collisions.
 
-### Build for production
-
-```bash
-npm run build
-npm start
+```sh
+MOCK_MODE=true npm run build
+MOCK_MODE=true npm start -- --port 3500
 ```
 
-### Lint
+Create `.env.local` yourself if live testing is separately approved. Never commit credentials:
 
-```bash
-npm run lint
-```
-
-### Contract tests (YouCam API shape validation)
-
-```bash
-node --experimental-strip-types tests/youcam-api-contract.test.ts
-```
-
----
-
-## Environment variables
-
-Create `.env.local` in the project root (never committed):
-
-```
+```text
 YOUCAM_API_KEY=your_key_here
 YOUCAM_BASE_URL=https://yce-api-01.makeupar.com/s2s/v2.0
 MOCK_MODE=true
 ```
 
-| Variable | Required | Purpose |
-|----------|----------|---------|
-| `YOUCAM_API_KEY` | For live mode | Bearer token for all YouCam API calls |
-| `YOUCAM_BASE_URL` | For live mode | Base URL for the YouCam S2S API (default shown) |
-| `MOCK_MODE` | Optional | `true` = return mock data without live API calls (safe for demos). Defaults to mock if unset or if no API key is present. |
+`MOCK_MODE=true` explicitly disables provider work. With any other value the routes use live mode; a missing key is **unconfigured**, not mock. `/api/mode` reports the running server mode. Live tasks consume account units and need a verified budget and bounded approval. Stop on 429. A timed-out/cancelled request may already have submitted a provider task; cancellation cannot undo it.
 
-> **With `MOCK_MODE=true` or without an API key, the app runs entirely on mock data — no live API calls are made.**
+## Verification
 
----
-
-## Project structure
-
-```
-src/
-├── app/
-│   ├── page.tsx              # Main 3-step flow (occasion → skin → gallery)
-│   ├── layout.tsx            # Root layout + metadata
-│   ├── globals.css           # Design tokens + glassmorphism
-│   └── api/
-│       ├── skin/route.ts     # Skin-tone analysis (upload → submit → poll)
-│       └── vto/route.ts      # Clothes VTO (upload → submit → poll)
-├── components/
-│   └── Navbar.tsx            # App header
-├── data/
-│   └── outfits.ts            # 10-item outfit catalog (5 occasions x 2)
-└── lib/
-    ├── youcam.ts             # YouCam file upload + data URL parsing
-    └── color.ts              # Hex -> HSL conversion + hue similarity scoring
-
-tests/
-└── youcam-api-contract.test.ts  # Contract validation for YouCam API shapes
-
-public/
-├── outfits/                  # 10 SVG outfit illustrations
-└── garment_test/             # Garment reference images for mock VTO
+```sh
+npx --no-install tsc --noEmit
+npm run lint
+MOCK_MODE=true npm run build
+git diff --check
 ```
 
----
+Offline TypeScript suites use plain assertions, with every provider fetch stubbed. Use a `tsx` runner for the full suites (including project JSON imports):
 
-## Screenshots
+```sh
+for suite in tests/*.test.ts; do npx tsx "$suite" || break; done
+npx tsx scripts/benchmark-report.ts
+```
 
-Captured from the mock-mode run in `docs/submission/screenshots/`:
+`npx` may download test tooling if it is not already available. The standalone benchmark also works with Node 22+ type stripping. Browser suites require Playwright and Chrome; use an existing installation via `PLAYWRIGHT_MODULE_PATH` or install test tooling separately:
 
-- `01-home.png` — occasion selection grid
-- `02-skin-analysis-upload.png` — skin-tone upload step
-- `03-skin-result.png` — detected skin-tone swatch
-- `04-gallery.png` — occasion-curated, harmony-sorted gallery
-- `05-fullbody-upload.png` — full-body photo upload prompt
-- `06-vto-mock-result.png` — mock virtual try-on result
-- `07-share.png` — share/download actions
+```sh
+TEST_BASE_URL=http://localhost:3500 node tests/face-camera.test.mjs
+TEST_BASE_URL=http://localhost:3500 node tests/garment-library.browser.test.mjs
+TEST_BASE_URL=http://localhost:3500 node tests/ui-revamp.browser.test.mjs
+node tests/image-preprocessing.browser.test.mjs
+```
 
----
+Browser/API regression fixtures are synthetic or local test assets. No tests authorize paid YouCam requests. The benchmark `--check` intentionally fails while evidence is pending. See [benchmark protocol](docs/testing/BENCHMARKS.md) for failure denominators, rating rubric, budgets and approval boundaries.
 
-## Demo video
+## Code and sources
 
-*(Pending — demo video link will be added after recording.)*
+- `src/app/page.tsx`: occasion → optional skin → recommendations/fitting room.
+- `src/components/WardrobeUpload.tsx`, `LookComparison.tsx`: session clothes and result decisions.
+- `src/lib/styling.ts`: deterministic recommendations and eligibility; `vto-input.ts`: server image/mode validation.
+- `src/app/api/vto/route.ts`: catalogue/uploaded references; serialized JSON must be **under 4,000,000 bytes**.
+- `src/data/outfits.ts`, `indian-wear.json`: identity, references, styling and provenance.
+- [Photo credits/licences](docs/garment-library/README.md) and [source feasibility](docs/garment-library/SOURCE_FEASIBILITY.md). Photo licences are separate from code licensing; no retailer partnership or blanket image permission is implied.
 
----
+## Release and submission
 
-## Background: pivot from Proof
+[Milestones](docs/plans/2026-10-20-personal-stylist-milestones.md), [project state](docs/agent-workflow/PROJECT_STATE.md), [user validation](docs/testing/REAL_USER_VALIDATION.md), [demo script](docs/submission/DEMO_SCRIPT.md) and [submission checklist](docs/submission/PITCH_CHECKLIST.md) track implementation separately from live/release evidence.
 
-This project started as **Proof** — a skin-analysis daily-tracking concept. Noise testing showed the API's measurement variance (~3 pts) exceeded the real-world signal (~2 pts), making daily change detection impossible (see [`docs/noise-test.md`](docs/noise-test.md)).
+Budget snapshot verified on 21 October: 916 remaining units; Cloth V4 costs 2 units/call and optional facial colour analysis costs 20. The 25% reserve is 229 units; the six-task pilot costs 12 units and the twelve-case scorecard costs 24. See [budget evidence](docs/testing/BENCHMARKS.md). This is not approval to spend.
 
-We pivoted to **SangeetFit** — using the same YouCam skin-tone analysis API for occasion-aware outfit styling, adding clothes VTO as the secondary integration.
+Pending: approved six-task pilot, twelve-case identity/garment scorecard (eight owned garments, four permitted references), five participants, Android Chrome/iPhone Safari checks, judge access and final genuine demo/submission. Participants and photos will be added later at the user's request. Existing screenshots are historical mock evidence until refreshed. No demo video has been recorded. Public live deployment needs controlled judging access and a credit reserve; the client one-request guard is not server-wide quota protection.
 
----
+Working target: submit 1 November, keep 2 November as buffer, preserve judging availability through 20 November. Reverify exact requirements, dates/timezone and access with the [official rules](https://youcam-api-skin-ai-ecommerce.devpost.com/rules).
+
+Working policy: commit and push verified checkpoints to `codex/ui-revamp`. Its `vercel.json` branch rule disables automatic Git deployments; a separately approved deployment can be prepared later. Machine-local settings, traces, draft branding and private photos/results are excluded from checkpoints.
 
 ## License
 
-MIT
+No application LICENSE file is included yet; settle the code licence before public distribution. Third-party photos keep their individual licences and attribution requirements.
