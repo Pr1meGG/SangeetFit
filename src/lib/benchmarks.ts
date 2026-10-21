@@ -1,5 +1,5 @@
 /** Offline evidence only: this module never submits tasks or reads image data. */
-export type BenchmarkCase = { caseId: string; participantId: string; kind: "upload" | "catalogue" };
+export type BenchmarkCase = { caseId: string; participantId: string; sourceVersion: string; kind: "upload" | "catalogue" };
 export type BenchmarkRecord = BenchmarkCase & {
   mode: "live" | "mock";
   status: "success" | "failed";
@@ -15,6 +15,25 @@ export type BenchmarkEvidence = {
   budget?: { availableUnits?: number | null; vtoUnitCost?: number | null; skinUnitCost?: number | null; approved?: boolean };
 };
 
+export const MEN_VTO_CASE_IDS = [
+  "concept-emerald-kurta",
+  "concept-sapphire-sherwani",
+  "concept-oxblood-bandhgala",
+  "concept-mint-kurta",
+  "concept-saffron-kurta",
+  "concept-marigold-jacket-set",
+  "concept-sage-embroidered-kurta",
+  "concept-ivory-gold-kurta",
+  "concept-cream-embroidered-bandhgala",
+  "concept-navy-velvet-bandhgala",
+  "concept-plum-brocade-sherwani",
+  "concept-antique-gold-sherwani",
+  "concept-charcoal-bandhgala",
+  "library-gold-silk-kurta",
+  "library-ivory-nehru-ensemble",
+  "library-ivory-button-kurta",
+] as const;
+
 function object(value: unknown, allowed: string[], context: string): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`${context} must be an object`);
   const result = value as Record<string, unknown>;
@@ -23,9 +42,9 @@ function object(value: unknown, allowed: string[], context: string): Record<stri
 }
 
 function benchmarkCase(value: unknown, record: boolean): BenchmarkCase {
-  const item = object(value, ["caseId", "participantId", "kind", ...(record ? ["mode", "status", "rendered", "identityRating", "garmentRating", "durationMs", "taskSubmissions"] : [])], "Case");
-  for (const key of ["caseId", "participantId"]) {
-    if (typeof item[key] !== "string" || !/^[a-z][a-z0-9_-]{0,31}$/.test(item[key] as string)) throw new Error(`${key} must be a short pseudonymous ID`);
+  const item = object(value, ["caseId", "participantId", "sourceVersion", "kind", ...(record ? ["mode", "status", "rendered", "identityRating", "garmentRating", "durationMs", "taskSubmissions"] : [])], "Case");
+  for (const key of ["caseId", "participantId", "sourceVersion"]) {
+    if (typeof item[key] !== "string" || !/^[a-z][a-z0-9_-]{0,63}$/.test(item[key] as string)) throw new Error(`${key} must be a short pseudonymous ID`);
   }
   if (item.kind !== "upload" && item.kind !== "catalogue") throw new Error("Case kind must be upload or catalogue");
   return item as BenchmarkCase;
@@ -41,7 +60,7 @@ export function parseBenchmarkEvidence(value: unknown): BenchmarkEvidence {
   const records = root.records.map((value) => {
     const item = benchmarkCase(value, true) as BenchmarkRecord;
     const planned = cases.get(item.caseId);
-    if (!planned || planned.participantId !== item.participantId || planned.kind !== item.kind) throw new Error(`Record ${item.caseId} does not match a predeclared case`);
+    if (!planned || planned.participantId !== item.participantId || planned.sourceVersion !== item.sourceVersion || planned.kind !== item.kind) throw new Error(`Record ${item.caseId} does not match a predeclared case`);
     if (seen.has(item.caseId)) throw new Error(`Duplicate outcome for ${item.caseId}; preserve its first outcome and count retries in taskSubmissions`);
     seen.add(item.caseId);
     if (item.mode !== "live" && item.mode !== "mock") throw new Error(`Record ${item.caseId} needs an explicit live/mock mode`);
@@ -91,9 +110,15 @@ export function scoreBenchmarkEvidence(input: unknown) {
   const casesPerPerson = new Map<string, number>();
   plannedCases.forEach((item) => casesPerPerson.set(item.participantId, (casesPerPerson.get(item.participantId) ?? 0) + 1));
   const people = casesPerPerson.size;
-  const composition = total >= 12 && people >= 5 && uploads >= 8 && catalogue >= 4 && Array.from(casesPerPerson.values()).every((count) => count >= 2);
+  const expected = new Set<string>(MEN_VTO_CASE_IDS);
+  const composition = total === expected.size && people === 1 && new Set(plannedCases.map((item) => item.sourceVersion)).size === 1 && uploads === 0 && catalogue === expected.size && plannedCases.every((item) => expected.has(item.caseId));
+  const pilot = records.filter((item) => item.caseId === MEN_VTO_CASE_IDS[0] || item.caseId === MEN_VTO_CASE_IDS[1]);
+  const pilotGate = pilot.some((item) => item.mode !== "live" || item.status !== "success" || !item.rendered || (item.identityRating !== null && item.identityRating < 4) || (item.garmentRating !== null && item.garmentRating < 4)) ? false
+    : pilot.length === 2 && pilot.every((item) => item.identityRating !== null && item.garmentRating !== null) ? true : null;
   const metrics = {
     liveMode: metric(records.filter(item => item.mode === "live").length, complete, 1),
+    taskCoverage: metric(records.filter(item => item.taskSubmissions >= 1).length, complete, 1),
+    pilot: { passed: pilot.filter((item) => item.mode === "live" && item.status === "success" && item.rendered && (item.identityRating ?? 0) >= 4 && (item.garmentRating ?? 0) >= 4).length, target: 2, gate: pilotGate },
     technical: metric(technical.length, complete, 0.9),
     identity: metric(identity.length, complete && technical.every((item) => item.identityRating !== null), 0.9),
     garment: metric(garment.length, complete && technical.every((item) => item.garmentRating !== null), 0.8),

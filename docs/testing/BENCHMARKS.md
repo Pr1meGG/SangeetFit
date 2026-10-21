@@ -1,10 +1,10 @@
-# Offline benchmark evidence
+# Offline VTO engineering benchmark
 
-Targets are acceptance goals, not achieved results. The checked-in `benchmark-records.json` contains twelve proposed cases and **no test outcomes**. `p01`–`p05` are reserved pseudonyms, not evidence of recruited participants or consent. Fix exact photos and garment references before testing; consent happens separately. Do not put participant names, photos, URLs, credentials, or medical information in this file.
+Targets are acceptance goals, not achieved results. The checked-in [benchmark-records.json](benchmark-records.json) predeclares **16 distinct men's catalogue looks on one person** and contains **zero outcomes**. `p01` is a reserved pseudonym, not proof of consent or a received photo. This sweep tests candidate reference behaviour for one source image; it does not validate uploaded own clothes, independent usability or reliability across people. Never store names, photos, signed result URLs, credentials or medical information in evidence.
 
 ## Run without provider requests
 
-Use Node22+ (or the bundled Node) to execute:
+Use Node 22+:
 
 ```sh
 node --experimental-strip-types scripts/benchmark-report.ts
@@ -12,19 +12,22 @@ node --experimental-strip-types scripts/benchmark-report.ts docs/testing/benchma
 node --experimental-strip-types tests/benchmarks.test.ts
 ```
 
-Default execution reports evidence and exits0 for a valid pending/failing report. `--check` exits1 unless every quality gate passes. Invalid JSON, unexpected fields, invalid ratings or unmatched cases exit1. No command calls YouCam, reads `.env.local`, or spends units.
+Normal reporting exits 0 for valid pending or failing evidence. `--check` exits 1 until all engineering gates pass. Invalid JSON, unexpected fields, invalid ratings or unmatched cases exit 1. These commands never call YouCam or read `.env.local`.
 
-## Record one outcome per predeclared case
+## Record one outcome per predeclared look
 
-Before an explicitly approved live batch, fix the case list: at least 12 cases across five consenting people, with eight owned-garment uploads and four permitted references; each person tries at least two looks. The first six cases form a separately approved pilot: `p01` and `p02` each try one owned upper-body garment, one owned full outfit and one permitted reference. Those six outcomes stay in the final denominator. Record a failed attempt even when generation or display fails. Never remove a failed case or replace its outcome with a successful retry. Count additional task submissions on its original record; a retry automatically fails the zero-duplicates gate. A new diagnostic batch needs a separate predeclared evidence file; it must not silently replace the reported original batch.
+The 16 `caseId` values in the fixture are exact server-owned outfit IDs. The first two are `concept-emerald-kurta` and `concept-sapphire-sherwani`. Preflight the full-body photo and exact references, then obtain separate approval for the two-task pilot. Continue with at most 14 remaining cases only after the pilot meets [the review gate](REAL_USER_VALIDATION.md) and a new bounded approval is given. Every task attempt, including a failure, remains in the denominator. Do not replace a failed outcome with a successful retry; count any extra submissions and disclose them.
 
-Record shape:
+Set the same non-sensitive `sourceVersion` token on every planned case and its outcome. `photo-v1` is a placeholder until the actual photo is selected; it is neither a filename nor an image hash. The scorer checks the declared token and requires both pilot looks to render with identity and garment ratings ≥4 before the full sweep can pass. The tester must still verify that the token really refers to the same photo.
+
+Record shape (example only, not an observed result):
 
 ```json
 {
-  "caseId": "upload-01",
+  "caseId": "concept-emerald-kurta",
   "participantId": "p01",
-  "kind": "upload",
+  "sourceVersion": "photo-v1",
+  "kind": "catalogue",
   "mode": "live",
   "status": "failed",
   "rendered": false,
@@ -35,33 +38,34 @@ Record shape:
 }
 ```
 
-This is a schema example, not a recorded attempt. `status` means task success/failure; successful tasks whose result will not render have `rendered:false`. Rate the identity yourself (participant) and garment fidelity against the reference. Use 5 for clear preservation, 4 for minor non-distracting differences, 3 or below for changes affecting trust. Ratings without a rendered successful result are invalid. Duration is milliseconds from explicit Generate to displayed result; keep unknown durations null. Failed attempts have no image ratings.
+`status` describes task success/failure; a successful task whose image fails to render has `rendered:false`. The participant rates identity against their source photo and garment fidelity against the exact reference. Use 5 for clear preservation, 4 for minor non-distracting differences, 3 or lower for changes affecting trust. No output counts as a failed case, never a positive rating. Time is measured from explicit Generate to displayed result. Keep unknown duration null and failed attempts unrated.
 
-All planned cases stay in the denominator. Every outcome must record the actual live/mock mode; mock references cannot be identity/garment-rated or pass the live-quality gate. Unrecorded cases and missing successful-image ratings/durations keep affected gates pending. No evidence yields null rates, never a pass. One output per case is scored; multiple submissions are still disclosed. The report includes median and observed range for successfully displayed live results; retain timeout/failure observations separately.
+All planned cases stay in the denominator. Actual live/mock mode is mandatory; mock placeholders cannot pass a live-quality gate. Unrecorded cases and missing successful-image ratings/durations keep affected gates pending. Every recorded case must have at least one actual submission; a failure before submission cannot count as testing that look. One output per case is scored; extra task submissions fail the duplicate gate. Report the median and observed range of rendered live results plus all timeout/failure observations. Preserve the original batch if a separately authorized diagnostic retest occurs.
 
-## Release targets
+## Engineering targets
 
 | Metric | Gate |
 |---|---|
-| Task success plus rendered image | ≥11/12 planned cases |
-| Identity rating ≥4 | ≥11/12 planned cases |
-| Garment rating ≥4 | ≥10/12 planned cases |
-| Both ratings ≥4 | ≥10/12 planned cases |
+| Live task success plus rendered image | ≥15/16 |
+| Participant-rated identity ≥4 | ≥15/16 |
+| Garment fidelity ≥4 | ≥13/16 |
+| Both ratings ≥4 | ≥13/16 |
 | Median successful displayed-result latency | ≤60,000ms |
 | Additional task submissions | 0 |
+| Planned looks actually submitted | 16/16 |
+| First two pilot looks rendered, identity and garment ≥4 | 2/2 |
+| Declared source-photo version | Same across 16/16 |
 
-Small-sample gates do not establish production reliability or guaranteed identity preservation. Report failures and the actual sample, not only percentages. The fixed schema does not establish immutable history: retain the original batch file and review changes rather than editing inconvenient outcomes away.
+A pass is one-person engineering evidence only. It cannot be called a five-user study, independent usability result, own-garment proof, or guarantee that every face is preserved. The scorer checks declared composition and outcomes; it does not establish immutable history. Review evidence edits and report failures rather than editing inconvenient rows away.
 
 ## Budget is a feasibility calculation
 
-Enter `availableUnits`, `vtoUnitCost`, and `skinUnitCost` only after checking the actual account and current applicable pricing. Unknown values stay null. The report reserves 25%, caps development at 40 VTO and 5 optional skin tasks, and calculates an affordable mix prioritizing VTO before optional skin. `fullCeilingFits` says whether the full 40+5 fits; it does not authorize any spend. Insufficient units reduce the caps. `approved` defaults false; even a true value is merely recorded metadata and never submits tasks. Every actual batch still needs specific approval. Stop on 429; no blind retries.
+Enter `availableUnits`, `vtoUnitCost` and `skinUnitCost` only after checking the actual account and current applicable pricing. Unknown values stay null. The report reserves 25%, caps development at 40 VTO and 5 optional skin tasks and calculates an affordable mix prioritizing VTO. `approved` defaults false; setting it true is only metadata and never submits a task. Every live batch still needs specific authorization. Stop on 429; do not retry blindly.
 
-**Read-only snapshot, 21 October 2026:** the signed-in [YouCam dashboard](https://yce.perfectcorp.com/api-console/en/) displayed **916 units**. The official [unit calculator](https://yce.perfectcorp.com/ai-api/unit-calculator), with **AI Clothes Virtual Try-On V4.0** selected, displayed **2 units/call** with no cost-changing parameters. **AI Facial Color Tones Analyzer V1.0** displayed **20 units/call**; this corresponds to the app's optional `skin-tone-analysis` feature. No API task, top-up or account setting change was made.
+**Read-only snapshot, 21 October 2026:** the signed-in [YouCam dashboard](https://yce.perfectcorp.com/api-console/en/) displayed **916 units**. The official [unit calculator](https://yce.perfectcorp.com/ai-api/unit-calculator) displayed **2 units/call** for AI Clothes Virtual Try-On V4.0 and **20 units/call** for the optional Facial Color Tones Analyzer V1.0. No task, top-up or account setting change was made.
 
-Reserve: **229 units**; development allowance: **687 units**. The six-case pilot needs **12 units**, and all twelve planned VTO cases need **24 units**. `plannedVtoUnits` and `plannedVtoFits` report this calculation; the development ceiling of 40 VTO +5 optional skin tasks would cost 180 units. Recheck balance and pricing before any approved batch because other account use can change them. `approved` remains false.
+At that snapshot, reserve is **229 units** and development allowance **687 units**. The two-task pilot would use **4 units**; 16 planned VTO tasks would use **32 units**. `plannedVtoUnits` and `plannedVtoFits` calculate the full sweep, but neither is approval to spend. Recheck balance, pricing and API-key-to-project mapping before the pilot; actual task deductions were not inspected.
 
-This snapshot belongs to the active signed-in console project. API-key-to-project mapping and actual task deductions were not inspected; confirm the intended project before spending.
+## Separate product validation
 
-## Separate five-person usability protocol
-
-Recruit five consenting participants. With photos ready, observe whether each person independently chooses a celebration occasion, understands a recommendation reason, generates and compares two looks, then saves a choice. The two pilot participants can contribute their first two looks; their third pilot case remains in the quality denominator. Record time to first Generate (target median≤60s), independent completion (target 4/5), reason understanding/preference choice (target 4/5), navigation failures and device/browser used in a separate pseudonymous note. These observations are not fabricated from the VTO scoring data. Actual Android Chrome and iPhone Safari checks are required before claiming both tested.
+Self-testing occasion → recommendation → two looks → choice can reveal defects, but it is not an independent-user completion rate. Own-clothes try-on and real Android Chrome/iPhone Safari checks are also separate pending evidence. Record only observed devices and capabilities. Public screenshots or video should use a permitted demo asset unless the participant explicitly consents to publication.

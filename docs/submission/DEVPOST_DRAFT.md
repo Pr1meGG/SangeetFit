@@ -1,6 +1,6 @@
 # SangeetFit — Devpost description draft
 
-Drafted 21 October 2026. This text has not been submitted. Recheck the evidence and replace the status section after the live pilot, device checks and final demo are complete.
+Drafted 21 October 2026. This text has not been submitted. Recheck the evidence and replace the status section after the one-person live reference sweep, device checks and final demo are complete.
 
 ## Inspiration
 
@@ -20,9 +20,9 @@ Recommendations are deterministic and based on user-confirmed occasion, style an
 
 ## Current evidence and limits — update before submitting
 
-The project's current verification record reports passing offline, build and mock-browser checks. Earlier authorized live Cloth V4 tests succeeded for one sample-person/reference pair. **Live quality for uploaded personal garments, face preservation across users, garment fidelity, real-phone camera and image saving have not yet been established.** The planned twelve-case quality scorecard has zero recorded outcomes and the five-person usefulness study has not run. AI previews can alter facial or clothing details and do not establish physical fit or size.
+The project's current verification record reports passing offline, build and mock-browser checks. Earlier authorized live Cloth V4 tests succeeded for one sample-person/reference pair. **Live quality for uploaded personal garments, face preservation across users, garment fidelity, real-phone camera and image saving have not yet been established.** The planned one-person, 16-reference men's engineering scorecard has zero recorded outcomes. There is no independent usability study. AI previews can alter facial or clothing details and do not establish physical fit or size.
 
-Next we will run a separately authorized six-task pilot, then extend the predeclared scorecard to twelve attempts across five consenting people if the pilot passes. We will check Android Chrome and iPhone Safari, review permitted reference outputs, and record the final demo from the verified build. Combining separate tops and bottoms and a persistent wardrobe are later product directions.
+Next we will use one consenting person's full-body photo for a separately authorized two-task pilot: Emerald Silk Kurta and Sapphire Embroidered Sherwani. If both are usable, a separate authorization can extend testing to the other 14 distinct men's references. This will assess one person's reference output, not own-clothes quality or general usability. The participant's identity, photos and results will not appear in GitHub or the public demo. We will check Android Chrome and iPhone Safari, review permitted reference outputs, and record the final demo from the verified build and a separately permitted demo image. Combining separate tops and bottoms and a persistent wardrobe are later product directions.
 
 ## Internal release notes — do not paste into the submission form
 

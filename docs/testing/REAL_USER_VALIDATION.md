@@ -1,68 +1,28 @@
-# SangeetFit — Five-person validation protocol
+# SangeetFit — one-person men's reference validation
 
-Updated 21 October 2026. **No participant session or new live attempt is recorded by this document.** Skin analysis is optional; genuine live VTO is required for VTO evidence. Mock sessions may test navigation but never count as live image-quality validation.
+Updated 21 October 2026. **No participant photo or new live result has been received or recorded.** This is an engineering sweep of the current men's catalogue, not independent usability evidence or proof of broad face retention. Own-garment quality remains a separate, untested gate. Mock navigation never counts as live image-quality evidence.
 
 ## Preconditions
 
-- Review current working-tree state and preserve user work. Run the offline suites, TypeScript, lint, mock production build and relevant browser regressions before recruiting.
-- Recheck available credits and applicable pricing before each batch; the 21 October snapshot is 916 units, Cloth V4 2 units/call and optional facial colour analysis 20 units/call. Preserve 25% of available units. Each capped live batch needs explicit approval; this protocol does not grant it.
-- Fix the test cases and photo/reference selections before the batch. Existing case IDs reserve pseudonyms only; they do not establish consent or actual participants.
-- Get informed permission to send person and garment images to YouCam. Explain that app-session retention differs from the provider's handling, that AI can change face/garment details, and that evidence will not publish photos or signed result URLs.
-- Review original inputs manually for clear face, full-body pose and appropriate garment references. The app's byte validation does not prove suitability.
+- One tester is planned under reserved pseudonym `p01`. No other participant or photo is authorized. The reserved ID is not a record of consent.
+- Obtain one suitable JPG/PNG full-body photo with a clear, unobstructed face, one person, front-facing pose and the intended clothing area visible. A separate selfie is not needed for Cloth V4; optional skin analysis is outside this sweep. Keep the original and generated images outside GitHub, public demos and benchmark JSON. A local path is preferable to attaching a private photo to chat.
+- Confirm informed consent for sending the full-body photo to YouCam. The app retains it only in the page session; provider processing and retention are separate. The [YouCam API privacy policy](https://www.perfectcorp.com/fr/perfectbeauty/youcam/privacy-policy-api) describes photo and possible face-derived data processing. Do not imply a local-only VTO.
+- Preflight the exact source photo and 16 server-owned garment IDs listed in [benchmark-records.json](benchmark-records.json). The first two are `concept-emerald-kurta` and `concept-sapphire-sherwani`. Recheck the running app says **Live AI**, the intended API project, remaining credits and current Cloth V4 cost. Preserve 25% of units. Do not read or publish API keys.
+- Obtain specific approval for **two** pilot tasks. A later batch of at most **14** remaining tasks needs its own approval after reviewing the pilot. This document and the budget snapshot do not authorize any call. Stop on 429; no blind retries.
 
-## Two separate evidence sets
+## Test and review
 
-### Input readiness — 21 October
+1. Fix the 16 case IDs and the source-photo version before the pilot. Use the same photo for every case; if it changes, start a separately identified batch rather than presenting unlike images as directly comparable.
+2. For each approved case, press **Generate try-on** once. Record the actual live/mock mode, submit/render outcome, Generate-to-render time and task count. A timeout may leave a provider task running; it does not authorize another submission.
+3. When a live image renders, have `p01` rate identity and garment fidelity against the source and exact reference. **5:** clearly preserved; **4:** minor differences without distracting distortion; **3 or lower:** visible changes affecting trust. No output is a failure, not an unscored success.
+4. Pilot gate: both the emerald kurta and sapphire sherwani must render and receive identity and garment ratings ≥4/5. If either fails, pause the other 14 cases and diagnose photo framing, reference quality or category without hiding the original result.
+5. Save/open each result privately as it arrives. The app compares only its two most recent session looks; a later result displaces older looks, and provider links can expire. Comparing, reloading an image and browsing must submit zero additional tasks. Do not publish signed URLs or a contact sheet containing the participant's face.
+6. Record each attempt once in [benchmark-records.json](benchmark-records.json), including failures and any task submitted before a timeout. Retests need a separately approved, predeclared batch; keep the original outcome. Use [BENCHMARKS](BENCHMARKS.md) for schema, budget and full-sweep gates.
 
-Participant and personal-photo preparation is deferred at the user's request. These are reserved slots, not recruited or consenting people. Keep original photos and the private mapping from case IDs to inputs outside GitHub.
+## Acceptance and reporting
 
-| Participant slot | Planned cases | Input roles | Status |
-|---|---|---|---|
-| p01 | upload-01, upload-02, catalogue-01 | Owned upper-body, owned full outfit, permitted reference; same person photo | Deferred; first pilot tranche |
-| p02 | upload-03, upload-04, catalogue-02 | Owned upper-body, owned full outfit, permitted reference; same person photo | Deferred; first pilot tranche |
-| p03 | upload-05, upload-06 | Two owned garments; same person photo | Deferred |
-| p04 | upload-07, catalogue-03 | Owned garment and permitted reference; same person photo | Deferred |
-| p05 | upload-08, catalogue-04 | Owned garment and permitted reference; same person photo | Deferred |
+Full-sweep engineering targets are ≥15/16 rendered live results, ≥15/16 identity ratings ≥4, ≥13/16 garment ratings ≥4 and ≥13/16 with both ratings ≥4; successful-result median ≤60 seconds; zero duplicate submissions. These are targets, not achieved results. A passing score describes this one source photo and these 16 references only.
 
-Candidate menu for the two pilot reference slots (choose exact IDs only after participant preferences and input suitability are known):
+The builder may walk through occasion → recommendation → two looks → comparison → choice, but that is a self-test. Do not report an independent-user completion rate. Actual Android Chrome and iPhone Safari checks remain separate; claim only devices actually tested. Own-clothes upload and garment fidelity also remain unverified until their own approved cases run.
 
-| Audience | New model-led concept | Sourced alternative | What this tests |
-|---|---|---|---|
-| Women | `concept-coral-anarkali` (Mehendi/Haldi) or `concept-midnight-lehenga` (Sangeet/Reception) | `library-coral-embroidered-kurta` (CC0, frontal upper garment) | A current collection reference versus a simpler sourced upper garment. |
-| Men | `concept-emerald-kurta` (Sangeet/Mehendi) or `concept-cream-embroidered-bandhgala` (Sangeet/Wedding) | `library-ivory-button-kurta` (public domain, frontal upper garment) or `library-ivory-nehru-ensemble` (public domain, full outfit) | A current collection reference versus a sourced upper/full outfit. |
-
-The concept edit has recorded local-image hashes and generation provenance in [`editorial.ts`](../../src/data/editorial.ts); sourced-photo licences are in the [source register](../garment-library/SOURCE_FEASIBILITY.md). All are **candidates**, not visually reviewed VTO results or seller products. Prefer at least one model-led concept across `catalogue-01/02` so the current collection receives direct evidence. If both slots use sourced alternatives, report that the new edit remains untested. Do not promote any reference based on upload success alone.
-
-Before requesting the six-task pilot approval, complete this private preflight without committing person photos or signed URLs: obtain p01/p02 consent and one suitable person photo each; choose one owned upper-body photo, one owned full-outfit photo and an exact candidate ID for each participant; check that the intended clothing area is fully visible and the source pose is usable; record the case-to-input mapping outside GitHub. Confirm the running app says **Live AI**, recheck the account/project balance and current Cloth V4 cost, reserve 25%, then request approval for **exactly six tasks**. The current app sends `auto` for catalogue garment categories, which the [V4 task reference](https://docs.perfectcorp.com/reference/ai_clothes/v4.0/paths/~1s2s~1v2.0~1task~1cloth-v4/post) supports; output quality is still unknown. Never submit a diagnostic seventh task or retry a failed case under this approval.
-
-**VTO quality:** predeclare 12 cases across five consenting people: eight owned garments and four permitted references, with at least two looks per person. Cases assigned to `p01` and `p02` form the six-task pilot; each person supplies one upper-body and one full-outfit owned reference, plus one permitted reference. The pilot passes only if at least five of six results render and both identity and garment are rated ≥4/5. These six cases count in the twelve-case scorecard. Record one output per case, including failed tasks, render failures, elapsed time and task-submission count in [benchmark-records.json](benchmark-records.json). See [BENCHMARKS](BENCHMARKS.md) for exact record fields, ratings, denominators and report commands. Do not remove failures or overwrite an outcome with a successful retry.
-
-**Usability:** recruit five distinct consenting participants. With photos ready, each independently chooses a celebration occasion, understands a recommendation reason, generates two looks, compares them and saves/opens a choice. Reuse predeclared quality outputs for the usability study; the pilot participants' third results are additional quality evidence. Do not spend twice merely to maintain two spreadsheets. Any additional tasks count against the approved batch and total budget.
-
-Skin analysis is recorded separately as skipped, live success, live failure or mock. Skipping it does not invalidate live VTO evidence. A mock garment result is a reference placeholder, not a generated person.
-
-## Participant procedure
-
-1. Record pseudonym, consent, date, device/browser and actual mode. Do not retain names or raw photos in evidence.
-2. Start timing with photos ready. Select an occasion and add an owned garment or choose a candidate explicitly labelled for testing. Confirm metadata is user/editor supplied, not image-analysis output.
-3. Ask the participant to explain why the outfit was recommended. Record their words without coaching.
-4. Provide/review the person photo; press **Generate** once. Record upload/submit/poll/render failure stage when applicable. A timeout does not authorize a new task.
-5. For a rendered live result, have the participant rate identity and compare garment fidelity against the reference. A successful API status alone is not a visual pass.
-6. Generate the second predeclared look within the approved cap, preferably using the same person photo. Confirm comparison/original toggles/reopening send zero tasks.
-7. Choose a look; try save/open, zoom and applicable catalogue outfit sharing. Mark device download or share limitations honestly. Do not send messages to other people as part of testing without explicit authorization.
-8. Record independent completion, time to first Generate, reason understanding/preferred choice, failures and whether they would use it again.
-
-Use this empty template; rows must be actual observations:
-
-| Participant | Date | Device/browser | Consent | Live VTO case IDs | Skin mode/outcome | First Generate seconds | Independent completion | Reason understood / choice made | Save/open | Notes |
-|---|---|---|---|---|---|---|---|---|---|---|
-
-## Acceptance and follow-up
-
-- Quality targets: rendered task success ≥11/12; identity rating ≥4 for ≥11/12; garment rating ≥4 for ≥10/12; both ≥4 for ≥10/12; successful displayed-result median ≤60s; zero duplicate submissions. Missing outcomes/ratings keep affected gates pending. No result counts as failure.
-- Usability targets: ≥4/5 independent completions, ≥4/5 understanding the reason and choosing a preference; median first-Generate time ≤60s with photos ready.
-- Actual Android Chrome and iPhone Safari checks are separate evidence requirements. Desktop emulation is not proof of phone camera or save/share behaviour.
-- Stop on 429. Record failures and fix critical defects. Retests are new approved evidence; retain the original batch rather than editing failures away.
-- Update the project state/task board only with executed outcomes. Report the sample size, device coverage, failure count and limits rather than calling the product universally reliable.
-
-The balance/pricing snapshot is recorded in [BENCHMARKS](BENCHMARKS.md). No participant outcome or phone result exists yet; the user deferred participant/photo preparation on 21 October.
+Report the count of attempts, failures, ratings, latency range, source-photo version, device/browser and limits without recording names, photos, result URLs or medical data in the repo. No reference becomes `live-reviewed` solely because a provider task returned success. Final public demo images require separate publication permission or a permitted demo asset.

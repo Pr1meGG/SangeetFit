@@ -54,7 +54,7 @@ Seller actions require an exact-item HTTPS URL, named seller and recorded produc
 
 ## Evidence and release acceptance
 
-[Milestones](plans/2026-10-20-personal-stylist-milestones.md), [benchmark protocol](testing/BENCHMARKS.md) and [five-person validation](testing/REAL_USER_VALIDATION.md) define the gates. The checked-in benchmark contains proposed cases and no outcomes.
+[Milestones](plans/2026-10-20-personal-stylist-milestones.md), [benchmark protocol](testing/BENCHMARKS.md) and [one-person validation](testing/REAL_USER_VALIDATION.md) define the current gates. The planned 16-look men's reference sweep uses one consenting person and a full-body photo; it has no outcomes. This engineering check cannot establish independent usability, own-garment quality or broad identity preservation. A separate face selfie is not an input to Cloth V4 and is not part of this sweep.
 
 Prior approved Cloth V4 tasks succeeded for one sample-person/maroon-lehenga pair, including one through a deployed preview. The output was not independently visually scored, so this proves a pipeline case, not identity preservation or broad reliability. Prior skin success is separate optional integration evidence.
 
