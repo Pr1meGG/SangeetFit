@@ -6,6 +6,8 @@ YouCam Clothes VTO (Virtual Try-On) application built with Next.js 14, TypeScrip
 
 ## Development Skill Workflow
 
+Use Superpowers for relevant design, implementation and verification workflows, Ponytail to keep each change small and complete, and Caveman when installed for concise progress reports. Preserve full technical detail in code, tests and durable documentation. Project safety and evidence rules below still apply.
+
 ### Skill Activation Policy
 
 **Brainstorming**

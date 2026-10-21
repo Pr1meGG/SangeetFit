@@ -6,9 +6,11 @@ Compact prioritized backlog. Update after material task-status changes. No item 
 
 This queue supersedes the historical behaviour descriptions below. Targets are not measured outcomes.
 
+To reopen the local progress pane, run `python3 -m http.server 3501 --bind 127.0.0.1 --directory docs/agent-workflow` from the repository root and open `http://127.0.0.1:3501/STATUS_PANE.html`. The embedded app uses whatever is currently running on port 3500; check its mode badge before Generate.
+
 | ID | Status | Acceptance / next gate |
 |---|---|---|
-| M0 preservation + feasibility | branch synced; budget verified; participant inputs deferred | 21 Oct dashboard: 916 units; V4 2/call, optional colour 20/call; reserve 229. Checkpoints 52a8487 and 3c8c6cd pushed; remote SHA verified with zero ahead/behind. Branch auto-deploy disabled; no new deployment observed. Participant/photo selection deferred by user. No spend approved. |
+| M0 preservation + feasibility | branch synced; budget verified; participant inputs deferred | 21 Oct dashboard: 916 units; V4 2/call, optional colour 20/call; reserve 229. Checkpoints 52a8487, 3c8c6cd and 448d234 pushed; remote SHA verified with zero ahead/behind. Branch auto-deploy disabled; no new deployment observed. Participant/photo selection deferred by user. No spend approved. |
 | M1 own clothes + proof | software implemented; live gate pending | Session garment metadata/upload, validated two-image request and explicit generation implemented. Separately approve two people × three-reference pilot (owned upper-body, owned full outfit, permitted reference each) after budget/consent; require ≥5/6 rendered with identity and garment both ≥4/5. |
 | M2 explainable ranking | implemented; usefulness validation pending | Occasion/audience/style/colour/stable-order policy and actual metadata reasons; user ratings remain pending. |
 | M3 references + decisions | comparison implemented; reference gate pending | Two session looks, original/zoom/choice/save and photo versions implemented. Zero primary references visually reviewed; two accurate permitted alternatives suffice for this demo, with twelve active references a stretch target. No seller products/permissions invented. |
