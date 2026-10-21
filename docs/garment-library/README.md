@@ -2,6 +2,10 @@
 
 Internet-sourced starter library for SangeetFit, retrieved 20 October 2026. Photos are hosted locally; browsing and mock try-on need no third-party image requests.
 
+## Model-led concept edit (21 October)
+
+The default collection now begins with five original AI-generated model/outfit concepts: Midnight & Gold Lehenga, Ivory Embroidered Lehenga, Coral Embroidered Anarkali, Emerald Silk Kurta, and Oxblood Bandhgala. Their local JPEGs live under `public/garment_test/editorial/`; `src/data/editorial.ts` records the generation date and hash of each final asset. The displayed image is also its exact YouCam reference. These are fictional models and outfit designs, **not seller products or verified try-on results**. All five remain candidates until live garment fidelity and identity outcomes are reviewed. The fourteen sourced photos below remain available through the collection's archive filter, with their original credits intact.
+
 The machine-readable manifest is `src/data/indian-wear.json`, imported through `src/data/indian-wear.ts`. Each record includes source/author/license links, original/download URL, date, local-file SHA-256, dimensions, garment colors, occasion, and reference-quality notes. Photos are sourced from their Wikimedia Commons file pages; licenses were checked per file, not inferred from Wikimedia's general site license.
 
 ## Scope and try-on status

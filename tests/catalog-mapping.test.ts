@@ -9,6 +9,7 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { OUTFITS, TRY_ON_REFERENCES } from "../src/data/outfits.ts";
 import { INDIAN_WEAR_LIBRARY } from "../src/data/indian-wear.ts";
+import { EDITORIAL_LOOKS } from "../src/data/editorial.ts";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outfitsDir = path.join(projectRoot, "public", "outfits");
@@ -19,7 +20,7 @@ const ids = new Set<string>();
 for (const o of OUTFITS) {
   assert(!ids.has(o.id), `duplicate outfit id ${o.id}`);
   ids.add(o.id);
-  assert(o.imageUrl.startsWith("/outfits/") || o.imageUrl.startsWith("/garment_test/library/"), `unexpected asset path: ${o.imageUrl}`);
+  assert(o.imageUrl.startsWith("/outfits/") || o.imageUrl.startsWith("/garment_test/library/") || o.imageUrl.startsWith("/garment_test/editorial/"), `unexpected asset path: ${o.imageUrl}`);
   assert(fs.existsSync(path.join(projectRoot, "public", o.imageUrl)), `displayImage missing on disk: ${o.imageUrl}`);
 }
 console.log(`PASS: ${OUTFITS.length} outfits, unique ids, all displayImages exist`);
@@ -51,6 +52,7 @@ const VISUAL_WHITELIST: Record<string, string> = {
   "mehendi-02": "kurta_set_hd.png",      // pink women's kurta set
   "reception-03": "western_dress_hd.png", // black western gown
   ...Object.fromEntries(INDIAN_WEAR_LIBRARY.filter(o => o.vtoSupported).map(o => [o.id, o.tryOnReference!])),
+  ...Object.fromEntries(EDITORIAL_LOOKS.map(o => [o.id, o.tryOnReference!])),
 };
 for (const o of OUTFITS) {
   if (o.vtoSupported) {

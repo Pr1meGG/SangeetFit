@@ -61,13 +61,15 @@ function verifiedDate(value: string): boolean {
 
 function hasReferencePermission(outfit: Partial<Outfit>): boolean {
   const source = outfit.source;
+  const concept = outfit.generatedConcept;
   return Boolean(
     outfit.vtoSupported && outfit.tryOnReference &&
     outfit.imageUrl === `/garment_test/${outfit.tryOnReference}` &&
-    source?.author.trim() && source.title.trim() &&
-    ["CC0", "Public domain", "CC BY-SA 3.0", "CC BY-SA 4.0"].includes(source.license) &&
-    httpsUrl(source.url) && httpsUrl(source.licenseUrl) && httpsUrl(source.originalUrl) &&
-    verifiedDate(source.retrievedAt) && /^[a-f0-9]{64}$/i.test(source.sha256)
+    ((concept?.tool === "OpenAI image generation" && verifiedDate(concept.createdAt) && /^[a-f0-9]{64}$/i.test(concept.sha256)) ||
+      (source?.author.trim() && source.title.trim() &&
+        ["CC0", "Public domain", "CC BY-SA 3.0", "CC BY-SA 4.0"].includes(source.license) &&
+        httpsUrl(source.url) && httpsUrl(source.licenseUrl) && httpsUrl(source.originalUrl) &&
+        verifiedDate(source.retrievedAt) && /^[a-f0-9]{64}$/i.test(source.sha256)))
   );
 }
 

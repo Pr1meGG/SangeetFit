@@ -255,8 +255,8 @@ export default function Home() {
                 <span className="sf-welcome-foot"><Shirt size={16} /> Outfit ideas, made personal.</span>
               </div>
               <div className="sf-collage" aria-label="Indian celebration outfit inspiration">
-                <div className="sf-collage-main"><img src="/garment_test/library/navy-gold-lehenga.png" alt="Navy and gold lehenga inspiration" /><span>Sangeet nights</span></div>
-                <div className="sf-collage-small"><img src="/garment_test/library/gold-silk-kurta.jpg" alt="Gold silk kurta inspiration" /><span>A little festive</span></div>
+                <div className="sf-collage-main"><img src="/garment_test/editorial/midnight-lehenga.jpg" alt="AI outfit concept: midnight and gold lehenga" /><span>Sangeet nights</span></div>
+                <div className="sf-collage-small"><img src="/garment_test/editorial/emerald-kurta.jpg" alt="AI outfit concept: emerald silk kurta" /><span>A little festive</span></div>
                 <span className="sf-collage-flower" aria-hidden="true">✳</span>
                 <div className="sf-collage-note"><Heart size={16} /> Find your festive side.</div>
               </div>
@@ -273,7 +273,7 @@ export default function Home() {
               </div>
             </section>
             <section className="sf-home-footer"><div><Sparkles size={20} /><p><strong>Just looking for inspiration?</strong><span>Explore the reference collection. No selfie needed.</span></p></div><Link href="/library" className="sf-text-link">See full collection <ArrowRight size={17} /></Link></section>
-            <div className="sf-photo-attribution"><GarmentCredit source={OUTFITS.find(o => o.id === "library-navy-gold-lehenga")?.source} /><GarmentCredit source={OUTFITS.find(o => o.id === "library-gold-silk-kurta")?.source} /></div>
+            <div className="sf-photo-attribution"><p>AI-generated outfit concepts · try-on quality unreviewed</p></div>
           </>
         )}
 
@@ -345,7 +345,7 @@ export default function Home() {
           <section className="sf-tryon-dialog" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="tryon-title" tabIndex={-1} onClick={event => event.stopPropagation()}>
             <header className="sf-dialog-header"><div><span className="sf-context">Your fitting room</span><h2 id="tryon-title">Make this look yours.</h2></div><button className="sf-icon-button" aria-label="Close try-on" onClick={closeVTO}><X size={21} /></button></header>
             <div className="sf-dialog-content">
-              <div className="sf-selected-outfit"><img src={vtoModal.outfit.imageUrl} alt={vtoModal.outfit.name} /><div><strong>{vtoModal.outfit.name}</strong><span>{occasion} · {vtoModal.outfit.garmentType.replaceAll("-", " ")}</span><small>{vtoModal.outfit.origin === "upload" ? "Your garment reference" : "Catalogue reference"}</small></div></div>
+              <div className="sf-selected-outfit"><img src={vtoModal.outfit.imageUrl} alt={vtoModal.outfit.name} /><div><strong>{vtoModal.outfit.name}</strong><span>{occasion} · {vtoModal.outfit.garmentType.replaceAll("-", " ")}</span><small>{vtoModal.outfit.origin === "upload" ? "Your garment reference" : vtoModal.outfit.generatedConcept ? "AI outfit concept · no retail listing" : "Catalogue reference"}</small></div></div>
               {vtoLoading && <div className="sf-generating" role="status"><div className="sf-generating-icon"><Shirt size={34} strokeWidth={1.2} /><Loader2 className="animate-spin" size={20} /></div><h3>Putting your look together.</h3><p>One try-on is processing. You can close this view; the submitted task may still finish. No extra task will start while it is pending.</p></div>}
               {rateLimited && <p role="alert" className="sf-alert sf-alert-error">Rate limit reached. No task will be retried automatically. Wait before reloading to try again.</p>}
               {vtoError?.outfitId === vtoModal.outfit.id && !vtoLoading && <p className="sf-alert sf-alert-error" role="alert">{vtoError.message}</p>}

@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { INDIAN_WEAR_LIBRARY } from "../src/data/indian-wear.ts";
+import { EDITORIAL_LOOKS } from "../src/data/editorial.ts";
 
 void (async () => {
   process.env.MOCK_MODE = "false";
@@ -38,8 +39,13 @@ void (async () => {
   }) as typeof fetch;
   try {
     const { POST } = await import("../src/app/api/vto/route.ts");
-    for (const suffix of [".jpg", ".png"]) {
-      const outfit = INDIAN_WEAR_LIBRARY.find(item => item.vtoSupported && item.tryOnReference?.endsWith(suffix))!;
+    const cases = [
+      INDIAN_WEAR_LIBRARY.find(item => item.vtoSupported && item.tryOnReference?.endsWith(".jpg"))!,
+      INDIAN_WEAR_LIBRARY.find(item => item.vtoSupported && item.tryOnReference?.endsWith(".png"))!,
+      EDITORIAL_LOOKS[0],
+    ];
+    for (const outfit of cases) {
+      const suffix = path.extname(outfit.tryOnReference!);
       const res = await POST(new Request("http://localhost/api/vto", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
         fullBodyDataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=", garmentId: outfit.id, referenceAsset: outfit.tryOnReference, vtoSupported: true,
       }) }) as never);
@@ -50,7 +56,7 @@ void (async () => {
       assert.equal(uploaded.content_type, suffix === ".jpg" ? "image/jpeg" : "image/png");
       assert.deepEqual(uploaded.bytes, readFileSync(path.join(root, "public", outfit.imageUrl)));
     }
-    assert.equal(tasks, 2);
-    console.log("PASS: JPEG and PNG library references load exact local bytes with correct MIME/basename and preserve the Cloth V4 contract (all fetches stubbed)");
+    assert.equal(tasks, 3);
+    console.log("PASS: sourced JPEG/PNG and original concept references load exact local bytes with correct MIME/basename (all fetches stubbed)");
   } finally { globalThis.fetch = realFetch; }
 })().catch(error => { console.error(error); process.exit(1); });

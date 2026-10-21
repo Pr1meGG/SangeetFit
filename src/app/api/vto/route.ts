@@ -6,6 +6,7 @@ import { setTimeout as wait } from "node:timers/promises";
 import { isRecord, uploadYouCamFile, YouCamHttpError } from "@/lib/youcam";
 import { MAX_VTO_REQUEST_BYTES, parseVtoInput, VtoInputError } from "@/lib/vto-input";
 import { INDIAN_WEAR_LIBRARY } from "@/data/indian-wear";
+import { EDITORIAL_LOOKS } from "@/data/editorial";
 
 // Whole request has a 180s deadline; allow 300s per official Vercel limits
 // (Fluid Compute: Hobby default+max = 300s; legacy non-Fluid Hobby caps at 60s).
@@ -30,7 +31,7 @@ const REFERENCE_ASSETS: Record<string, { contentType: string; garmentTypes: stri
   "user_saree.png": { contentType: "image/png", garmentTypes: ["saree"] },
   "kurta_set_hd.png": { contentType: "image/png", garmentTypes: ["kurta-set"] },
   "western_dress_hd.png": { contentType: "image/png", garmentTypes: ["gown"] },
-  ...Object.fromEntries(INDIAN_WEAR_LIBRARY.filter(outfit => outfit.vtoSupported).map(outfit => [
+  ...Object.fromEntries([...INDIAN_WEAR_LIBRARY, ...EDITORIAL_LOOKS].filter(outfit => outfit.vtoSupported).map(outfit => [
     outfit.tryOnReference!,
     { contentType: outfit.tryOnReference!.endsWith(".png") ? "image/png" : "image/jpeg", garmentTypes: [outfit.garmentType] },
   ])),

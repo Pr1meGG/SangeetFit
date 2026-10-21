@@ -1,4 +1,5 @@
 import { INDIAN_WEAR_LIBRARY } from "./indian-wear";
+import { EDITORIAL_LOOKS } from "./editorial";
 import { enrichCatalogOutfit } from "../lib/styling";
 
 /**
@@ -33,6 +34,7 @@ export const TRY_ON_REFERENCES: readonly string[] = [
   "kurta_set_hd.png",
   "western_dress_hd.png",
   ...INDIAN_WEAR_LIBRARY.filter(outfit => outfit.vtoSupported).map(outfit => outfit.tryOnReference!),
+  ...EDITORIAL_LOOKS.map(outfit => outfit.tryOnReference!),
 ] as const;
 
 export type TryOnReference = (typeof TRY_ON_REFERENCES)[number] | null;
@@ -72,6 +74,7 @@ export interface Outfit {
   };
   referenceStatus?: "candidate" | "browse-only";
   referenceNotes?: string;
+  generatedConcept?: { createdAt: string; tool: "OpenAI image generation"; sha256: string };
 }
 
 export type RawOutfit = Omit<Outfit, "occasionTags" | "styleLevel" | "tryOnStatus"> &
@@ -361,6 +364,7 @@ const CATALOG: RawOutfit[] = [
     youcamCategory: "auto",
     vtoSupported: false,
   },
+  ...EDITORIAL_LOOKS,
   ...INDIAN_WEAR_LIBRARY,
 ];
 
