@@ -5,6 +5,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { INDIAN_WEAR_LIBRARY } from "../src/data/indian-wear.ts";
 import { pngDataUrl } from "./fixtures/png.ts";
+import { configureOfflineBudget, offlineBudgetResponse } from "./fixtures/budget.ts";
 
 const png = pngDataUrl();
 const jpegOutfit = INDIAN_WEAR_LIBRARY.find(item => item.vtoSupported && item.tryOnReference?.endsWith(".jpg"))!;
@@ -13,6 +14,7 @@ const mock = process.argv.includes("--mock");
 
 void (async () => {
   process.env.MOCK_MODE = String(mock);
+  configureOfflineBudget();
   process.env.YOUCAM_API_KEY = "offline-test-key";
   process.env.LIVE_ACCESS_CODE = "offline-preview-code-at-least-24-characters";
   process.env.YOUCAM_BASE_URL = "https://example.test/s2s/v2.0";
@@ -25,6 +27,8 @@ void (async () => {
   let requestSignal: AbortSignal | undefined;
   const realFetch = globalThis.fetch;
   globalThis.fetch = (async (input, init) => {
+    const budget = offlineBudgetResponse(input, init);
+    if (budget) return budget;
     const url = String(input);
     calls.push(url);
     if (timeoutAt) {
@@ -160,6 +164,7 @@ void (async () => {
     stopAt = "";
     const realTimeout = AbortSignal.timeout;
     AbortSignal.timeout = milliseconds => {
+      if (milliseconds === 5_000) return realTimeout(milliseconds);
       assert.equal(milliseconds, 180_000, "whole request budget is 180 seconds");
       deadlineController = new AbortController();
       return deadlineController.signal;

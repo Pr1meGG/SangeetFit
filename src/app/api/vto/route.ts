@@ -7,6 +7,7 @@ import { isRecord, uploadYouCamFile, YouCamHttpError } from "@/lib/youcam";
 import { parseVtoInput, VtoInputError } from "@/lib/vto-input";
 import { privateJson, readPhotoJson } from "@/lib/request";
 import { liveAccessError } from "@/lib/live-access";
+import { LiveBudgetError, reserveLiveBudget } from "@/lib/live-budget";
 import { INDIAN_WEAR_LIBRARY } from "@/data/indian-wear";
 import { EDITORIAL_LOOKS } from "@/data/editorial";
 
@@ -161,6 +162,7 @@ async function runTryOn(req: NextRequest, signal: AbortSignal) {
       : await fs.readFile(path.join(process.cwd(), "public", "garment_test", input.referenceAsset), { signal });
     const contentType = input.kind === "upload" ? input.garmentImage.contentType : reference!.contentType;
     const category = input.kind === "upload" ? input.garmentCategory : outfit!.youcamCategory;
+    await reserveLiveBudget("vto", signal);
     const srcFileId = await uploadYouCamFile({
       apiKey: YOUCAM_API_KEY,
       baseUrl: YOUCAM_BASE,
@@ -183,8 +185,8 @@ async function runTryOn(req: NextRequest, signal: AbortSignal) {
     return privateJson({ success: true, resultUrl, mode: "live" });
   } catch (err: unknown) {
     if (signal.aborted) return timedOutResponse();
-    const status = err instanceof VtoInputError ? err.status : err instanceof YouCamHttpError && err.status === 429 ? 429 : 502;
-    const error = err instanceof VtoInputError ? err.message : status === 429 ? "YouCam rate limit reached (429). No task was retried." : "Try-on could not complete. Check the photos before trying again.";
+    const status = err instanceof VtoInputError || err instanceof LiveBudgetError ? err.status : err instanceof YouCamHttpError && err.status === 429 ? 429 : 502;
+    const error = err instanceof VtoInputError || err instanceof LiveBudgetError ? err.message : status === 429 ? "YouCam rate limit reached (429). No task was retried." : "Try-on could not complete. Check the photos before trying again.";
     return privateJson({ success: false, error }, status);
   }
 }

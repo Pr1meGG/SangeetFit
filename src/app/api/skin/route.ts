@@ -4,6 +4,7 @@ import { isRecord, uploadYouCamFile, YouCamHttpError } from "@/lib/youcam";
 import { parseVtoImage, VtoInputError } from "@/lib/vto-input";
 import { privateJson, readPhotoJson } from "@/lib/request";
 import { liveAccessError } from "@/lib/live-access";
+import { LiveBudgetError, reserveLiveBudget } from "@/lib/live-budget";
 
 // Whole request has a 180s deadline; verify Fluid Compute before enabling live
 // processing because legacy non-Fluid Hobby functions are limited to 60s.
@@ -69,6 +70,7 @@ async function runAnalysis(req: NextRequest, signal: AbortSignal) {
       // Live mode explicitly requested but not configured — never substitute a mock value.
       return privateJson({ success: false, error: "Live skin analysis is unavailable: YOUCAM_API_KEY is not configured on this deployment", mode: "live" }, 503);
     }
+    await reserveLiveBudget("skin", signal);
     const fileId = await uploadYouCamFile({
       apiKey: YOUCAM_API_KEY,
       baseUrl: YOUCAM_BASE,
@@ -82,8 +84,8 @@ async function runAnalysis(req: NextRequest, signal: AbortSignal) {
     return privateJson({ success: true, skin_color: skinColor, mode: "live" });
   } catch (err: unknown) {
     if (signal.aborted) return timedOutResponse();
-    const status = err instanceof VtoInputError ? err.status : err instanceof YouCamHttpError && err.status === 429 ? 429 : 502;
-    const error = err instanceof VtoInputError ? err.message : status === 429 ? "YouCam rate limit reached (429). No task was retried." : "Skin analysis could not complete. Check the selfie before trying again.";
+    const status = err instanceof VtoInputError || err instanceof LiveBudgetError ? err.status : err instanceof YouCamHttpError && err.status === 429 ? 429 : 502;
+    const error = err instanceof VtoInputError || err instanceof LiveBudgetError ? err.message : status === 429 ? "YouCam rate limit reached (429). No task was retried." : "Skin analysis could not complete. Check the selfie before trying again.";
     return privateJson({ success: false, error }, status);
   }
 }

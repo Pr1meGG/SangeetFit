@@ -3,6 +3,7 @@ import { strict as assert } from "node:assert";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { pngDataUrl } from "./fixtures/png.ts";
+import { configureOfflineBudget, offlineBudgetResponse } from "./fixtures/budget.ts";
 
 const accessCode = "offline-preview-code-at-least-24-characters";
 const png = pngDataUrl();
@@ -10,6 +11,7 @@ const mock = process.argv.includes("--mock");
 
 void (async () => {
   process.env.MOCK_MODE = String(mock);
+  configureOfflineBudget();
   process.env.YOUCAM_API_KEY = "offline-test-key";
   process.env.YOUCAM_BASE_URL = "https://example.test/s2s/v2.0";
   process.env.LIVE_ACCESS_CODE = accessCode;
@@ -30,6 +32,8 @@ void (async () => {
     body: JSON.stringify(body),
   });
   globalThis.fetch = (async (input, init) => {
+    const budget = offlineBudgetResponse(input, init);
+    if (budget) return budget;
     const url = String(input);
     const currentStage = url.includes("/upload/") ? "binary" : url.endsWith("/file") ? "metadata" : /\/task\/(?:skin-tone-analysis|cloth-v4)$/.test(url) ? "submit" : "poll";
     calls.push(currentStage);
@@ -141,7 +145,7 @@ void (async () => {
       assert(tasks <= 1);
     }
     const realTimeout = AbortSignal.timeout;
-    AbortSignal.timeout = milliseconds => { assert.equal(milliseconds, 180_000); deadline = new AbortController(); return deadline.signal; };
+    AbortSignal.timeout = milliseconds => { if (milliseconds === 5_000) return realTimeout(milliseconds); assert.equal(milliseconds, 180_000); deadline = new AbortController(); return deadline.signal; };
     try {
       for (const target of ["metadata", "binary", "submit", "poll"]) {
         failure = "timeout"; stage = target; calls = []; tasks = 0; sharedSignal = null;

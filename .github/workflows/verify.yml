@@ -6,9 +6,14 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      redis:
+        image: redis:7.4
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 10
     env:
       MOCK_MODE: "true"
       NEXT_TELEMETRY_DISABLED: "1"
+      REQUIRE_REDIS_TEST: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -18,3 +23,5 @@ jobs:
       - run: npm ci
       - run: npx --no-install playwright install --with-deps chromium
       - run: npm run verify
+        env:
+          TEST_REDIS_CONTAINER: ${{ job.services.redis.id }}

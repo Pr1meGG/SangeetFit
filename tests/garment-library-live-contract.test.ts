@@ -6,9 +6,11 @@ import { fileURLToPath } from "node:url";
 import { INDIAN_WEAR_LIBRARY } from "../src/data/indian-wear.ts";
 import { EDITORIAL_LOOKS } from "../src/data/editorial.ts";
 import { pngDataUrl } from "./fixtures/png.ts";
+import { configureOfflineBudget, offlineBudgetResponse } from "./fixtures/budget.ts";
 
 void (async () => {
   process.env.MOCK_MODE = "false";
+  configureOfflineBudget();
   process.env.YOUCAM_API_KEY = "offline-contract-test";
   process.env.LIVE_ACCESS_CODE = "offline-preview-code-at-least-24-characters";
   process.env.YOUCAM_BASE_URL = "https://example.test/s2s/v2.0";
@@ -17,6 +19,8 @@ void (async () => {
   const uploads: { content_type: string; file_name: string; file_size: number; bytes?: Buffer }[] = [];
   let tasks = 0;
   globalThis.fetch = (async (input, init) => {
+    const budget = offlineBudgetResponse(input, init);
+    if (budget) return budget;
     const url = String(input);
     if (url.endsWith("/file")) {
       const file = JSON.parse(String(init?.body)).files[0];
