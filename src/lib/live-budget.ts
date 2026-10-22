@@ -29,8 +29,9 @@ return 1
 
 function configuration(): { url: string; token: string } | null {
   try {
-    const url = new URL(process.env.UPSTASH_REDIS_REST_URL || "");
-    const token = process.env.UPSTASH_REDIS_REST_TOKEN || "";
+    const explicitUpstash = process.env.UPSTASH_REDIS_REST_URL || process.env.UPSTASH_REDIS_REST_TOKEN;
+    const url = new URL((explicitUpstash ? process.env.UPSTASH_REDIS_REST_URL : process.env.KV_REST_API_URL) || "");
+    const token = (explicitUpstash ? process.env.UPSTASH_REDIS_REST_TOKEN : process.env.KV_REST_API_TOKEN) || "";
     if (url.protocol !== "https:" || !url.hostname.endsWith(".upstash.io") || url.port || url.username || url.password || url.pathname !== "/" || url.search || url.hash || !token || token.length > 4096 || /[\r\n]/.test(token)) return null;
     return { url: url.href, token };
   } catch { return null; }

@@ -1,0 +1,49 @@
+{
+  "verifiedDate": "2026-10-22",
+  "method": "authenticated read-only Vercel CLI resource inspect and env metadata",
+  "resource": {
+    "name": "sangeetfit-live-budget",
+    "status": "available",
+    "product": "Upstash for Redis",
+    "billingPlan": {
+      "id": "free",
+      "name": "Free"
+    },
+    "project": "sangeet-fit",
+    "environments": [
+      "preview",
+      "production"
+    ]
+  },
+  "environmentMetadata": {
+    "KV_REST_API_URL": {
+      "type": "sensitive",
+      "targets": [
+        "preview",
+        "production"
+      ]
+    },
+    "KV_REST_API_TOKEN": {
+      "type": "sensitive",
+      "targets": [
+        "preview",
+        "production"
+      ]
+    },
+    "explicitUpstashPairListed": false
+  },
+  "credentialValuesPrinted": false,
+  "envLocalRead": false,
+  "agentCloudMutations": 0,
+  "youCamTasks": 0,
+  "ledgerContentsRead": false,
+  "automaticUpgradeVerified": false,
+  "evictionVerified": false,
+  "newDeployment": false,
+  "agentDataPlaneVerified": false,
+  "userReportedRedisCommands": {
+    "PING": "PONG",
+    "EXISTS sangeetfit:live-budget:v1": 0,
+    "source": "user response; commands run separately in Vercel database CLI"
+  }
+}

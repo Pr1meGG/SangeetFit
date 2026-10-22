@@ -1,6 +1,6 @@
 # SangeetFit release procedure
 
-**Latest checkpoint:** [cloud/device record](CLOUD_CHECKPOINT.md) supersedes initial pending CI/deployment statements below. Real-Redis CI passed and an approved protected mock Preview is deployed. Production is unchanged. Free-store setup remains blocked by marketplace acceptance and denied browser-origin permission; no store/budget exists.
+**Latest checkpoint:** [cloud/device record](CLOUD_CHECKPOINT.md) supersedes initial pending CI/deployment statements below. Real-Redis CI passed and an approved protected mock Preview is deployed. The user subsequently created `sangeetfit-live-budget`; read-only metadata verified an available Free resource connected in Preview and Production. The user reported PONG and an EXISTS result of 0 for the ledger key, so initialization is still pending. A deployed active cap remains unverified. This follow-up changed no deployment or cloud configuration.
 
 This is a preparation checklist, not deployment or live-task authorization. The two privately reviewed men's references are evidence from one source photo only. Own-clothes quality, independent usability and public judge access remain unverified. Android has partial USB-local mock evidence below; iPhone remains untested.
 
@@ -29,7 +29,7 @@ Hardware slider touch moved 50% → 92% with a 44px-high range control and acces
 
 The application uses one persistent Upstash Redis hash through its HTTPS REST API. Both photo endpoints and every app instance use the fixed key `sangeetfit:live-budget:v1`. Redis executes the conditional reservation atomically using [EVAL](https://upstash.com/docs/redis/commands/scripting/eval). No Redis package is needed; the store contains only four aggregate integers, never photos, participants, invite codes or provider URLs.
 
-Enable this only after authorizing persistent storage setup and the intended deployment. Do not use an expiring trial database for judging. Configure server-only `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` in the same environments as the provider key. The URL must be an HTTPS `*.upstash.io` root with no credentials, port override, path or query. Do not put secrets in command arguments or print environment files.
+Enable this only after authorizing persistent storage setup and the intended deployment. Do not use an expiring trial database for judging. Configure server-only `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` in the same environments as the provider key. The Vercel-managed integration's existing `KV_REST_API_URL` and `KV_REST_API_TOKEN` pair is also supported, so copying its secrets into aliases is unnecessary. If either explicit Upstash field is nonempty, only that family is used; an incomplete/invalid explicit pair fails closed instead of borrowing a KV credential. The read-only KV token cannot reserve units and is never substituted. The URL must be an HTTPS `*.upstash.io` root with no credentials, port override, path or query. Do not put secrets in command arguments or print environment files.
 
 Refresh the actual YouCam balance and applicable VTO/skin costs. Choose an allowance that leaves at least 25% reserved and subtracts other committed work. Example only: **if** the freshly verified values are 910 remaining, 2 units per VTO and 20 per skin task, a deliberately small 40-unit application allowance leaves 870 outside the allowance. These are earlier snapshots, not newly verified prices or spending approval. With credentials supplied securely through the environment, initialization is explicit and create-only:
 
@@ -43,7 +43,7 @@ The first command refuses to overwrite an existing key. `status` prints allowanc
 
 This cap covers **only code using this ledger**. Other apps, scripts and older deployments using the same YouCam key bypass it. Route all approved live access through the guarded release, use the same store across deployments sharing that key, and disable old live access or use an appropriately isolated key. Changes to those deployments/keys require separate approval. A Redis outage intentionally pauses generation while browsing remains available. `/api/mode` checks configuration only; it does not query the ledger, expose balances or guarantee an available allowance.
 
-No cloud store was provisioned or seeded during implementation. No new code was deployed and no YouCam task was submitted. The operator must verify prices/configuration and a controlled deployment before calling the cap active.
+No cloud store was provisioned or seeded by the implementation agent. The user later created and connected the Free resource; metadata confirms its availability and scope. The user reported PONG and an absent ledger key (EXISTS 0); no agent data-plane request was made. This source fix is not deployed. No YouCam task was submitted. The operator must verify prices, the agreed allowance, initialization and a controlled deployment before calling the cap active.
 
 ## Rollback and exposure control
 

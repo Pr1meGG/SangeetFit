@@ -9,6 +9,9 @@ void (async () => {
   process.env.LIVE_ACCESS_CODE = "offline-preview-code-at-least-24-characters";
   delete process.env.UPSTASH_REDIS_REST_URL;
   delete process.env.UPSTASH_REDIS_REST_TOKEN;
+  delete process.env.KV_REST_API_URL;
+  delete process.env.KV_REST_API_TOKEN;
+  delete process.env.KV_REST_API_READ_ONLY_TOKEN;
   let calls = 0;
   const realFetch = globalThis.fetch;
   globalThis.fetch = (async () => { calls++; throw new Error("provider must not be reached"); }) as typeof fetch;
@@ -27,20 +30,13 @@ void (async () => {
     console.log("PASS: missing shared budget blocks both live routes before provider work");
 
     const { liveBudgetConfigured, reserveLiveBudget } = await import("../src/lib/live-budget.ts");
-    process.env.UPSTASH_REDIS_REST_TOKEN = "offline-budget-token";
-    for (const invalid of ["http://test.upstash.io", "https://evil.test", "https://test.upstash.io.evil.test", "https://user:pass@test.upstash.io", "https://test.upstash.io/path", "https://test.upstash.io/?secret=1", "https://test.upstash.io:444"]) {
-      process.env.UPSTASH_REDIS_REST_URL = invalid;
-      assert.equal(liveBudgetConfigured(), false);
-      await assert.rejects(reserveLiveBudget("vto", new AbortController().signal), /not configured/);
-    }
-    assert.equal(calls, 0);
-    process.env.UPSTASH_REDIS_REST_URL = "https://offline-budget.upstash.io";
-    assert.equal(liveBudgetConfigured(), true);
-    assert.deepEqual(await mode().then(r => r.json()), { mode: "live", accessRequired: true });
-    let reply: unknown = { result: 0 };
+    let expectedUrl = "https://offline-kv.upstash.io/";
+    let expectedToken = "offline-kv-token";
+    let reply: unknown = { result: 1 };
     globalThis.fetch = (async (url, init) => {
       calls++;
-      assert.equal(String(url), "https://offline-budget.upstash.io/", "denied budget must prevent every provider call");
+      assert.equal(String(url), expectedUrl, "budget must use the selected URL family");
+      assert.equal(new Headers(init?.headers).get("authorization"), `Bearer ${expectedToken}`, "budget must use the selected write token");
       assert.equal(init?.cache, "no-store"); assert.equal(init?.redirect, "error");
       assert(init?.signal);
       const command = JSON.parse(String(init.body));
@@ -51,6 +47,51 @@ void (async () => {
       if (reply === "http-error") return new Response("private-token-or-url", { status: 429 });
       return Response.json(reply);
     }) as typeof fetch;
+    process.env.KV_REST_API_URL = "https://offline-kv.upstash.io";
+    process.env.KV_REST_API_TOKEN = "offline-kv-token";
+    process.env.KV_REST_API_READ_ONLY_TOKEN = "offline-read-only-token";
+    assert.equal(liveBudgetConfigured(), true, "a complete Vercel KV pair must configure the shared budget");
+    assert.deepEqual(await mode().then(r => r.json()), { mode: "live", accessRequired: true });
+    await reserveLiveBudget("skin", new AbortController().signal);
+    assert.equal(calls, 1, "KV-only configuration must use the existing reservation transport");
+
+    const invalidUrls = ["http://test.upstash.io", "https://evil.test", "https://test.upstash.io.evil.test", "https://user:pass@test.upstash.io", "https://test.upstash.io/path", "https://test.upstash.io/?secret=1", "https://test.upstash.io:444"];
+    calls = 0;
+    for (const [url, token] of [["", "offline-kv-token"], ["https://offline-kv.upstash.io", ""], ["https://offline-kv.upstash.io", "invalid\r\ntoken"], ["https://offline-kv.upstash.io", "x".repeat(4097)], ...invalidUrls.map(url => [url, "offline-kv-token"])]) {
+      process.env.KV_REST_API_URL = url;
+      process.env.KV_REST_API_TOKEN = token;
+      assert.equal(liveBudgetConfigured(), false, "incomplete or invalid KV configuration must fail closed, including read-only tokens");
+      assert.deepEqual(await mode().then(r => r.json()), { mode: "unconfigured" });
+      await assert.rejects(reserveLiveBudget("vto", new AbortController().signal), /not configured/);
+    }
+    assert.equal(calls, 0);
+    process.env.KV_REST_API_URL = "https://offline-kv.upstash.io";
+    process.env.KV_REST_API_TOKEN = "offline-kv-token";
+    for (const [url, token] of [["", "offline-budget-token"], ["https://offline-budget.upstash.io", ""], ["https://offline-budget.upstash.io", "invalid\r\ntoken"], ...invalidUrls.map(url => [url, "offline-budget-token"])]) {
+      process.env.UPSTASH_REDIS_REST_URL = url;
+      process.env.UPSTASH_REDIS_REST_TOKEN = token;
+      assert.equal(liveBudgetConfigured(), false, "an incomplete or invalid explicit Upstash pair must not fall back to valid KV credentials");
+      assert.deepEqual(await mode().then(r => r.json()), { mode: "unconfigured" });
+      await assert.rejects(reserveLiveBudget("vto", new AbortController().signal), /not configured/);
+    }
+    assert.equal(calls, 0);
+    process.env.UPSTASH_REDIS_REST_URL = "";
+    process.env.UPSTASH_REDIS_REST_TOKEN = "";
+    assert.equal(liveBudgetConfigured(), true, "empty explicit Upstash fields must allow the complete KV pair");
+    await reserveLiveBudget("skin", new AbortController().signal);
+    assert.equal(calls, 1);
+
+    process.env.UPSTASH_REDIS_REST_URL = "https://offline-budget.upstash.io";
+    process.env.UPSTASH_REDIS_REST_TOKEN = "offline-budget-token";
+    expectedUrl = "https://offline-budget.upstash.io/";
+    expectedToken = "offline-budget-token";
+    assert.equal(liveBudgetConfigured(), true);
+    assert.deepEqual(await mode().then(r => r.json()), { mode: "live", accessRequired: true });
+    calls = 0;
+    await reserveLiveBudget("vto", new AbortController().signal);
+    assert.equal(calls, 1, "explicit Upstash credentials must take precedence when both families are configured");
+    console.log("PASS: KV aliases share validated transport and mode; explicit Upstash pairs take precedence without mixing or fallback");
+
     for (const badReply of [{ result: 0 }, { result: -1 }, { result: "1" }, { error: "private-token-or-url" }, {}, "throw", "http-error"]) {
       reply = badReply;
       for (const [endpoint, body] of [[skin, { imageDataUrl: png }], [vto, { fullBodyDataUrl: png, garmentImageDataUrl: png, garmentCategory: "upper_body" }]] as const) {

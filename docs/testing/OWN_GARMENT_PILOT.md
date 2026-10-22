@@ -14,7 +14,7 @@ If the available clothes do not support these two categories, declare the actual
 
 ## Gates before requesting a bounded run
 
-1. Resolve the shared-store marketplace/browser gate. Configure and initialize the aggregate budget using a refreshed actual balance and task prices, preserving the 25% reserve. The current mock Preview cannot establish live own-clothes quality.
+1. The Free shared store is now metadata-verified as available and connected by the user. User-run CLI checks returned PONG and EXISTS 0. Initialize the agreed aggregate budget using a refreshed actual balance and task prices, preserving the 25% reserve. The budget key is absent according to the user-run check; deployment of the locally verified KV-name compatibility fix remains pending. The current mock Preview cannot establish live own-clothes quality.
 2. Confirm the exact private source and both garment references/categories with the participant. Check orientation, detail and combined prepared request size; the server requires serialized JSON below 4,000,000 bytes.
 3. Obtain explicit approval for exactly two live YouCam Cloth V4 tasks with those inputs. Explain that the specified photos leave the device for YouCam processing. No optional skin-analysis task is needed.
 4. Verify the intended running app reports live and uses the guarded release. Use the app's upload path and explicit Generate action; no direct provider shortcut or silent mock substitution.
