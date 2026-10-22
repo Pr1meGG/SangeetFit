@@ -1,0 +1,52 @@
+{
+  "verifiedDate": "2026-10-22",
+  "applicationSource": "682f98589ad6d656d5b48e5ca129bdf375d6ec25",
+  "resource": "sangeetfit-live-budget",
+  "key": "sangeetfit:live-budget:v1",
+  "authorization": "user approved 10-unit cap and explicitly allowed the open Vercel CLI tab",
+  "pricing": {
+    "balanceBeforeUnits": 910,
+    "vtoUnitsPerCall": 2,
+    "skinUnitsPerCall": 20,
+    "calculatorUrl": "https://yce.perfectcorp.com/ai-api/unit-calculator",
+    "verifiedIn": "reloaded signed-in dashboard and calculator UI; no API key read",
+    "balanceAfterUnits": 910
+  },
+  "initialization": {
+    "source": "existing INITIALIZE_BUDGET_SCRIPT, executed once through Vercel CLI UI",
+    "result": 1,
+    "createOnly": true,
+    "hundredths": {
+      "limit": 1000,
+      "used": 0,
+      "vto": 200,
+      "skin": 2000
+    }
+  },
+  "readback": {
+    "command": "HMGET sangeetfit:live-budget:v1 limit used vto skin",
+    "values": [
+      1000,
+      0,
+      200,
+      2000
+    ],
+    "ttlSeconds": -1,
+    "readOnlyUiRestored": true
+  },
+  "allowanceUnits": 10,
+  "reservedUnits": 0,
+  "remainingUnits": 10,
+  "maxVtoReservations": 5,
+  "skinFitsAllowance": false,
+  "unitsOutsideAllowance": 900,
+  "minimum25PercentReserve": 228,
+  "youCamTasks": 0,
+  "photosSent": 0,
+  "creditPurchases": 0,
+  "credentialValuesRead": false,
+  "envLocalRead": false,
+  "newDeployment": false,
+  "liveActivation": false,
+  "applicationRestTransportVerified": false
+}
