@@ -31,6 +31,14 @@ const OCCASIONS: { id: Occasion; label: string }[] = [
   { id: "reception", label: "Reception" },
 ];
 
+const OCCASION_IMAGES: Record<Occasion, string> = {
+  sangeet: "midnight-lehenga.jpg",
+  mehendi: "mint-floral-anarkali.jpg",
+  haldi: "saffron-sharara.jpg",
+  wedding: "ivory-lehenga.jpg",
+  reception: "emerald-kurta.jpg",
+};
+
 const AUDIENCES: { id: Audience | "all"; label: string }[] = [
   { id: "women", label: "Women's wear" },
   { id: "men", label: "Men's wear" },
@@ -348,41 +356,43 @@ export default function Home() {
       <div className="sf-main">
         {step === 1 && (
           <>
-            <section className="sf-welcome">
-              <div className="sf-welcome-copy">
-                <span className="sf-season"><span aria-hidden="true">✳</span> A celebration to dress for</span>
-                <h1>Five moments.<br />One wardrobe.</h1>
-                <p>Plan what to wear across every celebration. Start with your own clothes, borrow an idea from the collection, then try a look on your photo when you’re ready.</p>
-                <button className="sf-button sf-button-primary" onClick={() => { setShowShortlist(false); setStep(3); }}>Plan my five looks <ArrowRight size={18} /></button>
-                <Link className="sf-text-link" href="/library">Explore outfits <ArrowRight size={17} /></Link>
-                <button className="sf-text-link" onClick={() => { setStep(3); setShowUpload(true); }}>Try my own clothes <ArrowRight size={17} /></button>
-                <span className="sf-welcome-foot"><Shirt size={16} /> Outfit ideas, made personal.</span>
-              </div>
-              <div className="sf-collage" aria-label="Indian celebration outfit inspiration">
-                <div className="sf-collage-main"><img src="/garment_test/editorial/midnight-lehenga.jpg" alt="AI outfit concept: midnight and gold lehenga" /><span>Sangeet nights</span></div>
-                <div className="sf-collage-small"><img src="/garment_test/editorial/emerald-kurta.jpg" alt="AI outfit concept: emerald silk kurta" /><span>A little festive</span></div>
-                <span className="sf-collage-flower" aria-hidden="true">✳</span>
-                <div className="sf-collage-note"><Heart size={16} /> Find your festive side.</div>
+            <section className="sf-editorial-wrap sf-home-enter">
+              <div className="sf-editorial-hero">
+                <div className="sf-welcome-copy">
+                  <span className="sf-season">The celebration wardrobe</span>
+                  <h1>Five moments.<br /><em>One wardrobe.</em></h1>
+                  <p>Your clothes. Your celebrations. Find your look, try it on your photo, and choose what feels like you.</p>
+                  <div className="sf-cta-row">
+                    <button className="sf-button sf-button-primary" onClick={() => { setShowShortlist(false); setStep(3); }}>Plan my five looks <ArrowRight size={18} /></button>
+                    <Link className="sf-text-link" href="/library">Explore outfits <ArrowRight size={17} /></Link>
+                  </div>
+                  <button className="sf-text-link sf-own-clothes-link" onClick={() => { setStep(3); setShowUpload(true); }}><Shirt size={16} />Try my own clothes <ArrowRight size={17} /></button>
+                </div>
+                <div className="sf-campaign-images" aria-label="Indian celebration outfit inspiration">
+                  <figure><img src="/garment_test/editorial/midnight-lehenga.jpg" alt="AI outfit concept: midnight and gold lehenga" fetchPriority="high" width={768} height={1024} /><figcaption>The evening edit</figcaption></figure>
+                  <figure><img src="/garment_test/editorial/emerald-kurta.jpg" alt="AI outfit concept: emerald silk kurta" width={768} height={1024} /><figcaption>A little festive</figcaption></figure>
+                </div>
               </div>
             </section>
-            <section id="occasions" className="sf-occasion-section">
-              <div className="sf-section-heading"><div><h2>What are we dressing for?</h2><p>Pick a function. We’ll bring the outfit ideas.</p></div><span className="sf-small-note">Your plans, your style</span></div>
+            <section id="occasions" className="sf-editorial-wrap sf-occasion-section" aria-labelledby="occasion-heading">
+              <div className="sf-section-heading"><div id="occasion-heading"><h2>What are we dressing for?</h2><p>Pick a function. We’ll bring the outfit ideas.</p></div><span className="sf-small-note">Your plans, your style</span></div>
               <div className="sf-occasions">
                 {OCCASIONS.map((o, i) => {
                   const Icon = [Music2, Leaf, Sun, Heart, Sparkles][i];
                   return <button key={o.id} aria-label={o.label} className={`sf-occasion sf-occasion-${o.id}`} onClick={() => { setOccasion(o.id); setStep(2); setShowShortlist(false); }}>
-                    <span className="sf-occasion-icon"><Icon size={25} strokeWidth={1.4} /></span><strong>{o.label}</strong><span>{["Dance-floor moments", "Colourful afternoons", "A little sunshine", "The big celebration", "An evening to remember"][i]}</span><ArrowUpRight className="sf-occasion-arrow" size={17} />
+                    <img src={`/garment_test/editorial/${OCCASION_IMAGES[o.id]}`} alt="" loading="lazy" width={768} height={1024} />
+                    <span className="sf-occasion-caption"><span className="sf-occasion-name"><Icon size={16} strokeWidth={1.5} /><strong>{o.label}</strong><ArrowUpRight size={17} /></span><span>{["Dance-floor moments", "Colourful afternoons", "A little sunshine", "The big celebration", "An evening to remember"][i]}</span></span>
                   </button>;
                 })}
               </div>
             </section>
-            <section className="sf-home-footer"><div><Sparkles size={20} /><p><strong>Just looking for inspiration?</strong><span>Explore the reference collection. No selfie needed.</span></p></div><Link href="/library" className="sf-text-link">See full collection <ArrowRight size={17} /></Link></section>
+            <section className="sf-editorial-wrap sf-home-footer sf-editorial-aside"><div><Sparkles size={20} /><p><strong>Just looking for inspiration?</strong><span>Explore the reference collection. No selfie needed.</span></p></div><Link href="/library" className="sf-text-link">See full collection <ArrowRight size={17} /></Link></section>
             <div className="sf-photo-attribution"><p>AI-generated outfit concepts · review status shown per look</p></div>
           </>
         )}
 
         {step === 2 && (
-          <section className="sf-personalize">
+          <section className="sf-editorial-wrap sf-personalize">
             <div className="sf-personalize-copy">
               <button className="sf-back" onClick={() => { setShowFaceCamera(false); setStep(1); }}><ArrowLeft size={17} /> Occasions</button>
               <span className="sf-context">Getting ready for {occasion}</span>
@@ -418,7 +428,7 @@ export default function Home() {
         )}
 
         {step === 3 && (
-          <section className="sf-gallery">
+          <section className="sf-editorial-wrap sf-gallery">
             <button className="sf-back" onClick={() => { setShowShortlist(false); setStep(1); }}><ArrowLeft size={17} /> Occasions</button>
             <div className="sf-gallery-heading"><div><span className="sf-context">{showShortlist ? "Saved by you, this session" : `Getting dressed for ${occasion}`}</span><h1>{showShortlist ? "Your shortlist." : "Your clothes. Your kind of look."}</h1><p>Choose from your clothes or browse reference previews. Try a look on your photo, compare two results, and keep your favourite.</p></div><div className="sf-action-row"><button className="sf-button sf-button-primary" onClick={() => setShowUpload(true)}><Upload size={17} />Add my outfit</button><button className="sf-button sf-button-secondary" aria-pressed={showCandidates && !showShortlist} onClick={() => { setShowCandidates(value => showShortlist || !value); setShowShortlist(false); }}>Explore reference outfits</button><button className="sf-button sf-button-secondary" aria-pressed={showShortlist} onClick={() => setShowShortlist(value => !value)}><Heart size={17} />Shortlist ({shortlistCount})</button></div></div>
             {vtoError && failedOutfit && modalId !== failedOutfit.id && <div role="alert" className="sf-alert sf-alert-error"><span>Try-on for {failedOutfit.name}: {vtoError.message}</span><button className="sf-text-link" onClick={() => openVTO(failedOutfit)}>Review try-on</button></div>}
@@ -429,7 +439,7 @@ export default function Home() {
             <div className="sf-gallery-meta"><span>{curated.length} {showShortlist ? "saved" : showCandidates ? "outfit ideas" : "recommended outfits"}</span><span>Occasion tags · your style · your colours</span></div>
             {showCandidates && !showShortlist && <p className="sf-reference-note">Each reference shows its review status. Candidate try-ons are unreviewed; reviewed looks have limited pilot evidence.</p>}
             {curated.length === 0 && <div className="sf-empty"><Shirt size={34} strokeWidth={1.2} /><h2>{showShortlist ? "Keep a look you love." : "Start with something you own."}</h2><p>{showShortlist ? "Tap the heart on an outfit to keep it here." : "No live-reviewed catalogue options or tagged personal outfits match these choices yet. Add your own garment to get started."}</p><button className="sf-button sf-button-primary" onClick={() => { setShowUpload(true); setShowShortlist(false); }}>Add an outfit</button><button className="sf-text-link" onClick={() => { setShowCandidates(true); setShowShortlist(false); setQuery(""); setAudience("all"); }}>Browse reference candidates</button></div>}
-            <div className="sf-outfit-grid">{curated.map(({ outfit: item, reason }) => <article key={item.id} className="sf-outfit-card">
+            <div className="sf-editorial-wrap sf-editorial-grid">{curated.map(({ outfit: item, reason }) => <article key={item.id} className="sf-outfit-card is-editorial">
               <div className="sf-outfit-image"><button className="sf-outfit-open" onClick={() => openVTO(item)} aria-label={`Try on ${item.name}`}><img src={item.imageUrl} alt={item.name} loading="lazy" /></button><button type="button" className={`sf-heart ${favorites.has(item.id) ? "is-active" : ""}`} aria-pressed={favorites.has(item.id)} onClick={() => toggleFavorite(item.id)} aria-label={`${favorites.has(item.id) ? "Remove" : "Add"} ${item.name} ${favorites.has(item.id) ? "from" : "to"} shortlist`}><Heart size={18} fill={favorites.has(item.id) ? "currentColor" : "none"} /></button><span className="sf-outfit-badge">{item.origin === "upload" ? "Your clothes" : item.tryOnStatus === "candidate" ? "Unreviewed reference" : "Live-reviewed reference"}</span></div>
               <div className="sf-outfit-info"><div className="sf-outfit-type"><span>{item.styleLevel}</span><span className="sf-palette"><i style={{ backgroundColor: item.primaryColor }} /></span></div><h2>{item.name}</h2><p className="sf-recommendation-reason">{reason}</p><button className="sf-outfit-action" onClick={() => openVTO(item)}><Shirt size={16} />Try this look <ArrowUpRight size={16} /></button>{getVerifiedSellerUrl(item) && <a className="sf-text-link" href={getVerifiedSellerUrl(item)!} target="_blank" rel="noopener noreferrer">View at seller</a>}<GarmentCredit source={item.source} /></div>
             </article>)}</div>

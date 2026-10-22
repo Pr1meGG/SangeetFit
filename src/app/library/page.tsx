@@ -8,6 +8,12 @@ import GarmentCredit from "@/components/GarmentCredit";
 import { INDIAN_WEAR_LIBRARY } from "@/data/indian-wear";
 import { EDITORIAL_LOOKS } from "@/data/editorial";
 
+const TRY_ON_LABELS: Record<string, string> = {
+  "live-reviewed": "Pilot-reviewed · one source photo",
+  "candidate": "Try-on reference · unreviewed quality",
+  "blocked": "Browse only",
+};
+
 export default function GarmentLibrary() {
   const [query, setQuery] = useState("");
   const [audience, setAudience] = useState("all");
@@ -21,77 +27,83 @@ export default function GarmentLibrary() {
     (!referencesOnly || outfit.vtoSupported) &&
     `${outfit.name} ${outfit.garmentType}`.toLowerCase().includes(query.trim().toLowerCase()),
   );
-  const fieldClass = "w-full min-h-12 rounded-xl border border-[#E8DED1] bg-white px-3 py-3 text-sm text-[#33231F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#6B1E3A]";
+  const fieldClass = "w-full min-h-12 rounded-xl border border-[var(--sf-line)] bg-white px-3 py-3 text-sm text-[var(--sf-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--sf-burgundy)]";
 
   return (
-    <main id="main-content" className="min-h-screen bg-[#FBF7EF] text-[#33231F]">
+    <main id="main-content" className="sf-app sf-library">
       <Navbar />
-      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-8 sm:py-10 space-y-7">
-        <Link href="/" className="inline-flex gap-2 items-center min-h-11 text-sm text-[#6B1E3A] hover:underline py-2 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#6B1E3A]"><ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to your looks</Link>
-        <header className="space-y-2 max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6B1E3A]">SangeetFit collection</p>
-          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-[#6B1E3A]">The celebration edit.</h1>
-          <p className="text-[#78665E] leading-relaxed">Browse without a photo. To try a look, add a clear head-to-toe photo and tap Generate.</p>
-          <p className="text-sm text-[#78665E]">Browse {EDITORIAL_LOOKS.length} original AI outfit concepts. Two references passed a live pilot on one photo; the others remain unreviewed. Older sourced references are available in filters.</p>
+      <div className="sf-library-content max-w-7xl mx-auto px-4 py-6 sm:px-8 sm:py-10 space-y-7">
+        <Link href="/" className="sf-text-link inline-flex gap-2 items-center min-h-11 py-2"><ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to your looks</Link>
+        <header className="sf-library-header">
+          <p className="sf-editorial-eyebrow">SangeetFit collection</p>
+          <h1>The celebration edit.</h1>
+          <p className="sf-editorial-subhead">Browse without a photo. To try a look, add a clear head-to-toe photo and tap Generate.</p>
+          <p className="sf-editorial-subhead">Browse {EDITORIAL_LOOKS.length} original AI outfit concepts. Two references passed a live pilot on one photo; the others remain unreviewed. Older sourced references are available in filters.</p>
         </header>
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-[#6B1E3A]">Occasion</p>
+        <div className="sf-library-toolbar flex flex-wrap gap-6">
+          <div>
+            <p className="text-sm font-medium mb-2">Occasion</p>
             <div role="group" aria-label="Choose occasion" className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
               {["all", "sangeet", "mehendi", "haldi", "wedding", "reception"].map(value => (
-                <button key={value} type="button" aria-pressed={occasion === value} onClick={() => setOccasion(value)} className={`min-h-11 rounded-full border px-2 py-2 text-xs font-medium sm:px-4 sm:text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B1E3A] ${occasion === value ? "border-[#6B1E3A] bg-[#6B1E3A] text-white" : "border-[#E8DED1] bg-white text-[#6B1E3A]"}`}>{value === "all" ? "All occasions" : value.charAt(0).toUpperCase() + value.slice(1)}</button>
+                <button key={value} type="button" aria-pressed={occasion === value} onClick={() => setOccasion(value)} className={`sf-chip min-h-11 min-w-0 px-2 text-xs sm:px-4 sm:text-sm ${occasion === value ? "is-active" : ""}`}>{value === "all" ? "All occasions" : value.charAt(0).toUpperCase() + value.slice(1)}</button>
               ))}
             </div>
           </div>
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-[#6B1E3A]">For whom</p>
+          <div>
+            <p className="text-sm font-medium mb-2">Collection</p>
             <div role="group" aria-label="Choose collection" className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
               {[["all", "Everyone"], ["women", "Women’s wear"], ["men", "Men’s wear"]].map(([value, label]) => (
-                <button key={value} type="button" aria-pressed={audience === value} onClick={() => setAudience(value)} className={`min-h-11 rounded-full border px-2 py-2 text-xs font-medium sm:px-4 sm:text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B1E3A] ${audience === value ? "border-[#6B1E3A] bg-[#6B1E3A] text-white" : "border-[#E8DED1] bg-white text-[#6B1E3A]"}`}>{label}</button>
+                <button key={value} type="button" aria-pressed={audience === value} onClick={() => setAudience(value)} className={`sf-chip min-h-11 min-w-0 px-2 text-xs sm:px-4 sm:text-sm ${audience === value ? "is-active" : ""}`}>{label}</button>
               ))}
             </div>
           </div>
         </div>
 
-        <details className="rounded-2xl border border-[#E8DED1] bg-[#F5EEE4] p-4 sm:p-5">
-          <summary className="cursor-pointer min-h-11 flex items-center font-medium text-[#6B1E3A]">Search and filter outfits</summary>
+        <details className="rounded-2xl border border-[var(--sf-line)] p-4 sm:p-5">
+          <summary className="cursor-pointer min-h-11 flex items-center font-medium text-[var(--sf-burgundy)]">Search and filter outfits</summary>
           <div className="grid gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-3">
-          <label className="space-y-2 text-sm text-[#78665E]">
-            <span className="inline-flex gap-2 items-center"><Search className="w-4 h-4" aria-hidden="true" /> Search garments</span>
-            <input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Saree, kurta, lehenga…" className={fieldClass} />
-          </label>
-          {showArchive && <label className="flex items-center gap-3 text-sm text-[#78665E] min-h-11 cursor-pointer">
-            <input type="checkbox" checked={referencesOnly} onChange={event => setReferencesOnly(event.target.checked)} className="w-5 h-5 accent-[#6B1E3A]" /> Try-on references only
-          </label>}
-          <label className="flex items-center gap-3 text-sm text-[#78665E] min-h-11 cursor-pointer">
-            <input type="checkbox" checked={showArchive} onChange={event => setShowArchive(event.target.checked)} className="w-5 h-5 accent-[#6B1E3A]" /> Include 14 sourced reference photos
-          </label>
+            <label className="space-y-2 text-sm text-[var(--sf-muted)]">
+              <span className="inline-flex gap-2 items-center"><Search className="w-4 h-4" aria-hidden="true" /> Search garments</span>
+              <input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Saree, kurta, lehenga…" className={fieldClass} />
+            </label>
+            <label className="flex items-center gap-3 text-sm text-[var(--sf-muted)] min-h-11 cursor-pointer">
+              <input type="checkbox" checked={referencesOnly} onChange={event => setReferencesOnly(event.target.checked)} className="w-5 h-5 accent-[var(--sf-burgundy)]" /> Try-on references only
+            </label>
+            <label className="flex items-center gap-3 text-sm text-[var(--sf-muted)] min-h-11 cursor-pointer">
+              <input type="checkbox" checked={showArchive} onChange={event => setShowArchive(event.target.checked)} className="w-5 h-5 accent-[var(--sf-burgundy)]" /> Include 14 sourced reference photos
+            </label>
           </div>
         </details>
 
-        <p role="status" className="text-sm text-[#78665E]">Showing {outfits.length} of {visibleCollection.length} looks</p>
+        <p role="status" className="sf-library-status">Showing {outfits.length} of {visibleCollection.length} looks</p>
         {outfits.length === 0 ? (
-          <div className="rounded-2xl border border-[#E8DED1] bg-white p-10 text-center space-y-4">
+          <div className="sf-library-empty">
             <p>No garments match these filters.</p>
-            <button type="button" onClick={() => { setQuery(""); setAudience("all"); setOccasion("all"); setReferencesOnly(true); setShowArchive(false); }} className="min-h-11 px-5 rounded-xl border border-[#6B1E3A] text-[#6B1E3A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B1E3A]">Clear filters</button>
+            <p>Try a different occasion, audience, or search term.</p>
+            <button type="button" onClick={() => { setQuery(""); setAudience("all"); setOccasion("all"); setReferencesOnly(true); setShowArchive(false); }} className="sf-button sf-button-secondary">Clear filters</button>
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="sf-library-grid">
             {outfits.map((outfit, index) => (
-              <article key={outfit.id} className="rounded-2xl overflow-hidden border border-[#E8DED1] bg-white flex flex-col">
-                <div className="relative bg-[#F1E9DE] aspect-[3/4]">
-                  <img src={outfit.imageUrl} alt={outfit.name} width={outfit.source?.width ?? 1086} height={outfit.source?.height ?? 1448} loading={index === 0 ? "eager" : "lazy"} className={`absolute inset-0 w-full h-full ${outfit.generatedConcept ? "object-cover" : "object-contain p-3"}`} />
-                  {outfit.generatedConcept && <span className="absolute left-3 top-3 rounded-full bg-[#FBF7EF]/95 px-3 py-1.5 text-xs font-medium text-[#6B1E3A]">AI outfit concept</span>}
+              <article key={outfit.id} className="sf-library-card">
+                <div className="sf-library-image relative aspect-[3/4]">
+                  <img src={outfit.imageUrl} alt={outfit.name} width={outfit.source?.width ?? 1086} height={outfit.source?.height ?? 1448} loading={index === 0 ? "eager" : "lazy"} className="absolute inset-0 w-full h-full object-contain" />
+                  {outfit.generatedConcept && <span className="absolute left-3 top-3 rounded-full bg-[var(--sf-paper)] px-3 py-1.5 text-xs font-medium">AI outfit concept</span>}
                 </div>
-                <div className="p-4 sm:p-5 flex flex-col flex-1 gap-3">
-                  <p className="text-xs text-[#78665E] capitalize">{outfit.audience === "men" ? "Men’s wear" : "Women’s wear"} · {outfit.occasionTags.join(", ")}</p>
-                  <h2 className="font-semibold text-lg leading-snug text-[#33231F]">{outfit.name}</h2>
-                  <p className="text-sm text-[#78665E]">{outfit.description}</p>
-                  <p className={`text-xs ${outfit.vtoSupported ? "text-[#6B1E3A]" : "text-[#78665E]"}`}>{outfit.tryOnStatus === "live-reviewed" ? "Pilot-reviewed · one source photo" : outfit.vtoSupported ? "Try-on reference · AI quality untested" : "Browse only"}</p>
-                  {outfit.generatedConcept ? <p className="text-xs text-[#78665E]">Original concept · no retail listing</p> : <><p className="text-xs text-[#78665E]">{outfit.referenceNotes}</p><GarmentCredit source={outfit.source} /></>}
+                <div className="sf-library-info">
+                  <p className="text-xs text-[var(--sf-muted)]">{outfit.audience === "men" ? "Men’s wear" : "Women’s wear"} · {outfit.occasionTags.join(", ")}</p>
+                  <h2>{outfit.name}</h2>
+                  <p>{outfit.description}</p>
+                  <p className="sf-library-status">{TRY_ON_LABELS[outfit.tryOnStatus] ?? "Browse only"}</p>
+                  {outfit.generatedConcept ? <p className="text-xs text-[var(--sf-muted)]">Original concept · no retail listing</p> : (
+                    <>
+                      <p className="text-xs text-[var(--sf-muted)]">{outfit.referenceNotes}</p>
+                      <GarmentCredit source={outfit.source} />
+                    </>
+                  )}
                   {outfit.vtoSupported && outfit.tryOnStatus !== "blocked" && (
-                    <Link href={`/?step=3&occasion=${occasion === "all" ? outfit.occasion : occasion}&vto=${outfit.id}`} className="mt-auto min-h-12 text-center rounded-xl bg-[#6B1E3A] text-[#FBF7EF] font-medium text-sm px-4 py-3 hover:bg-[#54162D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B1E3A]">Try with your photo</Link>
+                    <Link href={`/?step=3&occasion=${occasion === "all" ? outfit.occasion : occasion}&vto=${outfit.id}`} className="sf-button sf-button-primary mt-auto">Try with your photo</Link>
                   )}
                 </div>
               </article>

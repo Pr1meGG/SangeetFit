@@ -40,7 +40,7 @@ const noNewTasks = async (count, message) => {
 try {
   assert.deepEqual(await page.request.get(`${base}/api/mode`).then(r => r.json()), { mode: "mock" }, "this suite must only use an isolated mock server");
   await page.goto(base);
-  await page.getByRole("heading", { name: /Five moments/ }).waitFor();
+  await page.getByRole("heading", { name: /Five moments\. One wardrobe\./ }).waitFor();
   const photos = await page.evaluate(() => {
     const image = (width, height, color, mime) => {
       const canvas = Object.assign(document.createElement("canvas"), { width, height });
@@ -55,6 +55,11 @@ try {
   for (const width of [320, 375, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `home overflows at ${width}`);
+    if (width === 1440) {
+      const copy = await page.locator(".sf-welcome-copy").boundingBox();
+      const images = await page.locator(".sf-campaign-images").boundingBox();
+      assert(copy && images && images.x >= copy.x + copy.width - 1, "desktop hero images must sit beside the copy");
+    }
   }
   await page.setViewportSize({ width: 375, height: 812 });
   await page.getByRole("button", { name: "Reception", exact: true }).click();

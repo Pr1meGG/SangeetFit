@@ -1,7 +1,16 @@
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 
-export const viewport: Viewport = { themeColor: "#FBF7EF", viewportFit: "cover" };
+const displayFont = localFont({
+  src: "../../public/fonts/bodoni-moda/BodoniModa-Regular.ttf",
+  variable: "--sf-display-font",
+  weight: "400",
+  display: "swap",
+  fallback: ["Georgia", "Times New Roman", "serif"],
+});
+
+export const viewport: Viewport = { themeColor: "#FCF8F6", viewportFit: "cover" };
 
 export const metadata: Metadata = {
   title: "SangeetFit — Indian Wedding Outfit Styling",
@@ -18,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={displayFont.variable}>
       <body className="min-h-screen">
         <a href="#main-content" className="sf-skip-link">Skip to content</a>
         {children}

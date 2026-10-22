@@ -31,18 +31,18 @@ export default function Navbar() {
   const label = mode ? MODE_LABELS[mode] : null;
 
   return (
-    <header className="sf-navbar sticky top-0 z-50 border-b border-[#E8DED1] bg-[#FBF7EF]/95 px-4 py-3 backdrop-blur-md sm:px-8">
-      <nav aria-label="Main navigation" className="mx-auto flex max-w-7xl items-center justify-between gap-3">
-        <Link href="/" className="flex min-h-11 items-center gap-2.5 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#6B1E3A]">
+    <header className="sf-navbar sticky top-0 z-50">
+      <nav aria-label="Main navigation" className="sf-navbar-inner">
+        <Link href="/" className="sf-brand">
           <img src="/brand/logo-symbol.svg" alt="" className="h-10 w-10 rounded-xl" width={40} height={40} />
-          <span>
-            <span className="block text-lg font-bold tracking-tight text-[#6B1E3A]">SangeetFit</span>
-            <span className="hidden text-[11px] text-[#78665E] sm:block">A little occasion. A lot of you.</span>
+          <span className="sf-brand-copy">
+            <span className="sf-wordmark">SangeetFit</span>
+            <span className="sf-brand-tagline">A little occasion. A lot of you.</span>
           </span>
         </Link>
-        <div className="flex items-center gap-3 text-xs sm:gap-6 sm:text-sm">
-          <Link href="/library" className="hidden min-h-11 items-center rounded-lg px-2 font-medium text-[#6B1E3A] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#6B1E3A] sm:inline-flex">Explore collection</Link>
-          <span role="status" className={`inline-flex items-center gap-1.5 rounded-full border border-[#E8DED1] bg-white/70 px-3 py-2 font-medium ${label?.className ?? "text-[#78665E]"}`}>
+        <Link href="/library" className="sf-navbar-explore">Explore collection</Link>
+        <div className="sf-navbar-state">
+          <span role="status" className={`sf-mode ${label?.className ?? "text-[#78665E]"}`}>
             {label?.icon === "zap" ? <Zap className="h-3 w-3" aria-hidden="true" /> : <Cpu className="h-3 w-3" aria-hidden="true" />}
             {label?.text ?? "Checking…"}
           </span>
