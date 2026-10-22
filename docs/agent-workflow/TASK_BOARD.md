@@ -2,6 +2,12 @@
 
 Compact prioritized backlog. Update after material task-status changes. No item is complete without verified evidence — do not mark anything done solely on a prior report.
 
+## UI-v2 checkpoint — 22 October 2026
+
+Campaign home, local display type, photo occasion choices, catalogue grid/filter cleanup, truthful source notes and fitting-room polish are implemented and locally verified. Full mock verification passed (13 executed offline suites plus one Redis skip, 8 browser suites, TypeScript, build and lint with 0 errors/20 warnings). Code/CSS, React and TypeScript reviews found no actionable issues. Physical-device checks of this design and deployment remain pending. The local false-mode server reports `unconfigured`.
+
+Next frontend task: inspect the current checkpoint and refine only observed usability defects, using [the DeepSeek/Freebuff handoff](DEEPSEEK_UI_V2_HANDOFF.md). Confirm file ownership before another agent writes. The live-quality, judge-access and submission gates below remain unchanged.
+
 ## Current milestone queue — 22 October 2026
 
 This queue supersedes the historical behaviour descriptions below. Targets are not measured outcomes.
