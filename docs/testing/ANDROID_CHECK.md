@@ -2,7 +2,15 @@
 
 Status: **partial physical-device pass, 22 October 2026**. After initially selecting manual testing, the user connected the phone by USB, enabled debugging and authorized this Mac. ADB and Chrome remote debugging inspected only the local SangeetFit tab. Phone: model I2126, Android 14, Chrome 155.0.8059.84; portrait viewport 392×761, five touch points. USB reverse forwarding served the latest verified local mock build at `http://localhost:3500`; Chrome reported a secure context. Device serial and personal content were not recorded.
 
-Observed on actual hardware: no horizontal overflow; native Chrome touch events opened the outfit dialog, confirmed consent, generated exactly one honest mock preview, selected a look and showed the original without another request. A synthetic `File` was injected into the file input to exercise on-device preprocessing; Android's native picker was **not** exercised. The mock image returned HTTP 200, JPEG, 381217 bytes; this is fetch evidence, **not** proof that Android saved it. No page JavaScript errors occurred. Real selfie camera returned a live 1280×1280 stream, and Cancel stopped every video track. No camera image was captured or sent. Raw synthetic test metadata remains under `/tmp`, outside Git.
+The initial hardware check covered portrait layout without overflow, a synthetic `File` injected into the page, one explicit mock request, choice/original inspection and a real 1280×1280 camera stream whose tracks stopped on Cancel. That initial run did not establish native picker or download behavior. No camera image was captured or sent.
+
+The later connected-phone check exercised Android's actual photo picker: the user confirmed a synthetic image, and the app prepared a 400×600 preview without a task. Generate then made exactly one mock request. Save downloaded a 381217-byte JPEG to the phone; its SHA-256 matched the packaged Emerald reference (`a3464154fbe72bb25caf351d22c402ba252e5058cc9576e7733dc603a0641d64`). Android named it `vto-concept-emerald-kurta.png.jpg`. This proves an actual local mock-image download, not saving an expiring live-provider URL.
+
+The native Replace control accepted the synthetic B fixture (stored 600×400, EXIF orientation 6), prepared it as 400×600 and cleared the previous modal result. Distinct-source switching was not established: the observation waiting for a different prepared image did not complete. Keep that case pending rather than inferring a pass from picker confirmation alone.
+
+A separately intercepted, live-shaped response unlocked the existing before/after component while the actual server remained mock. The phone displayed **SYNTHETIC UI TEST — NO YOUCAM RESULT**. Chrome touch input moved the 44px-high range from 50 to 92, with `92% of generated result visible` reported by accessibility metadata. Choice and original view added no requests. Clear private session removed comparison and reset consent; reload retained no source/results. No page errors were observed. This run used one real mock route request and one locally intercepted fixture request, with **zero YouCam tasks**. It establishes hardware control behavior, not live output quality.
+
+Sanitized metadata is in [ANDROID_DEVICE_EVIDENCE.json](ANDROID_DEVICE_EVIDENCE.json); temporary test harnesses and image bytes stay outside Git. Tested application source is `81dd342`; checkpoint `3353793` only changed documentation. Landscape was explicitly skipped by the user. iPhone, cloud Preview-on-phone, camera reopen/deny, distinct-source recovery and live signed-result download remain unverified.
 
 ## Which build to use
 
@@ -18,22 +26,22 @@ Record phone model, Android version, Chrome version, build SHA and date. Do not 
 
 | Step | Expected | Observed |
 |---|---|---|
-| Open home in portrait, then landscape | Readable text, usable navigation, no horizontal overflow | Portrait passed on hardware; landscape pending |
+| Open home in portrait, then landscape | Readable text, usable navigation, no horizontal overflow | Portrait passed on hardware; user skipped landscape |
 | Pick Sangeet; browse men's/women's references and search | Correct occasion, images load, filters work, no generation | Pending |
-| Open an outfit; choose a test full-body photo from Android's picker | Preview has correct orientation; upload alone starts no task | Pending |
-| Replace source photo | Preview changes; previous source is not silently reused | Pending |
+| Open an outfit; choose a test full-body photo from Android's picker | Preview has correct orientation; upload alone starts no task | Passed with synthetic image and native picker; upload started zero tasks |
+| Replace source photo | Preview changes; previous source is not silently reused | Partial: native replacement accepted EXIF-6 fixture, prepared 400×600 and cleared result; distinct-source switch pending |
 | Generate one mock preview | Clearly labelled reference/mock, not a genuine personal result | Passed: one explicit mock request on hardware |
-| Move before/after slider with one finger; open original/zoom | Touch works; full image remains inspectable | Pending |
-| Save/open the mock result | Image opens or saves; browser behavior recorded accurately | Pending |
+| Move before/after slider with one finger; open original/zoom | Touch works; full image remains inspectable | Slider 50→92 and original passed using visibly labelled synthetic response on hardware; zoom pending |
+| Save/open the mock result | Image opens or saves; browser behavior recorded accurately | Passed: actual 381217-byte JPEG download, matching packaged-reference SHA-256 |
 | Optional selfie camera: allow, cancel, reopen and deny | Helpful permission state; camera indicator stops on close; no automatic analysis | Allow/stream/Cancel cleanup passed; reopen/deny pending |
-| Clear private session and accept confirmation | Photos, outfit uploads, results and invite field clear | Pending |
-| Close/reload | Session-only data does not imply permanent wardrobe storage | Pending |
+| Clear private session and accept confirmation | Photos, outfit uploads, results and invite field clear | Comparison/source removed and consent reset; own-upload and invite-field variants not exercised in this run |
+| Close/reload | Session-only data does not imply permanent wardrobe storage | Reload retained no source/results; closing Chrome not tested |
 
 Camera preview/capture should use a non-sensitive test subject or framing; do not publish a private image. Uploads/captures are prepared locally in mock mode. No real API generation or credit use is part of this checklist. Saving a mock image proves download behavior only; live signed-result saving still needs its own authorized result check.
 
 ## Automated coverage
 
-`tests/android-touch.browser.test.mjs` uses Playwright Chromium's Pixel 7 touch emulation, synthetic photos and stubbed task responses. It covers mobile layout, preparation without generation, a budget rejection, touch slider and choice. Existing camera tests use synthetic video. These are separate from the actual-device observations above; touch slider, native picker, Android saving and live output quality are not established by that hardware run.
+`tests/android-touch.browser.test.mjs` uses Playwright Chromium's Pixel 7 touch emulation, synthetic photos and stubbed task responses. It covers mobile layout, preparation without generation, a budget rejection, touch slider and choice. Existing camera tests use synthetic video. Emulated checks remain separate from the physical-device observations above; neither establishes live output quality or coverage of every phone.
 
 ## Report back
 

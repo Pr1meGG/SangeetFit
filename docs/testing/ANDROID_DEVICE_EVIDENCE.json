@@ -1,0 +1,68 @@
+{
+  "kind": "physical Android, local mock; synthetic slider fixture only",
+  "providerTasks": 0,
+  "checks": {
+    "explicitMockRequest": 1,
+    "saveLink": {
+      "download": "vto-concept-emerald-kurta.png",
+      "sameOrigin": true
+    },
+    "nativeReplacementB": {
+      "storedWidth": 600,
+      "storedHeight": 400,
+      "exifOrientation": 6,
+      "preparedWidth": 400,
+      "preparedHeight": 600,
+      "resultCleared": true,
+      "distinctSourceNotEstablished": true
+    },
+    "nativeDownload": {
+      "bytes": 381217,
+      "format": "JPEG",
+      "sha256": "a3464154fbe72bb25caf351d22c402ba252e5058cc9576e7733dc603a0641d64",
+      "matchesPackagedReference": true
+    },
+    "slider": {
+      "fixture": "intercepted live-shaped response, visibly marked synthetic",
+      "initial": 50,
+      "final": 92,
+      "touchHeight": 44,
+      "ariaValue": "92% of generated result visible"
+    },
+    "chooseOriginalWithoutGeneration": true,
+    "clearSessionRemovedComparisonAndConsent": true,
+    "reloadHasNoSourceOrResults": true,
+    "syntheticInterceptedRequests": 1,
+    "pageErrors": [],
+    "nativePickerInitial": {
+      "preparedWidth": 400,
+      "preparedHeight": 600,
+      "requests": 0
+    }
+  },
+  "testedDate": "2026-10-22",
+  "applicationSource": "81dd342f954f87e705397dae3b660accdb0648ba",
+  "documentationCheckpoint": "33537934196b354561829627bf009994e23cdc5e",
+  "device": {
+    "model": "I2126",
+    "android": "14",
+    "chrome": "155.0.8059.84",
+    "portraitViewport": {
+      "width": 392,
+      "height": 761
+    },
+    "transport": "authorized USB localhost; no cloud preview"
+  },
+  "notVerified": [
+    "distinct-source switching",
+    "landscape (user skipped)",
+    "camera reopen/deny",
+    "zoom",
+    "own-upload/invite variants of session clearing",
+    "closing Chrome",
+    "iPhone Safari",
+    "cloud Preview on phone",
+    "live signed-result download",
+    "live garment quality"
+  ]
+}

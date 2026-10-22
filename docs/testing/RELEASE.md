@@ -2,7 +2,7 @@
 
 **Latest checkpoint:** [cloud/device record](CLOUD_CHECKPOINT.md) supersedes initial pending CI/deployment statements below. Real-Redis CI passed and an approved protected mock Preview is deployed. Production is unchanged. Free-store setup remains blocked by marketplace acceptance and denied browser-origin permission; no store/budget exists.
 
-This is a preparation checklist, not deployment or live-task authorization. The two privately reviewed men's references are evidence from one source photo only. Own-clothes quality, independent usability, physical phones and public judge access remain unverified.
+This is a preparation checklist, not deployment or live-task authorization. The two privately reviewed men's references are evidence from one source photo only. Own-clothes quality, independent usability and public judge access remain unverified. Android has partial USB-local mock evidence below; iPhone remains untested.
 
 ## Local release gate
 
@@ -11,6 +11,12 @@ This is a preparation checklist, not deployment or live-task authorization. The 
 3. Review the branch diff and exclude `.env.local`, local settings, traces, personal photos/results and signed provider URLs. Record the tested commit SHA. Push a verified scoped checkpoint and confirm the remote SHA matches before deployment preparation.
 
 The locally verified gated code checkpoint is `f05ca94`; it has not been deployed. A 22 October read-only check confirmed the existing public production app still serves `b3cadb6` on `work/sangeetfit-mvp`, 20 commits behind checkpoint `283d27a`. Home returns 200; `/api/mode` and `/library` return 404. See the [Android record](ANDROID_CHECK.md). Existing deployment is not evidence that the current branch is deployed.
+
+## Partial Android evidence — 22 October 2026
+
+On Android 14/Chrome 155, code `81dd342` was tested over USB-local mock. Android's native picker delivered a synthetic 400×600 image; upload alone started no task. Exactly one explicit mock VTO route request ran, and Android saved the 381217-byte JPEG with a SHA-256 matching the packaged Emerald reference. Native Replace accepted a stored 600×400 EXIF-6 fixture, prepared it as 400×600 and cleared the prior modal result. Distinct-source switching/recovery was not established. Choose/original made no extra requests; clearing the private session removed comparison/reset consent, and reload retained no source/results. No page errors occurred. Earlier real camera Allow/Cancel passed without capturing or sending a photo.
+
+Hardware slider touch moved 50% → 92% with a 44px-high range control and accessibility text at 92%, using an intercepted live-shaped response under **SYNTHETIC UI TEST — NO YOUCAM RESULT**. The server stayed mock and provider tasks stayed zero. This is control evidence, not a live YouCam result. Camera reopen/deny, iPhone, cloud Preview-on-phone, distinct-source switching/recovery and live signed-result download remain pending; landscape was skipped by user choice. See the [Android record](ANDROID_CHECK.md) for the detailed evidence and remaining checks. Application tests were not rerun for this documentation-only update.
 
 ## Controlled judge preview preflight
 
