@@ -32,7 +32,9 @@ This is an application allowance, not an authoritative YouCam billing balance. T
 
 ## Execution record
 
+- Latest outcome: `81dd342` synced; CI run 39706955618 passed including real Redis. User separately approved Free store/mock Preview; protected mock Preview deployed and mode/library verified. Store remains blocked by marketplace acceptance and denied browser-origin permission; no store/budget exists. Production unchanged, no paid plan/live task. See [cloud record](../testing/CLOUD_CHECKPOINT.md) before resuming; do not work around the denied origin.
+
 - Preflight: inspected routes, auth, tests, verification runner, deployment metadata and official Upstash EVAL/REST documentation.
 - Ruling: use shared aggregate storage despite the earlier no-database preference because a strict cross-instance cap requires atomic durable state. Session-only wardrobe remains unchanged.
 - Implementation and independent code/TypeScript review complete. Full local `npm run verify` exited 0: 13 offline suites passed, the real-Redis suite skipped explicitly, TypeScript/lint/build and all eight mock browser suites passed. Redis concurrency is mandatory in GitHub CI; cloud activation and deployment remain pending.
-- The user subsequently authorized USB testing. Actual Android14/Chrome155 portrait/mock decision flow and real camera cleanup passed; native picker, image saving and full hardware checklist remain pending. No captured camera photo, private photo upload or YouCam task.
+- The user subsequently authorized USB testing. Actual Android 14/Chrome155 portrait/mock decision flow and real camera cleanup passed; native picker, image saving and full hardware checklist remain pending. No captured camera photo, private photo upload or YouCam task.

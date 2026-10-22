@@ -4,6 +4,8 @@ Durable, verified facts about SangeetFit. Prior-generation results not rechecked
 
 ## Current implementation and 22 October release hardening
 
+**Latest cloud checkpoint:** source `81dd342` is synced and [CI passed](https://github.com/Pr1meGG/SangeetFit/actions/runs/39706955618), including actual Redis concurrency, all 14 offline suites and eight browser suites. The approved [mock Preview](https://sangeet-f9wblyyha-ryuk-codes.vercel.app) serves mock mode/library 200 behind Vercel SSO. Production remains b3cadb6. Free-store setup is blocked by marketplace acceptance and denied browser-origin permission; no store/budget exists. These facts supersede initial pending CI/deployment statements below. Full evidence: [cloud/device record](../testing/CLOUD_CHECKPOINT.md).
+
 This section supersedes earlier journey/UI behaviour descriptions below; historical live evidence keeps its original limited scope.
 
 - **22 October shared-budget update:** both live photo routes now reserve integer hundredths from one persistent Redis hash before any provider upload. One atomic Lua operation handles all workers/routes; missing, corrupt, expiring or exhausted state and storage failures block generation with sanitized 503 responses. Store deadline is five seconds. Reservations never expire/reset/refund automatically. A create-only operator tool and server-only Upstash configuration are documented in RELEASE. No store has been provisioned/seeded, so the cap is not active on production. Other applications/older deployments sharing the provider key bypass it.

@@ -1,5 +1,7 @@
 # SangeetFit release procedure
 
+**Latest checkpoint:** [cloud/device record](CLOUD_CHECKPOINT.md) supersedes initial pending CI/deployment statements below. Real-Redis CI passed and an approved protected mock Preview is deployed. Production is unchanged. Free-store setup remains blocked by marketplace acceptance and denied browser-origin permission; no store/budget exists.
+
 This is a preparation checklist, not deployment or live-task authorization. The two privately reviewed men's references are evidence from one source photo only. Own-clothes quality, independent usability, physical phones and public judge access remain unverified.
 
 ## Local release gate

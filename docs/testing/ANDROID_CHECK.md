@@ -6,6 +6,8 @@ Observed on actual hardware: no horizontal overflow; native Chrome touch events 
 
 ## Which build to use
 
+A subsequently approved [mock Preview](https://sangeet-f9wblyyha-ryuk-codes.vercel.app) deployed from `81dd342`. Authenticated mode/library checks passed; Vercel login is required. This cloud Preview has not been tested on the phone; hardware observations above used USB-local mock. See [cloud checkpoint](CLOUD_CHECKPOINT.md).
+
 The existing public app is [sangeet-fit.vercel.app](https://sangeet-fit.vercel.app/). A read-only check on 22 October found production deployment `dpl_4inrWPNEV24ExC7CR8TPcMwQP6dc`, commit `b3cadb62def2687db6129e95c363e11546e660fe` on `work/sangeetfit-mvp`. The home responds 200; `/library` and `/api/mode` respond 404. This is an older build, 20 commits behind release checkpoint `283d27a` before the budget work. Testing it does not validate current changes.
 
 Use an approved HTTPS mock preview or the current USB-reversed `http://localhost:3500` for the checklist below. Confirm `/api/mode` reports `{"mode":"mock"}` before uploading. Ordinarily the local loopback server belongs to its own device; USB reverse forwarding connects the phone's port 3500 to the Mac's port 3500. An ordinary LAN HTTP URL cannot verify camera access because browsers require a secure context. The USB localhost setup was verified as secure on this phone.
