@@ -24,7 +24,7 @@ export default function GarmentLibrary() {
   const fieldClass = "w-full min-h-12 rounded-xl border border-[#E8DED1] bg-white px-3 py-3 text-sm text-[#33231F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#6B1E3A]";
 
   return (
-    <main className="min-h-screen bg-[#FBF7EF] text-[#33231F]">
+    <main id="main-content" className="min-h-screen bg-[#FBF7EF] text-[#33231F]">
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 py-6 sm:px-8 sm:py-10 space-y-7">
         <Link href="/" className="inline-flex gap-2 items-center min-h-11 text-sm text-[#6B1E3A] hover:underline py-2 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#6B1E3A]"><ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to your looks</Link>
@@ -32,7 +32,7 @@ export default function GarmentLibrary() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6B1E3A]">SangeetFit collection</p>
           <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-[#6B1E3A]">The celebration edit.</h1>
           <p className="text-[#78665E] leading-relaxed">Browse without a photo. To try a look, add a clear head-to-toe photo and tap Generate.</p>
-          <p className="text-sm text-[#78665E]">Browse {EDITORIAL_LOOKS.length} original AI outfit concepts. Try-on quality is still unreviewed; older sourced references are available in filters.</p>
+          <p className="text-sm text-[#78665E]">Browse {EDITORIAL_LOOKS.length} original AI outfit concepts. Two references passed a live pilot on one photo; the others remain unreviewed. Older sourced references are available in filters.</p>
         </header>
 
         <div className="space-y-4">
@@ -88,7 +88,7 @@ export default function GarmentLibrary() {
                   <p className="text-xs text-[#78665E] capitalize">{outfit.audience === "men" ? "Men’s wear" : "Women’s wear"} · {outfit.occasionTags.join(", ")}</p>
                   <h2 className="font-semibold text-lg leading-snug text-[#33231F]">{outfit.name}</h2>
                   <p className="text-sm text-[#78665E]">{outfit.description}</p>
-                  <p className={`text-xs ${outfit.vtoSupported ? "text-[#6B1E3A]" : "text-[#78665E]"}`}>{outfit.vtoSupported ? "Try-on reference · AI quality untested" : "Browse only"}</p>
+                  <p className={`text-xs ${outfit.vtoSupported ? "text-[#6B1E3A]" : "text-[#78665E]"}`}>{outfit.tryOnStatus === "live-reviewed" ? "Pilot-reviewed · one source photo" : outfit.vtoSupported ? "Try-on reference · AI quality untested" : "Browse only"}</p>
                   {outfit.generatedConcept ? <p className="text-xs text-[#78665E]">Original concept · no retail listing</p> : <><p className="text-xs text-[#78665E]">{outfit.referenceNotes}</p><GarmentCredit source={outfit.source} /></>}
                   {outfit.vtoSupported && outfit.tryOnStatus !== "blocked" && (
                     <Link href={`/?step=3&occasion=${occasion === "all" ? outfit.occasion : occasion}&vto=${outfit.id}`} className="mt-auto min-h-12 text-center rounded-xl bg-[#6B1E3A] text-[#FBF7EF] font-medium text-sm px-4 py-3 hover:bg-[#54162D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6B1E3A]">Try with your photo</Link>

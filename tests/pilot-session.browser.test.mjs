@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE_PATH || "playwright");
 const base = process.env.TEST_ORIGIN || "http://localhost:3500";
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || "chromium", headless: true });
 const page = await browser.newPage({ viewport: { width: 375, height: 812 } });
 const requests = [];
 

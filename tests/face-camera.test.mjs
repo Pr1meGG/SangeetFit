@@ -5,7 +5,7 @@ import { strict as assert } from "node:assert";
 import { createRequire } from "node:module";
 
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE_PATH || "playwright");
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || "chromium", headless: true });
 const page = await browser.newPage({ viewport: { width: 375, height: 812 } });
 const errors = [];
 page.on("pageerror", error => errors.push(error.message));
@@ -64,7 +64,7 @@ await page.route("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@*/vision_
 }));
 
 try {
-  const baseUrl = process.env.TEST_BASE_URL || "http://localhost:3100";
+  const baseUrl = process.env.TEST_ORIGIN || process.env.TEST_BASE_URL || "http://localhost:3100";
   await page.goto(baseUrl);
   assert.deepEqual(await page.request.get(`${baseUrl}/api/mode`).then(r => r.json()), { mode: "mock" });
   await page.getByRole("button", { name: "Sangeet", exact: true }).click();
@@ -116,7 +116,10 @@ try {
   assert.equal(await page.evaluate(() => window.cameraTest.created), 2);
   await page.getByRole("button", { name: "Capture selfie", exact: true }).click();
   await page.getByRole("button", { name: "Use this photo" }).click();
-  await page.getByText("Detected skin tone", { exact: true }).waitFor();
+  await page.getByText("Selfie ready. Uploading did not start an analysis.").waitFor();
+  assert.equal(skinRequests, 0, "confirmation prepares the photo without analysis");
+  await page.getByRole("button", { name: "Analyze selfie", exact: true }).click();
+  await page.getByText("Sample skin-tone reference", { exact: true }).waitFor();
   assert.equal(skinRequests, 1);
   assert.equal(vtoRequests, 0);
   console.log("PASS: cropped JPEG capture, cleanup, retake and confirmed selfie-only submission");

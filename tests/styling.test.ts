@@ -5,12 +5,13 @@ import type { Outfit, VerifiedSeller } from "../src/data/outfits.ts";
 import { getVerifiedSellerUrl, isPrimaryEligible, recommendOutfits } from "../src/lib/styling.ts";
 
 const candidate = OUTFITS.find(outfit => outfit.id === "library-navy-gold-lehenga")!;
+const pilotIds = new Set(["concept-emerald-kurta", "concept-sapphire-sherwani"]);
 assert(candidate);
 for (const outfit of OUTFITS) {
   assert(outfit.occasionTags.includes(outfit.occasion));
   assert(["minimal", "festive", "statement"].includes(outfit.styleLevel));
-  assert.equal(outfit.tryOnStatus, outfit.vtoSupported && outfit.tryOnReference ? "candidate" : "blocked");
-  assert.equal(isPrimaryEligible(outfit), false, "no current asset has reviewed live-output evidence");
+  assert.equal(outfit.tryOnStatus, pilotIds.has(outfit.id) ? "live-reviewed" : outfit.vtoSupported && outfit.tryOnReference ? "candidate" : "blocked");
+  assert.equal(isPrimaryEligible(outfit), pilotIds.has(outfit.id), "only completed pilot references have reviewed evidence");
   assert.equal(getVerifiedSellerUrl(outfit), null, "image-source links must not become product listings");
 }
 assert(candidate.occasionTags.includes("reception"), "editorial tags can cover a second relevant occasion");

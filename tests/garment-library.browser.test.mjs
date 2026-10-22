@@ -3,7 +3,7 @@ import { strict as assert } from "node:assert";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE_PATH || "playwright");
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || "chromium", headless: true });
 const page = await browser.newPage({ viewport: { width: 375, height: 812 } });
 const base = process.env.TEST_ORIGIN || process.env.TEST_BASE_URL || "http://localhost:3500";
 const errors = [];

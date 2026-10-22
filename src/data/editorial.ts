@@ -36,7 +36,7 @@ const CONCEPTS: RawOutfit[] = [
     primaryColor: "#1B493E", secondaryColor: "#D6BA8C", imageUrl: "/garment_test/editorial/emerald-kurta.jpg",
     description: "Deep-emerald silk kurta with tonal embroidery and matching trousers.",
     tryOnReference: "editorial/emerald-kurta.jpg", youcamCategory: "auto", vtoSupported: true,
-    referenceStatus: "candidate", referenceNotes: "Single front-facing generated model; live garment transfer unreviewed.",
+    referenceStatus: "candidate", tryOnStatus: "live-reviewed", referenceNotes: "Live pilot reviewed on 21 October 2026 using one source photo. Participant rated face and garment fidelity 5/5; broader reliability is untested.",
     generatedConcept: { createdAt: "2026-10-21", tool: "OpenAI image generation", sha256: "a3464154fbe72bb25caf351d22c402ba252e5058cc9576e7733dc603a0641d64" },
   },
   {
@@ -189,7 +189,7 @@ const CONCEPTS: RawOutfit[] = [
     primaryColor: "#183D73", secondaryColor: "#B9A06B", imageUrl: "/garment_test/editorial/sapphire-sherwani.jpg",
     description: "Sapphire sherwani with antique-gold motifs and cream trousers.",
     tryOnReference: "editorial/sapphire-sherwani.jpg", youcamCategory: "auto", vtoSupported: true,
-    referenceStatus: "candidate", referenceNotes: "Single front-facing generated model; live garment transfer unreviewed.",
+    referenceStatus: "candidate", tryOnStatus: "live-reviewed", referenceNotes: "Live pilot reviewed on 21 October 2026 using one source photo. Participant rated face and garment fidelity 5/5; broader reliability is untested.",
     generatedConcept: { createdAt: "2026-10-21", tool: "OpenAI image generation", sha256: "ad886ccf7708b3703aa8d8dc79446b78f3d7b40ef57d9c1b2ff69b4729ac25bb" },
   },
   {

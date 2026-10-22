@@ -4,8 +4,9 @@ import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { INDIAN_WEAR_LIBRARY } from "../src/data/indian-wear.ts";
+import { pngDataUrl } from "./fixtures/png.ts";
 
-const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=";
+const png = pngDataUrl();
 const jpegOutfit = INDIAN_WEAR_LIBRARY.find(item => item.vtoSupported && item.tryOnReference?.endsWith(".jpg"))!;
 const jpeg = `data:image/jpeg;base64,${readFileSync(`public/garment_test/${jpegOutfit.tryOnReference}`).toString("base64")}`;
 const mock = process.argv.includes("--mock");
@@ -13,6 +14,7 @@ const mock = process.argv.includes("--mock");
 void (async () => {
   process.env.MOCK_MODE = String(mock);
   process.env.YOUCAM_API_KEY = "offline-test-key";
+  process.env.LIVE_ACCESS_CODE = "offline-preview-code-at-least-24-characters";
   process.env.YOUCAM_BASE_URL = "https://example.test/s2s/v2.0";
   let calls: string[] = [];
   let tasks: Record<string, unknown>[] = [];
@@ -58,7 +60,7 @@ void (async () => {
     const { POST } = await import("../src/app/api/vto/route.ts");
     const send = (body: unknown) => POST(new Request("http://localhost/api/vto", {
       method: "POST", body: typeof body === "string" ? body : JSON.stringify(body),
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-sangeetfit-access-code": process.env.LIVE_ACCESS_CODE! },
     }) as never);
     const upload = { fullBodyDataUrl: png, garmentImageDataUrl: png, garmentCategory: "upper_body" };
     let response = await send(upload);
@@ -104,6 +106,8 @@ void (async () => {
       { ...upload, garmentImageDataUrl: `data:image/png;base64,${tooWide.toString("base64")}` },
       { ...upload, fullBodyDataUrl: `data:image/png;base64,${zeroHeight.toString("base64")}` },
       { ...upload, fullBodyDataUrl: 123 },
+      { ...upload, fullBodyDataUrl: pngDataUrl(127, 127) },
+      { ...upload, garmentImageDataUrl: pngDataUrl(1, 1) },
       { ...upload, garmentCategory: undefined },
       { ...upload, imageDataUrl: png },
       { fullBodyDataUrl: png, garmentId: "unknown", referenceAsset: "../../bad.png", vtoSupported: true },

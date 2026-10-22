@@ -2,7 +2,7 @@
 import { strict as assert } from "node:assert";
 import { createRequire } from "node:module";
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE_PATH || "playwright");
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || "chromium", headless: true });
 const page = await browser.newPage({ viewport: { width: 375, height: 812 } });
 const base = process.env.TEST_ORIGIN || process.env.TEST_BASE_URL || "http://localhost:3500";
 const errors = [];
@@ -192,6 +192,9 @@ try {
 
   await page.getByRole("button", { name: "Optional skin-tone analysis", exact: true }).click();
   await page.locator("#selfie-file").setInputFiles(file(photos.person, "selfie.jpg"));
+  await page.getByText("Selfie ready. Uploading did not start an analysis.").waitFor();
+  assert.equal(skinRequests, 0, "selfie upload must not submit analysis");
+  await page.getByRole("button", { name: "Analyze selfie", exact: true }).click();
   await page.getByText(/Mock sample/).waitFor();
   await page.getByRole("button", { name: "Continue to gallery" }).click();
   assert.equal(skinRequests, 1);

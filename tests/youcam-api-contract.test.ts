@@ -5,8 +5,9 @@ import { fileURLToPath } from "node:url";
 import { parseDataUrl, uploadYouCamFile } from "../src/lib/youcam.ts";
 import { parseVtoInput, parseVtoImage } from "../src/lib/vto-input.ts";
 import { OUTFITS } from "../src/data/outfits.ts";
+import { pngDataUrl } from "./fixtures/png.ts";
 
-const validPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=";
+const validPng = pngDataUrl();
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -124,6 +125,8 @@ assert(!vtoSource.includes("format:"));
 // Missing/invalid live VTO source is rejected before any external request.
 assert(vtoSource.includes('A full-body photo is required for virtual try-on'), "live mode must reject missing full-body source");
 assert.throws(() => parseVtoImage("data:image/png;base64,aGVsbG8=", "Full-body photo"), /Full-body photo must be a valid JPG or PNG image/);
+assert.throws(() => parseVtoImage(pngDataUrl(127, 127), "Photo"), /at least 128 pixels/);
+assert(parseVtoImage(pngDataUrl(128, 1), "Photo"), "minimum uses longest side without upscaling");
 // Do not reuse the face selfie and do not silently fall back to a sample in live mode.
 assert(vtoSource.includes("never fall back to a sample"), "live mode must not fall back to a sample");
 console.log("PASS: VTO category, full-body source, and live contract");

@@ -10,7 +10,7 @@ const ts = require("typescript");
 const source = ts.transpileModule(readFileSync(new URL("../src/lib/image.ts", import.meta.url), "utf8"), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
 }).outputText;
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || "chromium", headless: true });
 try {
   const page = await browser.newPage();
   if (process.env.TEST_BASE_URL) await page.goto(process.env.TEST_BASE_URL);

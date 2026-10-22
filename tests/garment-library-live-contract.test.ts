@@ -5,10 +5,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { INDIAN_WEAR_LIBRARY } from "../src/data/indian-wear.ts";
 import { EDITORIAL_LOOKS } from "../src/data/editorial.ts";
+import { pngDataUrl } from "./fixtures/png.ts";
 
 void (async () => {
   process.env.MOCK_MODE = "false";
   process.env.YOUCAM_API_KEY = "offline-contract-test";
+  process.env.LIVE_ACCESS_CODE = "offline-preview-code-at-least-24-characters";
   process.env.YOUCAM_BASE_URL = "https://example.test/s2s/v2.0";
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
   const realFetch = globalThis.fetch;
@@ -46,8 +48,8 @@ void (async () => {
     ];
     for (const outfit of cases) {
       const suffix = path.extname(outfit.tryOnReference!);
-      const res = await POST(new Request("http://localhost/api/vto", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
-        fullBodyDataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=", garmentId: outfit.id, referenceAsset: outfit.tryOnReference, vtoSupported: true,
+      const res = await POST(new Request("http://localhost/api/vto", { method: "POST", headers: { "Content-Type": "application/json", "x-sangeetfit-access-code": process.env.LIVE_ACCESS_CODE! }, body: JSON.stringify({
+        fullBodyDataUrl: pngDataUrl(), garmentId: outfit.id, referenceAsset: outfit.tryOnReference, vtoSupported: true,
       }) }) as never);
       assert.equal(res.status, 200);
       assert.equal((await res.json()).mode, "live");

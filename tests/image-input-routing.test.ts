@@ -22,6 +22,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseVtoInput } from "../src/lib/vto-input.ts";
+import { pngDataUrl } from "./fixtures/png.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
@@ -43,7 +44,7 @@ console.log("PASS: /api/skin consumes only the face selfie (imageDataUrl)");
 // ── 2. /api/vto is full-body-only, never the face selfie ─────────────────────
 
 const vtoSource = readSource("src/app/api/vto/route.ts");
-const validPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=";
+const validPng = pngDataUrl();
 const input = parseVtoInput({ fullBodyDataUrl: validPng, garmentImageDataUrl: validPng, garmentCategory: "upper_body" });
 assert(input.fullBody?.buffer.equals(Buffer.from(validPng.split(",")[1], "base64")), "VTO validation must consume the dedicated full-body source");
 assert(
@@ -60,15 +61,12 @@ console.log("PASS: /api/vto consumes only fullBodyDataUrl and rejects a missing 
 
 const pageSource = readSource("src/app/page.tsx");
 
-// Selfie upload handler feeds analyzeSkin, which posts imageDataUrl to /api/skin.
-assert(
-  /selfie-file[\s\S]{0,600}compressImageForUpload[\s\S]{0,200}analyzeSkin\(dataUrl\)/.test(pageSource),
-  "the selfie file input must feed analyzeSkin"
-);
-assert(
-  pageSource.includes("body: JSON.stringify({ imageDataUrl: dataUrl })"),
-  "analyzeSkin must POST { imageDataUrl } to /api/skin"
-);
+// Upload/capture prepare a dedicated selfie; only the explicit action analyzes it.
+assert(pageSource.includes("void prepareSelfie(file)"), "selfie input must prepare the selfie");
+const selfiePreparation = pageSource.slice(pageSource.indexOf("const prepareSelfie"), pageSource.indexOf("const analyzeSkin"));
+assert(selfiePreparation.includes("setSelfieDataUrl(dataUrl)"));
+assert(!selfiePreparation.includes("fetch("), "preparing a selfie must not submit analysis");
+assert(pageSource.includes("body: JSON.stringify({ imageDataUrl: dataUrl })"), "Analyze sends only the dedicated selfie");
 
 // runVTO posts the full-body source; the body must not contain the selfie field.
 const vtoRunner = pageSource.slice(pageSource.indexOf("const runVTO"), pageSource.indexOf("const handleRestore"));
@@ -85,11 +83,9 @@ console.log("PASS: frontend routes selfie -> /api/skin and full-body -> /api/vto
 
 // ── 4. Preview retained on failure ────────────────────────────────────────────
 
-// No code path may clear the selected photo; upload failures only set an error.
-assert(
-  !pageSource.includes("setFullBodyDataUrl(null)"),
-  "upload-failure handling must never clear fullBodyDataUrl (preview must be retained)"
-);
+// Explicit session clearing may erase photos; upload failure must retain them.
+const photoHandler = pageSource.slice(pageSource.indexOf("const handleFullBodyFile"), pageSource.indexOf("  return (", pageSource.indexOf("const handleFullBodyFile")));
+assert(!photoHandler.includes("setFullBodyDataUrl(null)"), "upload failure must retain the selected photo");
 assert(
   pageSource.includes('src={fullBodyDataUrl}'),
   "the VTO modal must render the full-body preview from fullBodyDataUrl"
@@ -121,6 +117,7 @@ console.log(`PASS: face_selfie_test.png is ${width}x${height} native pixels (no 
 void (async () => {
   process.env.MOCK_MODE = "false";
   process.env.YOUCAM_API_KEY = "dummy-key-for-offline-test";
+  process.env.LIVE_ACCESS_CODE = "offline-preview-code-at-least-24-characters";
 
   let networkAttempted = false;
   const realFetch = globalThis.fetch;
@@ -137,7 +134,7 @@ void (async () => {
     const { POST } = await import("../src/app/api/vto/route.ts");
     const request = new Request("http://localhost/api/vto", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-sangeetfit-access-code": process.env.LIVE_ACCESS_CODE! },
       // Face-selfie-shaped body: no fullBodyDataUrl anywhere.
       body: JSON.stringify({
         imageDataUrl: "data:image/png;base64,aGVsbG8=",

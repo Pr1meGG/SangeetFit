@@ -4,7 +4,9 @@ import fs from "fs/promises";
 import path from "path";
 import { setTimeout as wait } from "node:timers/promises";
 import { isRecord, uploadYouCamFile, YouCamHttpError } from "@/lib/youcam";
-import { MAX_VTO_REQUEST_BYTES, parseVtoInput, VtoInputError } from "@/lib/vto-input";
+import { parseVtoInput, VtoInputError } from "@/lib/vto-input";
+import { privateJson, readPhotoJson } from "@/lib/request";
+import { liveAccessError } from "@/lib/live-access";
 import { INDIAN_WEAR_LIBRARY } from "@/data/indian-wear";
 import { EDITORIAL_LOOKS } from "@/data/editorial";
 
@@ -87,14 +89,16 @@ async function pollTask(apiKey: string, taskId: string, signal: AbortSignal, tim
       throw new Error("Malformed poll response");
     }
     if (data.data.task_status === "success") {
-      if (!isRecord(data.data.results) || typeof data.data.results.url !== "string" || !/^https?:\/\//.test(data.data.results.url)) {
+      if (!isRecord(data.data.results) || typeof data.data.results.url !== "string") {
         throw new Error("Malformed VTO result URL");
       }
-      return data.data.results.url;
+      const resultUrl = new URL(data.data.results.url);
+      if (resultUrl.protocol !== "https:" || resultUrl.username || resultUrl.password) throw new Error("Malformed VTO result URL");
+      return resultUrl.href;
     }
 
     if (data.data.task_status === "error") {
-      throw new Error(`Task failed: ${data.data.error_message || data.data.error || "unknown"}`);
+      throw new Error("YouCam could not generate this outfit");
     }
 
     await wait(Math.min(3000, Math.max(0, timeout - (Date.now() - start))), undefined, { signal });
@@ -106,13 +110,7 @@ async function pollTask(apiKey: string, taskId: string, signal: AbortSignal, tim
 async function runTryOn(req: NextRequest, signal: AbortSignal) {
   try {
     signal.throwIfAborted();
-    const rawBody = await req.text();
-    signal.throwIfAborted();
-    if (Buffer.byteLength(rawBody, "utf8") >= MAX_VTO_REQUEST_BYTES) {
-      throw new VtoInputError("Try-on request must be under 4 MB", 413);
-    }
-    let body: unknown;
-    try { body = JSON.parse(rawBody); } catch { throw new VtoInputError("Try-on request must contain valid JSON"); }
+    const body = await readPhotoJson(req, signal);
     const input = parseVtoInput(body);
     let outfit = null;
     let reference = null;
@@ -130,13 +128,13 @@ async function runTryOn(req: NextRequest, signal: AbortSignal) {
 
     if (MOCK_MODE) {
       if (input.kind === "upload") {
-        return NextResponse.json({ success: true, resultUrl: input.garmentImageDataUrl, mode: "mock" });
+        return privateJson({ success: true, resultUrl: input.garmentImageDataUrl, mode: "mock" });
       }
       if (!outfit) throw new VtoInputError("Unknown outfit");
       // Mock mode: results are placeholders — show the SAME display thumbnail the
       // catalog preview uses, clearly labelled, so what you preview is what mock shows.
       const mockUrl = outfit.imageUrl;
-      return NextResponse.json({
+      return privateJson({
         success: true,
         resultUrl: mockUrl,
         displayImage: outfit.imageUrl,
@@ -146,14 +144,14 @@ async function runTryOn(req: NextRequest, signal: AbortSignal) {
 
     // Live mode requires a real full-body source — never fall back to a sample.
     if (!input.fullBody) {
-      return NextResponse.json({ success: false, error: "A full-body photo is required for virtual try-on" }, { status: 400 });
+      return privateJson({ success: false, error: "A full-body photo is required for virtual try-on" }, 400);
     }
 
     if (!YOUCAM_API_KEY) {
       // Live mode explicitly requested but not configured — never substitute a mock image.
-      return NextResponse.json(
+      return privateJson(
         { success: false, error: "Live try-on is unavailable: YOUCAM_API_KEY is not configured on this deployment", mode: "live" },
-        { status: 503 },
+        503,
       );
     }
 
@@ -182,19 +180,24 @@ async function runTryOn(req: NextRequest, signal: AbortSignal) {
     const taskId = await submitTask(YOUCAM_API_KEY, srcFileId, refFileId, category, signal);
     const resultUrl = await pollTask(YOUCAM_API_KEY, taskId, signal);
 
-    return NextResponse.json({ success: true, resultUrl, mode: "live" });
+    return privateJson({ success: true, resultUrl, mode: "live" });
   } catch (err: unknown) {
     if (signal.aborted) return timedOutResponse();
-    const status = err instanceof VtoInputError ? err.status : err instanceof YouCamHttpError && err.status === 429 ? 429 : 500;
-    return NextResponse.json({ success: false, error: err instanceof Error ? err.message : "Try-on failed" }, { status });
+    const status = err instanceof VtoInputError ? err.status : err instanceof YouCamHttpError && err.status === 429 ? 429 : 502;
+    const error = err instanceof VtoInputError ? err.message : status === 429 ? "YouCam rate limit reached (429). No task was retried." : "Try-on could not complete. Check the photos before trying again.";
+    return privateJson({ success: false, error }, status);
   }
 }
 
 function timedOutResponse() {
-  return NextResponse.json({ success: false, error: "Try-on timed out or was cancelled. A submitted task may still complete; no new task was started automatically." }, { status: 504 });
+  return privateJson({ success: false, error: "Try-on timed out or was cancelled. A submitted task may still complete; no new task was started automatically." }, 504);
 }
 
 export async function POST(req: NextRequest) {
+  if (!MOCK_MODE) {
+    const denied = liveAccessError(req);
+    if (denied) return privateJson({ success: false, error: denied.error, mode: "live" }, denied.status);
+  }
   const signal = AbortSignal.any([req.signal, AbortSignal.timeout(180_000)]);
   let onAbort = () => {};
   const cancelled = new Promise<NextResponse>(resolve => {

@@ -128,6 +128,9 @@ export function parseVtoImage(value: unknown, label: string): ParsedDataUrl {
   if (!dimensions.width || !dimensions.height || dimensions.width > 4096 || dimensions.height > 4096) {
     throw new VtoInputError(`${label} must have positive dimensions no larger than 4096 pixels per side`);
   }
+  if (Math.max(dimensions.width, dimensions.height) < 128) {
+    throw new VtoInputError(`${label} is too small. Choose an image with a longest side of at least 128 pixels.`);
+  }
   if (png ? !validPng(buffer, dimensions.width, dimensions.height) : !validJpeg(buffer)) {
     throw new VtoInputError(invalid);
   }
