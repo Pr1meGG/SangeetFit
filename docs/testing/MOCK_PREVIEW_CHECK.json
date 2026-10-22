@@ -1,0 +1,76 @@
+{
+  "verifiedDate": "2026-10-22",
+  "authorization": "user explicitly approved deployment of the prepared 7858b2f build as a new mock Vercel Preview",
+  "deployment": {
+    "id": "dpl_7cRPXW8yEVWo36XPkY2zHek8Bmpm",
+    "url": "https://sangeet-4dzgkdoe9-ryuk-codes.vercel.app",
+    "environment": "preview",
+    "readyState": "READY",
+    "sourceCommit": "7858b2fd6d33491788ad76de69ffbb1d2b1a7b18",
+    "applicationSource": "682f98589ad6d656d5b48e5ca129bdf375d6ec25",
+    "sourceMetadataVerified": true,
+    "sourceArchiveFiles": 197,
+    "excluded": ["environment files", "machine-local settings", "private participant photos/results", "uncommitted branding"]
+  },
+  "build": {
+    "command": "npm run build && node --import tsx scripts/live-budget.mjs status",
+    "exitCode": 0,
+    "mockModeAtBuildAndRuntime": true,
+    "providerKeyAndLiveAccessCodeOverriddenEmpty": true,
+    "kvCredentialsInheritedFromConnectedResource": true,
+    "typeScriptPassed": true
+  },
+  "budgetRead": {
+    "observedAtUtc": "2026-10-22T07:35:12.900Z",
+    "transport": "existing operator script using the application's shared budgetCommand configuration",
+    "commands": ["HMGET", "TTL"],
+    "allowanceUnits": 10,
+    "reservedUnits": 0,
+    "remainingUnits": 10,
+    "vtoUnits": 2,
+    "skinUnits": 20,
+    "nonExpiringLedgerValidated": true,
+    "buildToRedisRestVerified": true,
+    "liveRuntimeReservationVerified": false
+  },
+  "authenticatedGets": [
+    {"path": "/api/mode", "status": 200, "body": {"mode": "mock"}},
+    {"path": "/", "status": 200},
+    {"path": "/library", "status": 200},
+    {"path": "/_next/static/css/3656f6823ae75b2d.css", "status": 200, "bytes": 43139},
+    {"path": "/_next/static/chunks/4bd1b696-cd566323a07c169f.js", "status": 200, "bytes": 203721},
+    {"path": "/garment_test/editorial/midnight-lehenga.jpg", "status": 200, "bytes": 590515}
+  ],
+  "anonymousAccess": {
+    "path": "/library",
+    "status": 302,
+    "redirectHost": "vercel.com",
+    "redirectPath": "/sso-api",
+    "publicJudgeAccessVerified": false,
+    "protectionChanged": false
+  },
+  "production": {
+    "url": "https://sangeet-fit.vercel.app",
+    "deploymentBefore": "dpl_4inrWPNEV24ExC7CR8TPcMwQP6dc",
+    "deploymentAfter": "dpl_4inrWPNEV24ExC7CR8TPcMwQP6dc",
+    "unchanged": true
+  },
+  "sourceCi": {
+    "runUrl": "https://github.com/Pr1meGG/SangeetFit/actions/runs/39738104073",
+    "conclusion": "success"
+  },
+  "ledgerWrites": 0,
+  "budgetReservations": 0,
+  "youCamTasks": 0,
+  "photosSent": 0,
+  "creditPurchases": 0,
+  "liveActivation": false,
+  "credentialValuesExposed": false,
+  "envLocalRead": false,
+  "limitations": [
+    "Mock deployment does not exercise live runtime reservations or establish live VTO quality.",
+    "Preview requires Vercel login; public judge access remains pending.",
+    "Cloud-on-phone, own-garment live quality and remaining device coverage were not tested in this deployment check.",
+    "Resource automatic-upgrade and eviction settings remain unverified."
+  ]
+}
