@@ -1,6 +1,6 @@
 # SangeetFit
 
-Plan what to wear across five wedding celebrations using clothes you already own. Rewear a favourite, try uncertain looks on your photo, compare two results and save your choice. Browse model-led concepts without a photo for optional inspiration. Built for the YouCam API hackathon with Next.js 14, TypeScript and Tailwind CSS.
+Plan what to wear across five wedding celebrations using clothes you already own. Rewear a favourite, try uncertain looks on your photo, compare two results and save your choice. Browse model-led concepts without a photo for optional inspiration. Built for the YouCam API hackathon with Next.js 16.4.1, React 19.3.1, TypeScript and Tailwind CSS.
 
 ## Current experience
 
@@ -19,19 +19,19 @@ Catalogue outfit sharing restores the selected outfit and occasion, not personal
 | Own clothes | JPEG/PNG preprocessing, confirmed metadata, validated two-image VTO request | Uploaded-garment live quality not established |
 | Five-event board | Session-only occasion choices, deliberate rewear, candidate inspiration separated from owned clothes | Planning usefulness not yet user-tested; selections clear on refresh/leaving |
 | Recommendations | Occasion/audience filtering; declared style, explicit colour, stable order; reasons | Metadata policy, not learned suitability or sizing |
-| Catalogue | 26 original AI model/outfit concepts across five occasions, plus 14 credited archive photos (eight wired candidates) and four legacy mappings; photo-free browsing | **Zero live-reviewed primary references**; concepts are not personal results or seller products |
+| Catalogue | 26 original AI model/outfit concepts across five occasions, plus 14 credited archive photos (eight wired candidates) and four legacy mappings; photo-free browsing | Emerald Silk Kurta and Sapphire Embroidered Sherwani have limited one-source live reviews; other references remain unreviewed. Concepts are not seller products |
 | Try-on | YouCam Cloth V4 upload → submit → poll; explicit action; one client request pending; no automatic retry | Two private live reference results on one person scored 5/5 face and garment by that participant; own-garment quality remains untested |
 | Compare/save | Two session results, source version/mode, live before/after slider, originals/zoom/choice, save/open | No permanent wardrobe; actual-device save behaviour pending |
 | Optional skin | Separate selfie → skin-tone-analysis API; mock sample visibly labelled | Separate evidence; not a VTO-quality substitute |
 | Seller action | Exact verified HTTPS product-link metadata supported | No current products/permissions established, so no seller buttons shown |
 
-Primary recommendations require a matching photographic reference, provenance/permission and a visual live-output review. A wired candidate is not a reviewed result. A fresh session therefore offers **Add my outfit**, with candidate browsing separately at `/library`; unsupported cards do not fill the recommendations.
+Primary recommendations require a matching photographic reference, provenance/permission and a visual live-output review. A wired candidate is not a reviewed result. The two pilot-reviewed men's concepts are eligible; a fresh session also offers **Add my outfit**, with unreviewed candidates available separately at `/library`. Unsupported cards do not fill the recommendations.
 
-Mock VTO returns the garment reference and explicitly says it is **not a generated image of you**. Live mode without a key returns a configuration error; it never substitutes mock output. Face retention, garment fidelity, physical fit and production reliability are not guaranteed. The live-quality benchmark currently contains **zero outcomes**.
+Mock VTO returns the garment reference and explicitly says it is **not a generated image of you**. Live mode without a key or configured preview access code fails closed; it never substitutes mock output. Face retention, garment fidelity, physical fit and production reliability are not guaranteed. The 16-look engineering benchmark has **two private pilot outcomes** and remains pending.
 
 ## Run locally
 
-Use Node 20.20+ or a supported newer Node runtime. Install dependencies, then force mock mode for ordinary development:
+Use Node 22.13+ (below 23). Install dependencies, then force mock mode for ordinary development:
 
 ```sh
 npm ci
@@ -51,36 +51,24 @@ Create `.env.local` yourself if live testing is separately approved. Never commi
 YOUCAM_API_KEY=your_key_here
 YOUCAM_BASE_URL=https://yce-api-01.makeupar.com/s2s/v2.0
 MOCK_MODE=true
+# Only for a separately approved live preview:
+# LIVE_ACCESS_CODE=a-private-random-value-between-24-and-256-characters
 ```
 
-`MOCK_MODE=true` explicitly disables provider work. With any other value the routes use live mode; a missing key is **unconfigured**, not mock. `/api/mode` reports the running server mode. Live tasks consume account units and need a verified budget and bounded approval. Stop on 429. A timed-out/cancelled request may already have submitted a provider task; cancellation cannot undo it.
+`MOCK_MODE=true` explicitly disables provider work. With any other value the routes use live mode; a missing key is **unconfigured**, not mock. `/api/mode` reports the running server mode. Live `/api/vto` and `/api/skin` require the server-only `LIVE_ACCESS_CODE` (24–256 characters); missing/invalid code blocks generation before photo processing. The user enters the same shared code in the page, where it stays only in that page session. It is an invitation gate, **not** per-user authentication or a global task quota. Never put it in a `NEXT_PUBLIC_` variable, URL, repository, screenshot or public submission. Live tasks consume account units and need a verified budget and bounded approval. Stop on 429. A timed-out/cancelled request may already have submitted a provider task; cancellation cannot undo it.
 
 ## Verification
 
 ```sh
-npx --no-install tsc --noEmit
+npm run test
+npm run typecheck
 npm run lint
 MOCK_MODE=true npm run build
+npm run test:browser
 git diff --check
 ```
 
-Offline TypeScript suites use plain assertions, with every provider fetch stubbed. Use a `tsx` runner for the full suites (including project JSON imports):
-
-```sh
-for suite in tests/*.test.ts; do npx tsx "$suite" || break; done
-npx tsx scripts/benchmark-report.ts
-```
-
-`npx` may download test tooling if it is not already available. The standalone benchmark also works with Node 22+ type stripping. Browser suites require Playwright and Chrome; use an existing installation via `PLAYWRIGHT_MODULE_PATH` or install test tooling separately:
-
-```sh
-TEST_BASE_URL=http://localhost:3500 node tests/face-camera.test.mjs
-TEST_BASE_URL=http://localhost:3500 node tests/garment-library.browser.test.mjs
-TEST_BASE_URL=http://localhost:3500 node tests/ui-revamp.browser.test.mjs
-node tests/image-preprocessing.browser.test.mjs
-```
-
-Browser/API regression fixtures are synthetic or local test assets. No tests authorize paid YouCam requests. The benchmark `--check` intentionally fails while evidence is pending. See [benchmark protocol](docs/testing/BENCHMARKS.md) for failure denominators, rating rubric, budgets and approval boundaries.
+`npm run verify` runs the offline, type, lint, mock build and browser sequence with provider credentials and live access cleared. Browser checks need Playwright Chromium (`npx --no-install playwright install chromium`); `PLAYWRIGHT_CHANNEL=chrome` selects a locally installed Chrome when needed. CI runs the same mock-only verification. Browser/API fixtures are synthetic or local test assets; checks do not authorize paid YouCam requests. The [benchmark](docs/testing/BENCHMARKS.md) `--check` intentionally fails while evidence is pending.
 
 ## Code and sources
 
@@ -93,7 +81,7 @@ Browser/API regression fixtures are synthetic or local test assets. No tests aut
 
 ## Release and submission
 
-[Milestones](docs/plans/2026-10-20-personal-stylist-milestones.md), [project state](docs/agent-workflow/PROJECT_STATE.md), [user validation](docs/testing/REAL_USER_VALIDATION.md), [demo script](docs/submission/DEMO_SCRIPT.md) and [submission checklist](docs/submission/PITCH_CHECKLIST.md) track implementation separately from live/release evidence.
+[Milestones](docs/plans/2026-10-20-personal-stylist-milestones.md), [project state](docs/agent-workflow/PROJECT_STATE.md), [user validation](docs/testing/REAL_USER_VALIDATION.md), [release procedure](docs/testing/RELEASE.md), [demo script](docs/submission/DEMO_SCRIPT.md) and [submission checklist](docs/submission/PITCH_CHECKLIST.md) track implementation separately from live/release evidence.
 
 Budget snapshot verified after the 21 October pilot: 910 remaining units; Cloth V4 cost 2 units/call and optional facial colour analysis cost 20. The 25% reserve, rounded up, is 228 units. The two completed pilot tasks used 4 units; the other 14 distinct men's references require separate authorization. Recheck balance and pricing before any task; this snapshot is not approval to spend. See [budget evidence](docs/testing/BENCHMARKS.md).
 
