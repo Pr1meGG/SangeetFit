@@ -2,6 +2,8 @@
 
 This record supersedes earlier pending CI/deployment statements in release-hardening notes. The Free Redis resource is connected, the authorized 10-unit ledger is initialized, and the latest approved mock Preview verified read-only build-to-Redis REST access. Runtime reservations, an active live cap and judge access remain unverified. See the latest [mock Preview evidence](MOCK_PREVIEW_CHECK.json).
 
+**Later Brave finding:** authenticated catalogue filters passed, but a class-dependent rule in the user's Brave profile hides the current Preview's photo-permission panel and blocks normal upload. A small hook rename passed the rebuilt local Brave flow and full mock verification; it is not deployed. See [BRAVE_CHECK.md](BRAVE_CHECK.md). Earlier HTTP/asset checks below do not establish a usable fitting room in this profile.
+
 ## Verified source and CI
 
 Historical source `81dd342f954f87e705397dae3b660accdb0648ba` was pushed to `codex/ui-revamp`; local and remote SHA matched. [GitHub run39706955618](https://github.com/Pr1meGG/SangeetFit/actions/runs/39706955618) passed: clean install, all 14 offline suites, eight mock browser suites, TypeScript, production build and lint with zero errors/19 warnings.

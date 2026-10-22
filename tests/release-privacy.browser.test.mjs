@@ -55,6 +55,10 @@ try {
   assert.equal(skinRequests, 1);
   await page.goto(`${base}/?step=3&occasion=sangeet&vto=concept-emerald-kurta`);
   const dialog = page.getByRole("dialog", { name: "Make this look yours." });
+  await dialog.waitFor();
+  // Reproduce the cosmetic filter observed hiding the photo permission notice in Brave.
+  await page.addStyleTag({ content: ".sf-consent { display: none !important; }" });
+  assert(await dialog.getByRole("button", { name: "I understand — continue" }).isVisible(), "photo permission must survive cookie-banner cosmetic filters");
   await dialog.getByRole("button", { name: "I understand — continue" }).click();
   await dialog.getByLabel("Full-body photo", { exact: true }).setInputFiles(file);
   await dialog.getByText("Photo ready. Uploading did not start a task.").waitFor();
