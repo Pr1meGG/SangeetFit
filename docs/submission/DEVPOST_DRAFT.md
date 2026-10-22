@@ -1,6 +1,6 @@
 # SangeetFit — Devpost description draft
 
-Drafted 21 October 2026. This text has not been submitted. Recheck the evidence and replace the status section after the one-person live reference sweep, device checks and final demo are complete.
+Updated 22 October 2026. This text has not been submitted. Refresh the evidence section after any further authorized testing and before publication; final screenshots, video and judge access remain pending.
 
 ## Inspiration
 
@@ -8,7 +8,7 @@ Choosing what to wear across Sangeet, Mehendi, Haldi, a wedding and a reception 
 
 ## What it does
 
-Users can browse a model-led celebration collection without uploading a photo, then choose an occasion and add photos of their own upper-body garments or complete outfits. They confirm each garment's colour, style and occasion tags. SangeetFit ranks matching items using those stated details and explains each recommendation in plain language; it does not claim to infer style or physical fit from the photo. The collection's AI-generated concepts are inspiration and unreviewed try-on candidates, not seller products or personal results.
+Users can browse a model-led celebration collection without uploading a photo, then choose an occasion and add photos of their own upper-body garments or complete outfits. They confirm each garment's colour, style and occasion tags. SangeetFit ranks matching items using those stated details and explains each recommendation in plain language; it does not claim to infer style or physical fit from the photo. The collection contains 26 AI-generated concepts for inspiration, not seller products or personal results. Two references have limited live review on one source photo; the others remain unreviewed candidates.
 
 To preview an outfit on themselves, the user supplies a separate full-body photo, sees where live photo processing will occur, and explicitly presses **Generate try-on**. They can compare two recent results from the same source photo, inspect the original and result, choose a favourite and save or open an image. Opening, comparing or revisiting a result does not start another generation task. The wardrobe, photos and choices are kept only in the current page session and may disappear on refresh. Fourteen credited sourced photos remain available in the archive, including browse-only images; seller links appear only for verified exact products.
 
@@ -20,12 +20,17 @@ Recommendations are deterministic and based on user-confirmed occasion, style an
 
 ## Current evidence and limits — update before submitting
 
-The project's current verification record reports passing offline, build and mock-browser checks. Earlier authorized live Cloth V4 tests succeeded for one sample-person/reference pair. **Live quality for uploaded personal garments, face preservation across users, garment fidelity, real-phone camera and image saving have not yet been established.** The planned one-person, 16-reference men's engineering scorecard has zero recorded outcomes. There is no independent usability study. AI previews can alter facial or clothing details and do not establish physical fit or size.
+The [22 October checkpoint](../testing/CLOUD_CHECKPOINT.md) records passing CI for source `81dd342`: all 14 offline suites, eight mock-browser suites, TypeScript, production build and lint with zero errors. The shared-budget code also passed actual Redis concurrency checks. These checks establish software behaviour, not live image quality or an active spending cap.
 
-Next we will use one consenting person's full-body photo for a separately authorized two-task pilot: Emerald Silk Kurta and Sapphire Embroidered Sherwani. If both are usable, a separate authorization can extend testing to the other 14 distinct men's references. This will assess one person's reference output, not own-clothes quality or general usability. The participant's identity, photos and results will not appear in GitHub or the public demo. We will check Android Chrome and iPhone Safari, review permitted reference outputs, and record the final demo from the verified build and a separately permitted demo image. Combining separate tops and bottoms and a persistent wardrobe are later product directions.
+Earlier authorized Cloth V4 tests succeeded for one sample-person/reference pair. A later two-task catalogue pilot rendered Emerald Silk Kurta and Sapphire Embroidered Sherwani on one consenting person's full-body photo. That participant rated both face and garment fidelity 5/5 for each result; another observer rated overall AI appearance 4/5. These are limited subjective results from one source, not proof of uploaded-own-garment quality, broad face preservation or independent usability. The internal 16-reference scorecard has two outcomes and 14 pending cases; further tasks need separate approval. That scorecard and the historical five-tester goal are internal validation targets, not official submission requirements. AI previews can alter facial or clothing details and do not establish physical fit or size.
+
+Actual Android 14/Chrome 155 checks partially passed in local mock mode: portrait layout, explicit one-request preview, choosing/original inspection and a real camera stream whose tracks stopped on Cancel. Native picker, saving, landscape, the touch slider on hardware and iPhone Safari remain unverified. No camera photo was captured or sent. The current protected mock Preview requires Vercel login and is not ready for judge access; production still serves an older build. Full device evidence is in the [Android record](../testing/ANDROID_CHECK.md).
+
+The participant's identity, photos and results will not appear in GitHub or the public demo. Record the final demo with a separately permitted source image. Any narration of successful personal-garment try-on must wait for its own authorized, reviewed live output; the catalogue pilot cannot support that claim. Combining separate tops and bottoms and a persistent wardrobe are later product directions.
 
 ## Internal release notes — do not paste into the submission form
 
-- Read-only account snapshot on 21 October: 916 units; Cloth V4 2 units per call; optional facial colour-tone analysis 20 units per call. Keep a 25% reserve (229 units), recheck the balance before testing, and approve each bounded live batch. No new live task was submitted for this draft.
+- Post-pilot account snapshot on 21 October: 910 units; Cloth V4 2 units per call; optional facial colour-tone analysis earlier quoted at 20 units per call and not used. Keep a 25% reserve (228 units), refresh balance/prices before further spending, and separately approve each bounded batch. No new live task was submitted for this draft.
+- The approved [mock Preview](https://sangeet-f9wblyyha-ryuk-codes.vercel.app) serves `mode:mock` and `/library` 200 behind Vercel SSO. Production remains `b3cadb6`. Shared-budget code is tested, but no store exists or allowance is seeded: marketplace acceptance and denied browser-origin permission block setup. Do not describe the cap as active or this Preview as public judge access. Live activation remains separately gated.
 - Add only verified benchmark results, genuine screenshots, the final public 1–3 minute video and a working judge-accessible URL after those exist. Do not present mock imagery as live try-on evidence.
-- Confirm repository access, source licensing, participant permission and judging availability before publishing. No repository, demo or video URL is supplied by this draft.
+- Confirm repository access, source licensing, permitted demo-image use and judging availability before publishing. No final judge-access or video URL is supplied by this draft.

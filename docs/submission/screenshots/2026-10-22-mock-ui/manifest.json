@@ -1,0 +1,38 @@
+{
+  "capturedDate": "2026-10-22",
+  "sourceCommit": "81dd342f954f87e705397dae3b660accdb0648ba",
+  "mode": "mock",
+  "browserViewport": {
+    "width": 692,
+    "height": 836
+  },
+  "privateImages": false,
+  "liveTasks": 0,
+  "screenshots": [
+    {
+      "file": "01-home-mock.jpg",
+      "bytes": 79292,
+      "sha256": "4eb9d31d288b998700aee0565a18a349921c81c30aa3b86331329a6464e008ff"
+    },
+    {
+      "file": "02-collection-mock.jpg",
+      "bytes": 58712,
+      "sha256": "67cb8287ac34d6008ae57166029fd38c4b614cc44dae118b8d390503e1f8fb3b"
+    },
+    {
+      "file": "03-recommendations-and-plan-mock.jpg",
+      "bytes": 172903,
+      "sha256": "dfa5fed66476bbf4f85c0763ca27eba923b12b348fab0f950cc33959f9a468a5"
+    },
+    {
+      "file": "04-own-garment-form-mock.jpg",
+      "bytes": 215123,
+      "sha256": "524affb3f4ebf348de5dd3fe5a0af20653e8e2a017589a3c89e9b2a7e71a2177"
+    },
+    {
+      "file": "05-explicit-try-on-consent-mock.jpg",
+      "bytes": 39567,
+      "sha256": "12bb48e75aa9a9ef5c4caec73535b99348e8f7a888b95f9d10243ec726b718bc"
+    }
+  ]
+}
