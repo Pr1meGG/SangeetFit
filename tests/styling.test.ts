@@ -2,7 +2,7 @@
 import { strict as assert } from "node:assert";
 import { OUTFITS } from "../src/data/outfits.ts";
 import type { Outfit, VerifiedSeller } from "../src/data/outfits.ts";
-import { getVerifiedSellerUrl, isPrimaryEligible, recommendOutfits } from "../src/lib/styling.ts";
+import { getVerifiedSellerUrl, isPrimaryEligible, recommendOutfits, recommendReferenceOutfits } from "../src/lib/styling.ts";
 
 const candidate = OUTFITS.find(outfit => outfit.id === "library-navy-gold-lehenga")!;
 const pilotIds = new Set(["concept-emerald-kurta", "concept-sapphire-sherwani"]);
@@ -18,9 +18,46 @@ assert(candidate.occasionTags.includes("reception"), "editorial tags can cover a
 assert.equal(recommendOutfits(OUTFITS, { occasion: "reception" }).length, 0);
 assert(recommendOutfits(OUTFITS, { occasion: "reception", includeCandidates: true }).some(item => item.outfit.id === candidate.id));
 assert(!recommendOutfits(OUTFITS, { occasion: "reception", includeCandidates: true }).some(item => item.outfit.tryOnStatus === "blocked"));
+assert.equal(recommendOutfits(OUTFITS, { occasion: "sangeet", audience: "women" }).length, 0, "no women's Sangeet reference has reviewed evidence");
+const womenSangeetReferences = recommendReferenceOutfits(OUTFITS, { occasion: "sangeet", audience: "women" });
+assert(womenSangeetReferences.length >= 5, "the reviewed-only default must still expose available women's references");
+assert(womenSangeetReferences.every(item => item.outfit.tryOnStatus === "candidate" && item.outfit.origin !== "upload"), "reference grouping keeps candidates separate from reviews and uploads");
+
+for (const occasion of ["sangeet", "mehendi", "haldi", "wedding", "reception"] as const) {
+  for (const audience of ["women", "men", "all"] as const) {
+    const recommended = recommendOutfits(OUTFITS, { occasion, audience });
+    const references = recommendReferenceOutfits(OUTFITS, { occasion, audience });
+    const recommendedIds = new Set(recommended.map(({ outfit }) => outfit.id));
+    assert(recommended.length + references.length > 0, `${occasion}/${audience} must expose eligible looks`);
+    assert(references.every(({ outfit }) => !recommendedIds.has(outfit.id)), `${occasion}/${audience} groups must be disjoint`);
+    assert(recommended.every(({ outfit }) => isPrimaryEligible(outfit)), `${occasion}/${audience} recommendations require reviewed evidence`);
+    assert(references.every(({ outfit, reason }) => outfit.origin !== "upload" && outfit.tryOnStatus === "candidate" &&
+      outfit.vtoSupported && outfit.imageUrl === `/garment_test/${outfit.tryOnReference}` &&
+      outfit.occasionTags.includes(occasion) && (audience === "all" || outfit.audience === "unisex" || outfit.audience === audience) &&
+      reason.includes(`Tagged for ${occasion.charAt(0).toUpperCase() + occasion.slice(1)}`)), `${occasion}/${audience} references must match permissions, tags and explanations`);
+  }
+}
+console.log("PASS: all 15 occasion/audience combinations expose disjoint reviewed and reference groups with matching metadata");
+
+const validReference: Outfit = { ...candidate, id: "valid-reference" };
+const rejectedReferences: Outfit[] = [
+  { ...candidate, id: "blocked-reference", tryOnStatus: "blocked" },
+  { ...candidate, id: "reviewed-reference", tryOnStatus: "live-reviewed" },
+  { ...candidate, id: "uploaded-reference", origin: "upload" },
+  { ...candidate, id: "missing-provenance", source: undefined, generatedConcept: undefined },
+  { ...candidate, id: "unknown-permission", source: { ...candidate.source!, license: "Unknown" } },
+  { ...candidate, id: "invalid-provenance", source: { ...candidate.source!, sha256: "missing" } },
+  { ...candidate, id: "unsupported-reference", vtoSupported: false },
+  { ...candidate, id: "missing-reference", tryOnReference: null },
+  { ...candidate, id: "mismatched-reference", tryOnReference: "another-outfit.jpg" },
+];
+assert.deepEqual(recommendReferenceOutfits([validReference, ...rejectedReferences], { occasion: "reception" })
+  .map(({ outfit }) => outfit.id), [validReference.id], "a valid control must survive while invalid permissions, wiring, review states and own uploads are rejected");
+console.log("PASS: catalogue references reject blocked/reviewed states, missing permissions/provenance, invalid wiring and own uploads");
 
 const reviewed: Outfit = { ...candidate, tryOnStatus: "live-reviewed" };
 assert(isPrimaryEligible(reviewed));
+assert.equal(recommendReferenceOutfits([{ ...candidate, origin: "upload" as const }], { occasion: "reception" }).length, 0, "own uploads never enter the catalogue reference group");
 assert(!isPrimaryEligible({ ...reviewed, source: undefined }));
 assert(!isPrimaryEligible({ ...reviewed, tryOnReference: "another-outfit.jpg" }));
 assert(!isPrimaryEligible({ ...reviewed, vtoSupported: false }));

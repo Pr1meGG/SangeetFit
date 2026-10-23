@@ -45,7 +45,7 @@ try {
   await page.getByRole("searchbox", { name: "Search outfit ideas" }).fill("no-such-outfit");
   await page.getByRole("button", { name: "Browse reference candidates" }).click();
   assert.equal(await page.getByRole("searchbox", { name: "Search outfit ideas" }).inputValue(), "");
-  assert(await page.locator(".sf-outfit-card").count() > 0, "empty-state recovery must show candidates");
+  assert(await page.locator(".sf-reference-card").count() > 0, "empty-state recovery must show candidates in their labelled group");
   assert.equal(requests.length, 2, "browsing after comparison must not generate");
   console.log("PASS: two candidate looks compare on one photo with exactly two explicit mock requests");
 } finally {

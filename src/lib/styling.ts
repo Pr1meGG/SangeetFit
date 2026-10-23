@@ -89,7 +89,7 @@ export interface StylingPreferences {
   audience?: Audience | "all";
   styleLevel?: StyleLevel;
   preferredColor?: string;
-  /** Candidate references are for a separately labelled testing collection. */
+  /** Include candidate references; the gallery renders them in a separately labelled group. */
   includeCandidates?: boolean;
 }
 
@@ -113,4 +113,11 @@ export function recommendOutfits<T extends Outfit>(outfits: readonly T[], prefs:
         colourMatch(outfit) ? "Includes your selected colour." : "",
       ].filter(Boolean).join(" "),
     }));
+}
+
+/** Unreviewed catalogue references are browsable alongside reviewed recommendations.
+ *  They are never mixed into the recommendation list, and own uploads are excluded. */
+export function recommendReferenceOutfits<T extends Outfit>(outfits: readonly T[], prefs: StylingPreferences): { outfit: T; reason: string }[] {
+  return recommendOutfits(outfits, { ...prefs, includeCandidates: true })
+    .filter(({ outfit }) => outfit.origin !== "upload" && outfit.tryOnStatus === "candidate");
 }

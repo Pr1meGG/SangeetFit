@@ -9,7 +9,7 @@ import { useSearchParams } from "next/navigation";
 import { X, CheckCircle, Shirt, ArrowLeft, ArrowRight, ArrowUpRight, Palette, Heart, Loader2, AlertCircle, Download, Share2, MessageCircle, Camera, Upload, ShieldCheck, Music2, Leaf, Sun, Sparkles, House, Search } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { OUTFITS, type Outfit, type Occasion, type Audience, type StyleLevel } from "@/data/outfits";
-import { recommendOutfits, getVerifiedSellerUrl } from "@/lib/styling";
+import { recommendOutfits, recommendReferenceOutfits, getVerifiedSellerUrl } from "@/lib/styling";
 import type { SessionOutfit, GeneratedLook } from "@/lib/session";
 import WardrobeUpload from "@/components/WardrobeUpload";
 import LookComparison from "@/components/LookComparison";
@@ -118,13 +118,13 @@ export default function Home() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
   const [showShortlist, setShowShortlist] = useState(false);
-  const [showCandidates, setShowCandidates] = useState(false);
   const [consentGiven, setConsentGiven] = useState(false);
   const [query, setQuery] = useState("");
   const [resultImageError, setResultImageError] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
   const dialogRef = useRef<HTMLElement>(null);
   const wardrobeAnchor = useRef<HTMLDivElement>(null);
+  const referenceSection = useRef<HTMLElement>(null);
   const inFlight = useRef(false);
   const photoSelection = useRef(0);
   const skinSelection = useRef(0);
@@ -326,17 +326,41 @@ export default function Home() {
   const toggleFavorite = (outfitId: string) => setFavorites(previous => {
     const next = new Set(previous); if (next.has(outfitId)) next.delete(outfitId); else next.add(outfitId); return next;
   });
+  const jumpToReferences = () => {
+    // The section can mount after a shortlist exit, so wait two frames before scrolling.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const section = referenceSection.current;
+      section?.focus({ preventScroll: true });
+      section?.scrollIntoView({ block: "start", behavior: "instant" });
+    }));
+  };
 
   const allOutfits = useMemo<SessionOutfit[]>(() => [...owned, ...OUTFITS], [owned]);
   const recommendations = useMemo(() => recommendOutfits(allOutfits, {
-    occasion, audience, styleLevel: stylePreference || undefined, preferredColor: preferredColor || undefined, includeCandidates: showCandidates,
-  }), [allOutfits, occasion, audience, stylePreference, preferredColor, showCandidates]);
+    occasion, audience, styleLevel: stylePreference || undefined, preferredColor: preferredColor || undefined,
+  }), [allOutfits, occasion, audience, stylePreference, preferredColor]);
+  const referenceCandidates = useMemo(() => recommendReferenceOutfits(allOutfits, {
+    occasion, audience, styleLevel: stylePreference || undefined, preferredColor: preferredColor || undefined,
+  }), [allOutfits, occasion, audience, stylePreference, preferredColor]);
   const curated = useMemo(() => {
     const list = showShortlist ? allOutfits.filter(outfit => favorites.has(outfit.id)).map(outfit => ({ outfit, reason: "Saved by you in this session." })) : recommendations;
-    return list.filter(({ outfit }) => `${outfit.name} ${outfit.garmentType}`.toLowerCase().includes(query.trim().toLowerCase()));
+    const needle = query.trim().toLowerCase();
+    return list.filter(({ outfit }) => `${outfit.name} ${outfit.garmentType}`.toLowerCase().includes(needle));
   }, [allOutfits, showShortlist, favorites, recommendations, query]);
+  const references = useMemo(() => {
+    if (showShortlist) return [];
+    const needle = query.trim().toLowerCase();
+    return referenceCandidates.filter(({ outfit }) => `${outfit.name} ${outfit.garmentType}`.toLowerCase().includes(needle));
+  }, [showShortlist, referenceCandidates, query]);
   const shortlistCount = favorites.size;
   const failedOutfit = vtoError ? allOutfits.find(outfit => outfit.id === vtoError.outfitId) : undefined;
+
+  const renderLookCard = (item: SessionOutfit, reason: string, kind: "recommended" | "reference") => (
+    <article key={item.id} className={`sf-look-card is-editorial ${kind === "reference" ? "sf-reference-card" : "sf-outfit-card"}`}>
+      <div className="sf-outfit-image"><button className="sf-outfit-open" onClick={() => openVTO(item)} aria-label={`Try on ${item.name}`}><img src={item.imageUrl} alt={item.name} loading="lazy" /></button><button type="button" className={`sf-heart ${favorites.has(item.id) ? "is-active" : ""}`} aria-pressed={favorites.has(item.id)} onClick={() => toggleFavorite(item.id)} aria-label={`${favorites.has(item.id) ? "Remove" : "Add"} ${item.name} ${favorites.has(item.id) ? "from" : "to"} shortlist`}><Heart size={18} fill={favorites.has(item.id) ? "currentColor" : "none"} /></button><span className="sf-outfit-badge">{item.origin === "upload" ? "Your clothes" : item.tryOnStatus === "candidate" ? "Unreviewed reference" : "Live-reviewed reference"}</span></div>
+      <div className="sf-outfit-info"><div className="sf-outfit-type"><span>{item.styleLevel}</span><span className="sf-palette"><i style={{ backgroundColor: item.primaryColor }} /></span></div><h2>{item.name}</h2><p className={kind === "reference" ? "sf-reference-reason" : "sf-recommendation-reason"}>{reason}</p><button className="sf-outfit-action" onClick={() => openVTO(item)}><Shirt size={16} />Try this look <ArrowUpRight size={16} /></button>{getVerifiedSellerUrl(item) && <a className="sf-text-link" href={getVerifiedSellerUrl(item)!} target="_blank" rel="noopener noreferrer">View at seller</a>}<GarmentCredit source={item.source} /></div>
+    </article>
+  );
 
   const handleFullBodyFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]; event.target.value = "";
@@ -443,19 +467,17 @@ export default function Home() {
         {step === 3 && (
           <section className="sf-editorial-wrap sf-gallery">
             <button className="sf-back" onClick={() => { setShowShortlist(false); setStep(1); }}><ArrowLeft size={17} /> Occasions</button>
-            <div className="sf-gallery-heading"><div><span className="sf-context">{showShortlist ? "Saved by you, this session" : `Getting dressed for ${occasion}`}</span><h1>{showShortlist ? "Your shortlist." : "Your clothes. Your kind of look."}</h1><p>Choose from your clothes or browse reference previews. Try a look on your photo, compare two results, and keep your favourite.</p></div><div className="sf-action-row"><button className="sf-button sf-button-primary" onClick={() => setShowUpload(true)}><Upload size={17} />Add my outfit</button><button className="sf-button sf-button-secondary" aria-pressed={showCandidates && !showShortlist} onClick={() => { setShowCandidates(value => showShortlist || !value); setShowShortlist(false); }}>Explore reference outfits</button><button className="sf-button sf-button-secondary" aria-pressed={showShortlist} onClick={() => setShowShortlist(value => !value)}><Heart size={17} />Shortlist ({shortlistCount})</button></div></div>
+            <div className="sf-gallery-heading"><div><span className="sf-context">{showShortlist ? "Saved by you, this session" : `Getting dressed for ${occasion}`}</span><h1>{showShortlist ? "Your shortlist." : "Your clothes. Your kind of look."}</h1><p>Choose from your clothes or browse reference previews. Try a look on your photo, compare two results, and keep your favourite.</p></div><div className="sf-action-row"><button className="sf-button sf-button-primary" onClick={() => setShowUpload(true)}><Upload size={17} />Add my outfit</button><button className="sf-button sf-button-secondary" disabled={showShortlist || references.length === 0} onClick={() => { setShowShortlist(false); jumpToReferences(); }}>Explore reference outfits</button><button className="sf-button sf-button-secondary" aria-pressed={showShortlist} onClick={() => setShowShortlist(value => !value)}><Heart size={17} />Shortlist ({shortlistCount})</button></div></div>
             {vtoError && failedOutfit && modalId !== failedOutfit.id && <div role="alert" className="sf-alert sf-alert-error"><span>Try-on for {failedOutfit.name}: {vtoError.message}</span><button className="sf-text-link" onClick={() => openVTO(failedOutfit)}>Review try-on</button></div>}
             {showUpload && <div ref={wardrobeAnchor}><WardrobeUpload occasion={occasion} onClose={() => setShowUpload(false)} onAdd={outfit => { if (currentSession !== sessionEpoch.current) return; setOwned(previous => [...previous, outfit]); setWeekPlan(previous => previous[occasion] ? previous : { ...previous, [occasion]: outfit.id }); setShowUpload(false); setShowShortlist(false); }} /></div>}
             <div className="sf-occasion-tabs" aria-label="Choose occasion">{OCCASIONS.map(item => <button key={item.id} aria-pressed={occasion === item.id} className={`sf-chip ${occasion === item.id ? "is-active" : ""}`} onClick={() => setOccasion(item.id)}>{item.label}</button>)}</div>
             <div className="sf-gallery-toolbar"><div className="sf-audiences" aria-label="Collection">{AUDIENCES.map(item => <button key={item.id} className={audience === item.id ? "is-active" : ""} aria-pressed={audience === item.id} onClick={() => setAudience(item.id)}>{item.label}</button>)}</div><label className="sf-search"><Search size={17} /><span className="sr-only">Search outfit ideas</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Find one of your outfits…" type="search" /></label></div>
             <div className="sf-preferences"><label>Style preference<select value={stylePreference} onChange={event => setStylePreference(event.target.value as StyleLevel | "")}><option value="">Any style</option><option value="minimal">Minimal</option><option value="festive">Festive</option><option value="statement">Statement</option></select></label><label>Preferred colour<select value={preferredColor} onChange={event => setPreferredColor(event.target.value)}><option value="">Any colour</option><option value="#6b1e3a">Burgundy</option><option value="#d4af37">Gold</option><option value="#1f3a5f">Navy</option><option value="#f7f1e5">Ivory</option><option value="#111111">Black</option><option value="#35634c">Green</option></select></label><button className="sf-text-link" onClick={() => setStep(2)}><Palette size={16} />{skinColor ? "View skin-tone reference" : "Optional skin-tone analysis"}</button></div>
-            <div className="sf-gallery-meta"><span>{curated.length} {showShortlist ? "saved" : showCandidates ? "outfit ideas" : "recommended outfits"}</span><span>Occasion tags · your style · your colours</span></div>
-            {showCandidates && !showShortlist && <p className="sf-reference-note">Each reference shows its review status. Candidate try-ons are unreviewed; reviewed looks have limited pilot evidence.</p>}
-            {curated.length === 0 && <div className="sf-empty"><Shirt size={34} strokeWidth={1.2} /><h2>{showShortlist ? "Keep a look you love." : "Start with something you own."}</h2><p>{showShortlist ? "Tap the heart on an outfit to keep it here." : "No live-reviewed catalogue options or tagged personal outfits match these choices yet. Add your own garment to get started."}</p><button className="sf-button sf-button-primary" onClick={() => { setShowUpload(true); setShowShortlist(false); }}>Add an outfit</button><button className="sf-text-link" onClick={() => { setShowCandidates(true); setShowShortlist(false); setQuery(""); setAudience("all"); }}>Browse reference candidates</button></div>}
-            <div className="sf-editorial-wrap sf-editorial-grid">{curated.map(({ outfit: item, reason }) => <article key={item.id} className="sf-outfit-card is-editorial">
-              <div className="sf-outfit-image"><button className="sf-outfit-open" onClick={() => openVTO(item)} aria-label={`Try on ${item.name}`}><img src={item.imageUrl} alt={item.name} loading="lazy" /></button><button type="button" className={`sf-heart ${favorites.has(item.id) ? "is-active" : ""}`} aria-pressed={favorites.has(item.id)} onClick={() => toggleFavorite(item.id)} aria-label={`${favorites.has(item.id) ? "Remove" : "Add"} ${item.name} ${favorites.has(item.id) ? "from" : "to"} shortlist`}><Heart size={18} fill={favorites.has(item.id) ? "currentColor" : "none"} /></button><span className="sf-outfit-badge">{item.origin === "upload" ? "Your clothes" : item.tryOnStatus === "candidate" ? "Unreviewed reference" : "Live-reviewed reference"}</span></div>
-              <div className="sf-outfit-info"><div className="sf-outfit-type"><span>{item.styleLevel}</span><span className="sf-palette"><i style={{ backgroundColor: item.primaryColor }} /></span></div><h2>{item.name}</h2><p className="sf-recommendation-reason">{reason}</p><button className="sf-outfit-action" onClick={() => openVTO(item)}><Shirt size={16} />Try this look <ArrowUpRight size={16} /></button>{getVerifiedSellerUrl(item) && <a className="sf-text-link" href={getVerifiedSellerUrl(item)!} target="_blank" rel="noopener noreferrer">View at seller</a>}<GarmentCredit source={item.source} /></div>
-            </article>)}</div>
+            <div className="sf-gallery-meta"><span>{showShortlist ? `${curated.length} saved` : `${curated.length} recommended · ${references.length} reference outfits`}</span><span>Occasion tags · your style · your colours</span></div>
+            {!showShortlist && <p className="sf-reference-note">Each look keeps its review status. Live-reviewed looks have one-source pilot evidence; unreviewed candidates have not been visually reviewed.</p>}
+            {curated.length === 0 && <div className={`sf-empty${!showShortlist && references.length > 0 ? " is-compact" : ""}`}><Shirt size={34} strokeWidth={1.2} /><h2>{showShortlist ? "Keep a look you love." : "Start with something you own."}</h2><p>{showShortlist ? "Tap the heart on an outfit to keep it here." : references.length > 0 ? `No reviewed recommendations match these choices yet. Add a garment you own, or explore the ${references.length} unreviewed reference outfit${references.length === 1 ? "" : "s"} below.` : "No looks match these choices. Add your own garment to get started."}</p><button className="sf-button sf-button-primary" onClick={() => { setShowUpload(true); setShowShortlist(false); }}>Add an outfit</button><button className="sf-text-link" onClick={() => { setQuery(""); setAudience("all"); setShowShortlist(false); jumpToReferences(); }}>Browse reference candidates</button></div>}
+            <div className="sf-editorial-wrap sf-editorial-grid">{curated.map(({ outfit: item, reason }) => renderLookCard(item, reason, "recommended"))}</div>
+            {!showShortlist && references.length > 0 && <section ref={referenceSection} tabIndex={-1} className="sf-reference-section" aria-labelledby="reference-outfits-heading"><div className="sf-section-heading"><div><span className="sf-context">The wider edit</span><h2 id="reference-outfits-heading">Reference outfits for {occasion.charAt(0).toUpperCase() + occasion.slice(1)}</h2><p>Unreviewed candidates, kept separate from reviewed recommendations. Nothing is generated until you tap Generate.</p></div><span className="sf-small-note">{references.length} candidate{references.length === 1 ? "" : "s"}</span></div><div className="sf-editorial-wrap sf-editorial-grid">{references.map(({ outfit: item, reason }) => renderLookCard(item, reason, "reference"))}</div></section>}
             {owned.length > 0 && <details className="sf-my-clothes"><summary>All my clothes ({owned.length})</summary><p>Your outfits stay here even when they don’t match this occasion’s tags. You can always try one manually.</p><div className="sf-owned-list">{owned.map(item => <div key={item.id}><img src={item.imageUrl} alt="" /><div><strong>{item.name}</strong><span>{item.occasionTags.join(", ")}</span></div><button className="sf-text-link" onClick={() => openVTO(item)}>Try my {item.name}</button><button className="sf-icon-button" aria-label={`Remove garment ${item.name}`} disabled={vtoLoading} onClick={() => removeOwned(item.id)}><X size={17} /></button></div>)}</div></details>}
             <LookComparison key={currentSession} looks={looks} onRemove={id => setLooks(previous => previous.filter(look => look.id !== id))} />
             <WeddingWeekBoard occasions={OCCASIONS} outfits={allOutfits} plan={weekPlan} onChoose={(event, outfitId) => setWeekPlan(previous => ({ ...previous, [event]: outfitId }))} onTryOn={(event, outfit) => { setOccasion(event); openVTO(outfit); }} onAddOwn={event => { setOccasion(event); setShowUpload(true); }} />
