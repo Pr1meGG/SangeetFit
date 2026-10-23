@@ -2,6 +2,12 @@
 
 Durable, verified facts about SangeetFit. Prior-generation results not rechecked in the current working tree are explicitly labeled **[prior report]**. Update this file when durable facts, verified outcomes, major decisions, or blockers change — not as a running log.
 
+## UI-v2 playtest checkpoint — 23 October 2026
+
+- Drove the mock surface at 1440/390/320 through occasion, gallery, reference browsing, consent, source upload, explicit generation, comparison, choice, own garment and library. Fixed three observed presentation defects: step transitions inherited the previous scroll offset and hid the new heading under the sticky navbar; bottom-nav “My clothes” mounted the inline form far above the viewport; the mock/live result status sat below the full-height image and was off-screen at both inspected sizes. Changes are limited to `src/app/page.tsx`, `src/app/globals.css` and additive assertions in the existing UI browser suite.
+- Fresh `TEST_PORT=3520 npm run verify` exited 0: 14 offline suites, TypeScript, lint (0 errors/20 existing warnings), mock production build and 8 mock browser suites. Redis-backed assertions skipped locally. Targeted Playwright and geometry checks at 320/390/1440 found no horizontal overflow or console errors; browsing, upload, result reopening and comparison created no `/api/vto` requests, and each explicit Generate submitted exactly one. Details and before/after images: [UI-v2 playtest](../testing/UI_V2_PLAYTEST_2026-10-23.md).
+- Remaining observed gap: the default gallery shows only the two live-reviewed menswear references. At Sangeet the Women’s filter shows zero cards while six women’s Sangeet candidates exist behind “Explore reference outfits”. The reviewed-first default was not changed. No physical-device test, live YouCam task, deployment or independent `sf-reviewer` pass (that subagent is unavailable in this client).
+
 ## UI-v2 campaign checkpoint — 22 October 2026
 
 - Refined the existing branch into a blush/oxblood fashion edit: aligned two-model hero, local licensed Bodoni Moda headings, existing gold logo, visual occasion choices, consistent full-length catalogue grid and a roomier fitting dialog. Kept session state, explicit generation, access/permission, provenance and review gates intact.

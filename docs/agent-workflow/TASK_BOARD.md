@@ -6,7 +6,9 @@ Compact prioritized backlog. Update after material task-status changes. No item 
 
 Campaign home, local display type, photo occasion choices, catalogue grid/filter cleanup, truthful source notes and fitting-room polish are implemented and locally verified. Full mock verification passed (13 executed offline suites plus one Redis skip, 8 browser suites, TypeScript, build and lint with 0 errors/20 warnings). Code/CSS, React and TypeScript reviews found no actionable issues. Physical-device checks of this design and deployment remain pending. The local false-mode server reports `unconfigured`.
 
-Next frontend task: inspect the current checkpoint and refine only observed usability defects, using [the DeepSeek/Freebuff handoff](DEEPSEEK_UI_V2_HANDOFF.md). Confirm file ownership before another agent writes. The live-quality, judge-access and submission gates below remain unchanged.
+23 October playtest: fixed step-transition scroll retention, the off-screen bottom-nav wardrobe form, and the mock/live result label sitting below the fold. `TEST_PORT=3520 npm run verify` passed (14 offline suites, 8 mock browser suites, TypeScript, 0 lint errors/20 warnings, mock build); Redis assertions skipped locally. See [the playtest record](../testing/UI_V2_PLAYTEST_2026-10-23.md).
+
+Next frontend task: decide how to surface labelled women’s candidate references when the default reviewed-only gallery has no women’s match, then implement that small browse fix with a focused browser regression. Use [the DeepSeek/Freebuff handoff](DEEPSEEK_UI_V2_HANDOFF.md); confirm file ownership before another agent writes. The live-quality, judge-access and submission gates below remain unchanged.
 
 ## Current milestone queue — 22 October 2026
 

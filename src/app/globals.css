@@ -310,6 +310,7 @@ a, button { touch-action: manipulation; }
 .sf-result-status svg { flex-shrink: 0; }
 .sf-result-status.is-live { color: #456241; }
 .sf-result-caption { font-size: 11px; line-height: 1.6; color: var(--sf-muted); margin-top: 7px; }
+.sf-result .sf-result-image { margin-top: 12px; }
 .sf-dialog-actions { padding: 16px 24px max(16px, env(safe-area-inset-bottom)); border-top: 1px solid var(--sf-line); display: flex; flex-wrap: wrap; gap: 8px; }
 .sf-dialog-actions .sf-button-primary { flex: 1; }
 .sf-dialog-actions p { flex: 0 0 100%; font-size: 10px; color: var(--sf-muted); text-align: center; margin-top: 3px; }

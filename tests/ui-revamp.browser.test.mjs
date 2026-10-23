@@ -63,7 +63,15 @@ try {
   }
   await page.setViewportSize({ width: 375, height: 812 });
   await page.getByRole("button", { name: "Reception", exact: true }).click();
+  await page.getByRole("heading", { name: "A little more you." }).waitFor();
+  await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(() => Math.round(window.scrollY)), 0, "occasion step must reset the previous scroll offset");
+  const stepHeading = await page.getByRole("heading", { name: "A little more you." }).boundingBox();
+  const navbar = await page.locator(".sf-navbar").boundingBox();
+  assert(stepHeading && navbar && stepHeading.y >= navbar.height, "step heading must be visible below the sticky navbar");
   await page.getByRole("button", { name: "Skip for now, explore outfits" }).click();
+  await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(() => Math.round(window.scrollY)), 0, "gallery step must reset the previous scroll offset");
   await page.getByRole("heading", { name: "Start with something you own." }).waitFor();
   assert.equal(await page.locator(".sf-outfit-card").count(), 0, "unreviewed references must not masquerade as recommendations");
   assert.equal(skinRequests, 0);
@@ -107,6 +115,13 @@ try {
   await page.getByRole("button", { name: "Remove My burgundy kurta from shortlist", exact: true }).click();
   await page.getByRole("heading", { name: "Keep a look you love." }).waitFor();
   await page.getByRole("button", { name: "Shortlist (0)", exact: true }).click();
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.getByRole("navigation", { name: "App navigation" }).getByRole("button", { name: "My clothes" }).click();
+  await page.waitForTimeout(300);
+  const wardrobeForm = page.getByRole("form", { name: "Add your own outfit" });
+  const wardrobeBox = await wardrobeForm.boundingBox();
+  assert(wardrobeBox && wardrobeBox.y >= 0 && wardrobeBox.y < 812, "My clothes must bring the inline form into view from a scrolled gallery");
+  await page.getByRole("button", { name: "Close outfit form" }).click();
   await addOutfit("My gold outfit", "full_body", photos.alternate);
   assert.equal(await board.getByLabel("Outfit for Reception").inputValue(), receptionChoice, "adding another garment must not replace a planned look");
   await page.getByRole("searchbox", { name: "Search outfit ideas" }).fill("burgundy");
@@ -143,7 +158,10 @@ try {
   await opener.click();
   await noNewTasks(1, "reopening a pending task must not submit a second one");
   releaseHeld(); holdResponse = false;
-  await page.getByText("Mock preview — reference outfit, not a personal try-on", { exact: true }).waitFor();
+  const mockStatus = page.getByText("Mock preview — reference outfit, not a personal try-on", { exact: true });
+  await mockStatus.waitFor();
+  const statusBox = await mockStatus.boundingBox();
+  assert(statusBox && statusBox.y >= 0 && statusBox.y < 812, "mock result label must be visible with the result, not below the fold");
   const result = page.getByAltText("Try-on result for My burgundy kurta");
   assert.equal(await result.evaluate(img => getComputedStyle(img).objectFit), "contain");
   await dialog.getByRole("button", { name: "Show original", exact: true }).click();
