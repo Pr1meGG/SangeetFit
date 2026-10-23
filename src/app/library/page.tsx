@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, House, Search } from "lucide-react";
+import { ArrowLeft, House, Search, Shirt, Heart } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import GarmentCredit from "@/components/GarmentCredit";
 import { INDIAN_WEAR_LIBRARY } from "@/data/indian-wear";
@@ -20,6 +20,21 @@ export default function GarmentLibrary() {
   const [occasion, setOccasion] = useState("all");
   const [referencesOnly, setReferencesOnly] = useState(true);
   const [showArchive, setShowArchive] = useState(false);
+  const [generationMode, setGenerationMode] = useState<"checking" | "mock" | "live" | "unconfigured" | "error">("checking");
+  useEffect(() => {
+    const controller = new AbortController();
+    void (async () => {
+      try {
+        const response = await fetch("/api/mode", { signal: controller.signal });
+        const data: { mode?: string } = await response.json();
+        if (!response.ok || !["mock", "live", "unconfigured"].includes(data.mode ?? "")) throw new Error("Mode unavailable");
+        if (!controller.signal.aborted) setGenerationMode(data.mode as "mock" | "live" | "unconfigured");
+      } catch {
+        if (!controller.signal.aborted) setGenerationMode("error");
+      }
+    })();
+    return () => controller.abort();
+  }, []);
   const visibleCollection = showArchive || query.trim() ? [...EDITORIAL_LOOKS, ...INDIAN_WEAR_LIBRARY] : EDITORIAL_LOOKS;
   const outfits = visibleCollection.filter(outfit =>
     (audience === "all" || outfit.audience === audience) &&
@@ -37,7 +52,13 @@ export default function GarmentLibrary() {
         <header className="sf-library-header">
           <p className="sf-editorial-eyebrow">SangeetFit collection</p>
           <h1>The celebration edit.</h1>
-          <p className="sf-editorial-subhead">Browse without a photo. To try a look, add a clear head-to-toe photo and tap Generate.</p>
+          <p className="sf-editorial-subhead" role="status">{generationMode === "live" || generationMode === "mock"
+            ? "Browse without a photo. To try a look, add a clear head-to-toe photo and tap Generate."
+            : generationMode === "checking"
+              ? "Browse without a photo. Checking whether virtual try-on is available…"
+              : generationMode === "error"
+                ? "Browse without a photo. Try-on availability could not be checked. You can still explore outfit ideas."
+                : "Browse without a photo. Virtual try-on is unavailable on this preview, but you can still explore the collection."}</p>
           <p className="sf-editorial-subhead sf-library-note">{EDITORIAL_LOOKS.length} original outfit concepts. Two passed a live pilot on one photo; the rest remain unreviewed. Older sourced references are in filters.</p>
         </header>
 
@@ -111,7 +132,12 @@ export default function GarmentLibrary() {
           </div>
         )}
       </div>
-      <nav className="sf-bottom-nav sf-bottom-nav-library" aria-label="App navigation"><Link href="/"><House size={20} />For you</Link><Link href="/library" aria-current="page"><Search size={20} />Explore</Link></nav>
+      <nav className="sf-bottom-nav sf-bottom-nav-library" aria-label="App navigation">
+        <Link href="/"><House size={20} />For you</Link>
+        <Link href="/library" aria-current="page"><Search size={20} />Explore</Link>
+        <Link href="/?step=3&view=clothes"><Shirt size={20} />My clothes</Link>
+        <Link href="/?step=3&view=shortlist"><Heart size={20} />Shortlist</Link>
+      </nav>
     </main>
   );
 }

@@ -67,7 +67,7 @@ try {
   const baseUrl = process.env.TEST_ORIGIN || process.env.TEST_BASE_URL || "http://localhost:3100";
   await page.goto(baseUrl);
   assert.deepEqual(await page.request.get(`${baseUrl}/api/mode`).then(r => r.json()), { mode: "mock" });
-  await page.getByRole("button", { name: "Sangeet", exact: true }).click();
+  await page.getByRole("button", { name: "Sangeet Dance-floor moments", exact: true }).click();
   await page.getByRole("button", { name: "Use camera instead" }).click();
   await page.getByText("Move a little closer", { exact: true }).waitFor({ timeout: 10000 });
   assert.equal(await page.evaluate(() => window.cameraTest.created), 1);
@@ -157,7 +157,7 @@ try {
 
   blockModel = true;
   await page.reload();
-  await page.getByRole("button", { name: "Sangeet", exact: true }).click();
+  await page.getByRole("button", { name: "Sangeet Dance-floor moments", exact: true }).click();
   await page.getByRole("button", { name: "Use camera instead" }).click();
   await page.getByText("Live face tracking unavailable — center your face in the oval", { exact: true }).waitFor();
   assert.equal(await page.getByRole("button", { name: "Capture anyway", exact: true }).isEnabled(), true);

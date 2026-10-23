@@ -2,6 +2,14 @@
 
 Durable, verified facts about SangeetFit. Prior-generation results not rechecked in the current working tree are explicitly labeled **[prior report]**. Update this file when durable facts, verified outcomes, major decisions, or blockers change — not as a running log.
 
+## Wardrobe decision checkpoint — 23 October 2026
+
+- Comparison now assigns an outfit to the named current event. Assignment is parent-owned by outfit ID, shared across photo versions; result removal preserves it, garment removal clears it, session reset clears the plan. Deliberate out-of-tag references remain representable in selectors with an explicit note.
+- Board counters report valid event assignments, distinct owned outfits and planned rewears, excluding reference outfits from owned counts. Print/Save as PDF renders only event/garment/source text and counts; images, private result URLs and access codes are excluded. Photos remain session-only.
+- Final `TEST_PORT=3533 npm run verify` exited 0: 16 enumerated offline suites (15 executed, real Redis skipped), canonical TypeScript, lint with 0 errors/22 warnings, mock production build and all 10 mock browser suites. `git diff --check` passed. Actual exported PDF read-back passed: one page, all five events, zero images/annotations or synthetic private markers; rendered for visual inspection. 320/390/1440 checks passed without overflow, with keyboard printing and a ≥44px print action.
+- All 11 starting TypeScript errors were repaired while preserving the unmounted family/combo/persistence drafts. Colour inspiration is explicitly exploratory. Independent code/delivery and TypeScript reviews found no actionable issues; the React reference-selector finding was reproduced and fixed before final verification.
+- Pilot, 3–5 guest facilitator sheet, judging preflight and demo/submission materials are prepared. No live YouCam request, deployment, budget change, participant contact, video publication or submission occurred. Actual-device printing/live saving and judge access remain pending. See [full verification and synthetic artifacts](../testing/WARDROBE_DECISION_CHECK_2026-10-23.md).
+
 ## UI-v2 gallery reference checkpoint — 23 October 2026
 
 - The gallery now shows two explicitly separated groups by default: reviewed recommendations from `recommendOutfits`, and a following “Reference outfits for {occasion}” section from the new `recommendReferenceOutfits` helper. The recommendation grid never includes unreviewed catalogue candidates, candidate cards keep the “Unreviewed reference” badge and `sf-reference-reason` styling, and own uploads are excluded from the reference group. The meta line reports both counts; the shortlist continues to show saved looks only.

@@ -2,6 +2,12 @@
 
 Compact prioritized backlog. Update after material task-status changes. No item is complete without verified evidence — do not mark anything done solely on a prior report.
 
+## Wardrobe decision follow-through — 23 October 2026
+
+Local app work is implemented and verified: baseline errors repaired; comparison assigns events; owned-only planned rewear counters and private text-only PDF export work. Final full mock verification exited 0 (16 offline suites enumerated, real Redis skipped; TypeScript/build; 0 lint errors/22 warnings; 10 browser suites). Code/TypeScript review and the repaired React finding are recorded in [the verification record](../testing/WARDROBE_DECISION_CHECK_2026-10-23.md).
+
+Next gates: declare/approve the [two owned-garment live cases](../testing/OWN_GARMENT_PILOT.md), arrange [3–5 real guest sessions](../testing/WARDROBE_GUEST_PLAYTEST.md), and complete the separately approved [judging release/budget/device preflight](../testing/JUDGING_ACCESS_PREFLIGHT.md). These outcomes are pending; prepared protocols are not evidence of a successful live pilot, user study or deployment. Recording permitted final footage and submission remain pending.
+
 ## UI-v2 checkpoint — 22 October 2026
 
 Campaign home, local display type, photo occasion choices, catalogue grid/filter cleanup, truthful source notes and fitting-room polish are implemented and locally verified. Full mock verification passed (13 executed offline suites plus one Redis skip, 8 browser suites, TypeScript, build and lint with 0 errors/20 warnings). Code/CSS, React and TypeScript reviews found no actionable issues. Physical-device checks of this design and deployment remain pending. The local false-mode server reports `unconfigured`.

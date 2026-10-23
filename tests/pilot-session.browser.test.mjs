@@ -42,12 +42,19 @@ try {
   assert.equal(requests[0].fullBodyDataUrl, requests[1].fullBodyDataUrl);
   assert.equal(await page.getByRole("region", { name: "Compare session looks" }).locator("article").count(), 2);
   assert.equal(await page.getByText(/These looks use different source photos/).count(), 0);
+  // A deliberate cross-occasion choice must remain representable by the event selector.
+  await page.getByRole("button", { name: "Haldi", exact: true }).click();
+  await page.getByRole("region", { name: "Compare session looks" }).locator("article").filter({ hasText: "Sapphire Embroidered Sherwani" }).getByRole("button", { name: "Plan for Haldi", exact: true }).click();
+  const board = page.getByRole("region", { name: "Five moments. One wardrobe.", exact: true });
+  assert.equal(await board.getByLabel("Outfit for Haldi").inputValue(), "concept-sapphire-sherwani", "the selected out-of-tag reference needs a corresponding select option");
+  assert.match(await board.getByLabel("Outfit for Haldi").locator("option:checked").textContent(), /Sapphire Embroidered Sherwani/);
+  assert.match(await board.getByRole("status", { name: "Wardrobe plan summary" }).innerText(), /0 owned outfits used/);
   await page.getByRole("searchbox", { name: "Search outfit ideas" }).fill("no-such-outfit");
   await page.getByRole("button", { name: "Browse reference candidates" }).click();
   assert.equal(await page.getByRole("searchbox", { name: "Search outfit ideas" }).inputValue(), "");
   assert(await page.locator(".sf-reference-card").count() > 0, "empty-state recovery must show candidates in their labelled group");
   assert.equal(requests.length, 2, "browsing after comparison must not generate");
-  console.log("PASS: two candidate looks compare on one photo with exactly two explicit mock requests");
+  console.log("PASS: two candidate looks, explicit cross-occasion planning and comparison use exactly two mock requests");
 } finally {
   await browser.close();
 }

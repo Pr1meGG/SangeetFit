@@ -53,7 +53,7 @@ try {
   assert(Number(await slider.inputValue()) >= 70, "touch must move before/after range");
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   await dialog.getByRole("button", { name: "Close try-on" }).tap();
-  await page.getByRole("button", { name: "Choose look", exact: true }).tap();
+  await page.getByRole("button", { name: "Plan for Sangeet", exact: true }).tap();
   await page.getByRole("button", { name: "Show original", exact: true }).tap();
   assert.equal(requests, 2, "comparison and original view must not generate");
   console.log("PASS: Android touch emulation, 360–851px layouts, local preparation, budget error, slider and choice; physical device untested");

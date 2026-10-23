@@ -79,7 +79,7 @@ try {
     }
   }
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.getByRole("button", { name: "Reception", exact: true }).click();
+  await page.getByRole("button", { name: "Reception An evening to remember", exact: true }).click();
   await page.getByRole("heading", { name: "A little more you." }).waitFor();
   await page.waitForTimeout(150);
   assert.equal(await page.evaluate(() => Math.round(window.scrollY)), 0, "occasion step must reset the previous scroll offset");
@@ -89,7 +89,7 @@ try {
   await page.getByRole("button", { name: "Use camera instead" }).click();
   assert(await page.getByRole("navigation", { name: "App navigation" }).isVisible(), "phone navigation must remain available during selfie capture");
   await page.getByRole("navigation", { name: "App navigation" }).getByRole("button", { name: "For you" }).click();
-  await page.getByRole("button", { name: "Reception", exact: true }).click();
+  await page.getByRole("button", { name: "Reception An evening to remember", exact: true }).click();
   await page.getByRole("heading", { name: "A little more you." }).waitFor();
   assert(await page.getByRole("button", { name: "Use camera instead" }).isVisible(), "returning to the selfie step must require a fresh camera action");
   assert.equal(await page.locator(".cap-stage").count(), 0, "leaving the selfie step must close the camera");
@@ -208,7 +208,7 @@ try {
   const receptionChoice = await board.getByLabel("Outfit for Reception").inputValue();
   assert(receptionChoice, "uploading from an empty event assigns the new outfit there");
   await board.getByLabel("Outfit for Sangeet").selectOption({ label: "My burgundy kurta" });
-  assert.equal(await board.getByText(/Worn again/).count(), 2, "one owned garment can be planned for two events");
+  assert.equal(await board.getByText(/Planned rewear/).count(), 2, "one owned garment can be planned for two events");
   await noNewTasks(0, "adding a garment only saves session metadata");
   assert.match(await page.locator(".sf-recommendation-reason").innerText(), /reception/i);
   await page.getByRole("button", { name: "Add My burgundy kurta to shortlist", exact: true }).click();
@@ -297,8 +297,8 @@ try {
   await page.getByRole("dialog", { name: "Zoom My gold outfit" }).waitFor();
   await page.keyboard.press("Escape");
   assert.equal(await page.getByRole("dialog").count(), 0);
-  await comparison.getByRole("button", { name: "Choose look", exact: true }).first().click();
-  assert.equal(await comparison.getByRole("button", { name: "My choice", exact: true }).getAttribute("aria-pressed"), "true");
+  await comparison.getByRole("button", { name: "Plan for Reception", exact: true }).first().click();
+  assert.equal(await comparison.getByRole("button", { name: "Planned for Reception", exact: true }).getAttribute("aria-pressed"), "true");
   assert.equal(await comparison.getByRole("link", { name: "Save or open My gold outfit", exact: true }).getAttribute("href"), fixture);
   await noNewTasks(2, "compare, original, zoom, choosing and save links consume no tasks");
   console.log("PASS: two saved looks retain same source, compare/original/zoom/choice/save require no task");
@@ -380,7 +380,7 @@ try {
   await page.getByText("All my clothes (2)").click();
   await page.getByRole("button", { name: "Remove garment My burgundy kurta" }).click();
   assert.equal(await board.getByLabel("Outfit for Sangeet").inputValue(), "");
-  assert.equal(await board.getByLabel("Outfit for Reception").inputValue(), "");
+  assert.equal(await board.getByLabel("Outfit for Reception").locator("option:checked").textContent(), "My gold outfit", "removing another garment preserves the outfit chosen from comparison");
   await noNewTasks(7, "removing a planned garment clears its slots without generating");
   console.log("PASS: five-event board assigns candidate inspiration, reuses owned clothes and clears removed garments without tasks");
 } finally { await browser.close(); }

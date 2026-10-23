@@ -8,7 +8,8 @@ Plan what to wear across five wedding celebrations using clothes you already own
 2. Upload a garment photo and confirm its name, upper-body/full-outfit category, colour, style level and occasion tags. Clothes stay in the current page session.
 3. See recommendations explained by actual occasion/style/colour metadata. Skin colour does not prohibit outfits or produce suitability percentages. You can also try an owned garment outside its suggested occasions.
 4. Open a look, consent to live-provider photo processing, add a full-body person photo and press **Generate try-on**. Uploading, browsing and opening do not generate tasks.
-5. Compare the two recent results, view originals, zoom, choose a look and save/open the image. Different source-photo versions are labelled. Reopening/comparing/reloading an image creates no new task.
+5. Compare the two recent results, view originals and zoom. **Plan for Sangeet** (or the selected occasion) assigns that outfit to the event board; **Planned for Sangeet** reflects the actual assignment. Different source-photo versions are labelled. Removing a result preserves the outfit assignment; removing the garment clears its event slots.
+6. Check events planned, distinct owned outfits used and planned rewears, then **Print / Save as PDF**. The dedicated text-only export includes all five events, garment names, owned/reference labels and undecided slots. It excludes photos, generated images, access codes and provider links. Comparing, planning and printing submit no generation tasks.
 
 Catalogue outfit sharing restores the selected outfit and occasion, not personal photos or results. Uploaded clothes do not get public links. Refreshing/leaving can clear clothes, photos, results and choices. Provider links may expire; opening/downloading must be checked on real phones. Top-and-bottom combinations and a permanent wardrobe are future work.
 
@@ -17,12 +18,12 @@ Catalogue outfit sharing restores the selected outfit and occasion, not personal
 | Area | Implemented behaviour | Evidence limit |
 |---|---|---|
 | Own clothes | JPEG/PNG preprocessing, confirmed metadata, validated two-image VTO request | Uploaded-garment live quality not established |
-| Five-event board | Session-only occasion choices, deliberate rewear, candidate inspiration separated from owned clothes | Planning usefulness not yet user-tested; selections clear on refresh/leaving |
+| Five-event board | Session-only occasion assignments from comparison or selectors, valid owned-only rewear counts, text-only print/PDF | Planning usefulness not yet guest-tested; selections clear on refresh/leaving; native-device PDF behavior must be checked |
 | Recommendations | Occasion/audience filtering; declared style, explicit colour, stable order; reasons | Metadata policy, not learned suitability or sizing |
 | Catalogue | 26 original AI model/outfit concepts across five occasions, plus 14 credited archive photos (eight wired candidates) and four legacy mappings; photo-free browsing | Emerald Silk Kurta and Sapphire Embroidered Sherwani have limited one-source live reviews; other references remain unreviewed. Concepts are not seller products |
 | Try-on | YouCam Cloth V4 upload → submit → poll; explicit action; one client request pending; no automatic retry | Two private live reference results on one person scored 5/5 face and garment by that participant; own-garment quality remains untested |
 | Compare/save | Two session results, source version/mode, live before/after slider, originals/zoom/choice, save/open | No permanent wardrobe; actual-device save behaviour pending |
-| Optional skin | Separate selfie → skin-tone-analysis API; mock sample visibly labelled | Separate evidence; not a VTO-quality substitute |
+| Optional skin | Separate selfie → skin-tone-analysis API; mock sample visibly labelled; exploratory colour ideas | Palette heuristic does not measure undertone or suitability; separate from VTO-quality evidence |
 | Seller action | Exact verified HTTPS product-link metadata supported | No current products/permissions established, so no seller buttons shown |
 
 Primary recommendations require a matching photographic reference, provenance/permission and a visual live-output review. A wired candidate is not a reviewed result. The two pilot-reviewed men's concepts are eligible; a fresh session also offers **Add my outfit**, with unreviewed candidates available separately at `/library`. Unsupported cards do not fill the recommendations.
@@ -84,6 +85,8 @@ git diff --check
 ## Release and submission
 
 [Milestones](docs/plans/2026-10-20-personal-stylist-milestones.md), [project state](docs/agent-workflow/PROJECT_STATE.md), [user validation](docs/testing/REAL_USER_VALIDATION.md), [release procedure](docs/testing/RELEASE.md), [Android checklist](docs/testing/ANDROID_CHECK.md), [demo script](docs/submission/DEMO_SCRIPT.md) and [submission checklist](docs/submission/PITCH_CHECKLIST.md) track implementation separately from live/release evidence.
+
+Next evidence gates: the [two-owned-garment pilot](docs/testing/OWN_GARMENT_PILOT.md), [3–5 guest playtest](docs/testing/WARDROBE_GUEST_PLAYTEST.md) and [judge-access preflight](docs/testing/JUDGING_ACCESS_PREFLIGHT.md). These are prepared protocols, not completed live runs, user studies or release verification.
 
 Budget snapshot verified after the 21 October pilot: 910 remaining units; Cloth V4 cost 2 units/call and optional facial colour analysis cost 20. The 25% reserve, rounded up, is 228 units. The two completed pilot tasks used 4 units; the other 14 distinct men's references require separate authorization. Recheck balance and pricing before any task; this snapshot is not approval to spend. See [budget evidence](docs/testing/BENCHMARKS.md).
 

@@ -10,7 +10,8 @@ import { X, CheckCircle, Shirt, ArrowLeft, ArrowRight, ArrowUpRight, Palette, He
 import Navbar from "@/components/Navbar";
 import { OUTFITS, type Outfit, type Occasion, type Audience, type StyleLevel } from "@/data/outfits";
 import { recommendOutfits, recommendReferenceOutfits, getVerifiedSellerUrl } from "@/lib/styling";
-import type { SessionOutfit, GeneratedLook } from "@/lib/session";
+import { getColorName, getRecommendedColors } from "@/lib/palette";
+import { summarizeWardrobePlan, type SessionOutfit, type GeneratedLook } from "@/lib/session";
 import WardrobeUpload from "@/components/WardrobeUpload";
 import LookComparison from "@/components/LookComparison";
 import BeforeAfterSlider from "@/components/BeforeAfterSlider";
@@ -18,6 +19,7 @@ import { compressImageForUpload, PERSON_UPLOAD_BYTES, assertVtoPayloadSize } fro
 import { FaceCameraCapture } from "@/components/FaceCameraCapture";
 import GarmentCredit from "@/components/GarmentCredit";
 import WeddingWeekBoard from "@/components/WeddingWeekBoard";
+import WardrobePlanPrint from "@/components/WardrobePlanPrint";
 
 function PreviewAccess({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   return <label className="sf-access">Preview access code<input type="password" value={value} onChange={event => onChange(event.target.value)} autoComplete="off" spellCheck={false} maxLength={256} /><span>Your invite code stays in this page session. Browsing does not need a code.</span></label>;
@@ -30,6 +32,8 @@ const OCCASIONS: { id: Occasion; label: string }[] = [
   { id: "wedding", label: "Wedding" },
   { id: "reception", label: "Reception" },
 ];
+
+const OCCASION_TAGLINES = ["Dance-floor moments", "Colourful afternoons", "A little sunshine", "The big celebration", "An evening to remember"] as const;
 
 const OCCASION_IMAGES: Record<Occasion, string> = {
   sangeet: "midnight-lehenga.jpg",
@@ -46,6 +50,7 @@ const AUDIENCES: { id: Audience | "all"; label: string }[] = [
 ];
 
 type Step = 1 | 2 | 3;
+type RestoreParams = { step?: Step; occasion?: Occasion; skin?: string; vto?: string; view?: "clothes" | "shortlist" };
 
 interface SkinResult {
   success: boolean;
@@ -65,7 +70,7 @@ interface VTOResult {
 function SearchParamHandler({
   onRestore,
 }: {
-  onRestore: (params: { step?: Step; occasion?: Occasion; skin?: string; vto?: string }) => void;
+  onRestore: (params: RestoreParams) => void;
 }) {
   const searchParams = useSearchParams();
   useEffect(() => {
@@ -73,13 +78,15 @@ function SearchParamHandler({
     const o = searchParams.get("occasion") as Occasion | null;
     const sk = searchParams.get("skin");
     const v = searchParams.get("vto");
+    const view = searchParams.get("view");
 
-    const result: { step?: Step; occasion?: Occasion; skin?: string; vto?: string } = {};
+    const result: RestoreParams = {};
     if (o && OCCASIONS.some(x => x.id === o)) result.occasion = o;
     if (sk && /^#[0-9A-Fa-f]{6}$/.test(sk)) result.skin = sk;
     if (s === "2") result.step = 2;
     else if (s === "3") result.step = 3;
     if (v) result.vto = v;
+    if (view === "clothes" || view === "shortlist") { result.step = 3; result.view = view; }
 
     if (Object.keys(result).length > 0) onRestore(result);
   }, [searchParams, onRestore]);
@@ -259,10 +266,12 @@ export default function Home() {
     } finally { if (epoch === sessionEpoch.current) { inFlight.current = false; setVtoLoading(false); } }
   }, [fullBodyDataUrl, photoProcessing, photoVersion, rateLimited, accessCode]);
 
-  const handleRestore = useCallback((params: { step?: Step; occasion?: Occasion; skin?: string; vto?: string }) => {
+  const handleRestore = useCallback((params: RestoreParams) => {
     if (params.occasion) setOccasion(params.occasion);
     if (params.skin) { setSkinColor(params.skin); setSkinMode("link"); }
     if (params.step) setStep(params.step);
+    if (params.view === "clothes") { setShowShortlist(false); setShowUpload(true); setStep(3); }
+    if (params.view === "shortlist") { setShowUpload(false); setShowShortlist(true); setQuery(""); setAudience("all"); setStep(3); }
     if (params.vto) {
       const outfit = OUTFITS.find(item => item.id === params.vto && item.vtoSupported && item.tryOnStatus !== "blocked");
       if (outfit) { setStep(3); setVtoModal({ outfit, resultUrl: "", mode: "" }); }
@@ -379,7 +388,7 @@ export default function Home() {
     finally { if (selection === photoSelection.current) setPhotoProcessing(false); }
   };
 
-  return (
+  return (<>
     <main className="sf-app" id="main-content" onClickCapture={event => {
       const anchor = (event.target as HTMLElement).closest?.("a[href]");
       if (!hasSession || !(anchor instanceof HTMLAnchorElement) || anchor.target === "_blank" || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
@@ -416,12 +425,17 @@ export default function Home() {
               <div className="sf-occasions">
                 {OCCASIONS.map((o, i) => {
                   const Icon = [Music2, Leaf, Sun, Heart, Sparkles][i];
-                  return <button key={o.id} aria-label={o.label} className={`sf-occasion sf-occasion-${o.id}`} onClick={() => { setOccasion(o.id); setStep(2); setShowShortlist(false); }}>
+                  return <button key={o.id} className={`sf-occasion sf-occasion-${o.id}`} onClick={() => { setOccasion(o.id); setStep(2); setShowShortlist(false); }}>
                     <img src={`/garment_test/editorial/${OCCASION_IMAGES[o.id]}`} alt="" loading="lazy" width={768} height={1024} />
-                    <span className="sf-occasion-caption"><span className="sf-occasion-name"><Icon size={16} strokeWidth={1.5} /><strong>{o.label}</strong><ArrowUpRight size={17} /></span><span>{["Dance-floor moments", "Colourful afternoons", "A little sunshine", "The big celebration", "An evening to remember"][i]}</span></span>
+                    <span className="sf-occasion-caption"><span className="sf-occasion-name"><Icon size={16} strokeWidth={1.5} /><strong>{o.label}</strong><ArrowUpRight size={17} /></span><span>{OCCASION_TAGLINES[i]}</span></span>
                   </button>;
                 })}
               </div>
+            </section>
+            <section className="sf-editorial-break" aria-label="How it works">
+              <strong>Your photo. One try-on. Five events.</strong>
+              <p>Browse curated concepts, add your own clothes, then see a look on you before you decide. Every look keeps its review status.</p>
+              <button className="sf-text-link" onClick={() => { setShowShortlist(false); setStep(3); }}>Start with a look <ArrowRight size={17} /></button>
             </section>
             <section className="sf-editorial-wrap sf-home-footer sf-editorial-aside"><div><Sparkles size={20} /><p><strong>Just looking for inspiration?</strong><span>Explore the reference collection. No selfie needed.</span></p></div><Link href="/library" className="sf-text-link">See full collection <ArrowRight size={17} /></Link></section>
             <div className="sf-photo-attribution"><p>AI-generated outfit concepts · review status shown per look</p></div>
@@ -459,7 +473,38 @@ export default function Home() {
               <p className="sf-privacy"><ShieldCheck size={15} /> Analyze sends this selfie to YouCam in live mode. The photo stays in this page session on our side; provider retention is separate.</p>
               {skinError && <p role="alert" className="sf-alert sf-alert-error"><AlertCircle size={17} />{skinError}</p>}
               {skinLoading && <p role="status" className="sf-alert"><Loader2 size={18} className="animate-spin" />Analyzing with YouCam API…</p>}
-              {skinColor && <div className="sf-tone-result" role="status"><div className="sf-tone-swatch" style={{ backgroundColor: skinColor }} /><div><strong>{skinMode === "link" ? "Shared colour reference" : skinMode === "mock" ? "Sample skin-tone reference" : "Detected skin tone"}</strong><span>{skinColor}{skinMode === "mock" ? " · Mock sample" : " · Colour reference"}</span></div><CheckCircle size={20} /><button className="sf-button sf-button-primary sf-full" onClick={() => setStep(3)}>Continue to gallery <ArrowRight size={17} /></button></div>}
+              {skinColor && (
+                <div className="sf-tone-result" role="status">
+                  <div className="sf-tone-swatch" style={{ backgroundColor: skinColor }} />
+                  <div>
+                    <strong>{skinMode === "link" ? "Shared colour reference" : skinMode === "mock" ? "Sample skin-tone reference" : "Detected skin tone"}</strong>
+                    <span>{skinColor}{skinMode === "mock" ? " · Mock sample" : " · Colour reference"}</span>
+                  </div>
+                  <CheckCircle size={20} />
+                  <button className="sf-button sf-button-primary sf-full" onClick={() => setStep(3)}>
+                    Continue to gallery <ArrowRight size={17} />
+                  </button>
+                </div>
+              )}
+              {skinColor && (
+                <div className="sf-palette-viz" aria-label="Optional colour inspiration">
+                  <h4>Explore colour ideas</h4>
+                  <div className="sf-palette-row">
+                    {(() => {
+                      const recommended = getRecommendedColors(skinColor);
+                      return recommended.slice(0, 6).map((color, i) => (
+                        <span
+                          key={i}
+                          className="sf-palette-swatch"
+                          style={{ backgroundColor: color }}
+                          title={getColorName(color)}
+                        />
+                      ));
+                    })()}
+                  </div>
+                  <p className="sf-palette-note">Exploratory colour ideas, not an undertone analysis or a measure of what suits you. Your preferences lead the way.</p>
+                </div>
+              )}
             </div>
           </section>
         )}
@@ -479,7 +524,7 @@ export default function Home() {
             <div className="sf-editorial-wrap sf-editorial-grid">{curated.map(({ outfit: item, reason }) => renderLookCard(item, reason, "recommended"))}</div>
             {!showShortlist && references.length > 0 && <section ref={referenceSection} tabIndex={-1} className="sf-reference-section" aria-labelledby="reference-outfits-heading"><div className="sf-section-heading"><div><span className="sf-context">The wider edit</span><h2 id="reference-outfits-heading">Reference outfits for {occasion.charAt(0).toUpperCase() + occasion.slice(1)}</h2><p>Unreviewed candidates, kept separate from reviewed recommendations. Nothing is generated until you tap Generate.</p></div><span className="sf-small-note">{references.length} candidate{references.length === 1 ? "" : "s"}</span></div><div className="sf-editorial-wrap sf-editorial-grid">{references.map(({ outfit: item, reason }) => renderLookCard(item, reason, "reference"))}</div></section>}
             {owned.length > 0 && <details className="sf-my-clothes"><summary>All my clothes ({owned.length})</summary><p>Your outfits stay here even when they don’t match this occasion’s tags. You can always try one manually.</p><div className="sf-owned-list">{owned.map(item => <div key={item.id}><img src={item.imageUrl} alt="" /><div><strong>{item.name}</strong><span>{item.occasionTags.join(", ")}</span></div><button className="sf-text-link" onClick={() => openVTO(item)}>Try my {item.name}</button><button className="sf-icon-button" aria-label={`Remove garment ${item.name}`} disabled={vtoLoading} onClick={() => removeOwned(item.id)}><X size={17} /></button></div>)}</div></details>}
-            <LookComparison key={currentSession} looks={looks} onRemove={id => setLooks(previous => previous.filter(look => look.id !== id))} />
+            <LookComparison key={currentSession} looks={looks} onRemove={id => setLooks(previous => previous.filter(look => look.id !== id))} occasionLabel={OCCASIONS.find(event => event.id === occasion)!.label} plannedOutfitId={weekPlan[occasion]} onPlanOutfit={outfitId => setWeekPlan(previous => ({ ...previous, [occasion]: outfitId }))} />
             <WeddingWeekBoard occasions={OCCASIONS} outfits={allOutfits} plan={weekPlan} onChoose={(event, outfitId) => setWeekPlan(previous => ({ ...previous, [event]: outfitId }))} onTryOn={(event, outfit) => { setOccasion(event); openVTO(outfit); }} onAddOwn={event => { setOccasion(event); setShowUpload(true); }} />
             <p className="sf-gallery-footnote"><Sparkles size={16} />Recommendations use confirmed tags and preferences. Your personal style gets the final say.</p>
           </section>
@@ -517,5 +562,6 @@ export default function Home() {
         </div>
       )}
     </main>
-  );
+    <WardrobePlanPrint summary={summarizeWardrobePlan(OCCASIONS, allOutfits, weekPlan)} />
+  </>);
 }
