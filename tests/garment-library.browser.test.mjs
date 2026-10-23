@@ -32,6 +32,15 @@ try {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await browseLink.click();
   await page.getByRole("heading", { name: "The celebration edit." }).waitFor();
+  const collectionNav = page.getByRole("navigation", { name: "App navigation" });
+  assert(await collectionNav.isVisible(), "phone navigation must remain available in the collection");
+  assert.equal(await collectionNav.getByRole("link", { name: "For you" }).getAttribute("href"), "/");
+  assert.equal(await collectionNav.getByRole("link", { name: "Explore" }).getAttribute("aria-current"), "page");
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await page.waitForTimeout(100);
+  const navBounds = await collectionNav.boundingBox();
+  assert(navBounds && Math.abs(navBounds.y + navBounds.height - 700) <= 1, "phone navigation must stay fixed to the viewport after scrolling");
+  assert(await collectionNav.getByRole("link", { name: "For you" }).isVisible(), "phone navigation links must stay usable after scrolling");
   const occasions = page.getByRole("group", { name: "Choose occasion" });
   const collections = page.getByRole("group", { name: "Choose collection" });
   for (const label of ["All occasions", "Sangeet", "Mehendi", "Haldi", "Wedding", "Reception", "Everyone", "Women’s wear", "Men’s wear"]) {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft, House, Search } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import GarmentCredit from "@/components/GarmentCredit";
 import { INDIAN_WEAR_LIBRARY } from "@/data/indian-wear";
@@ -38,7 +38,7 @@ export default function GarmentLibrary() {
           <p className="sf-editorial-eyebrow">SangeetFit collection</p>
           <h1>The celebration edit.</h1>
           <p className="sf-editorial-subhead">Browse without a photo. To try a look, add a clear head-to-toe photo and tap Generate.</p>
-          <p className="sf-editorial-subhead">Browse {EDITORIAL_LOOKS.length} original AI outfit concepts. Two references passed a live pilot on one photo; the others remain unreviewed. Older sourced references are available in filters.</p>
+          <p className="sf-editorial-subhead sf-library-note">{EDITORIAL_LOOKS.length} original outfit concepts. Two passed a live pilot on one photo; the rest remain unreviewed. Older sourced references are in filters.</p>
         </header>
 
         <div className="sf-library-toolbar flex flex-wrap gap-6">
@@ -111,6 +111,7 @@ export default function GarmentLibrary() {
           </div>
         )}
       </div>
+      <nav className="sf-bottom-nav sf-bottom-nav-library" aria-label="App navigation"><Link href="/"><House size={20} />For you</Link><Link href="/library" aria-current="page"><Search size={20} />Explore</Link></nav>
     </main>
   );
 }

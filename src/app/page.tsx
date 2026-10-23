@@ -485,7 +485,12 @@ export default function Home() {
           </section>
         )}
       </div>
-      {!showFaceCamera && <nav className="sf-bottom-nav" aria-label="App navigation"><button aria-current={step !== 3 || !showShortlist ? "page" : undefined} onClick={() => { setStep(1); setShowShortlist(false); }}><House size={20} />For you</button><Link href="/library"><Search size={20} />Explore</Link><button onClick={() => { setStep(3); setShowUpload(true); setShowShortlist(false); }}><Shirt size={20} />My clothes</button><button aria-current={step === 3 && showShortlist ? "page" : undefined} onClick={() => { setStep(3); setShowShortlist(true); setQuery(""); setAudience("all"); }}><Heart size={20} />Shortlist{shortlistCount > 0 && <span>{shortlistCount}</span>}</button></nav>}
+      <nav className="sf-bottom-nav" aria-label="App navigation">
+        <button aria-current={step === 1 ? "page" : undefined} onClick={() => { setShowFaceCamera(false); setStep(1); setShowShortlist(false); }}><House size={20} />For you</button>
+        <Link href="/library"><Search size={20} />Explore</Link>
+        <button aria-current={step === 3 && showUpload && !showShortlist ? "page" : undefined} onClick={() => { setShowFaceCamera(false); setStep(3); setShowUpload(true); setShowShortlist(false); }}><Shirt size={20} />My clothes</button>
+        <button aria-current={step === 3 && showShortlist ? "page" : undefined} onClick={() => { setShowFaceCamera(false); setStep(3); setShowShortlist(true); setQuery(""); setAudience("all"); }}><Heart size={20} />Shortlist{shortlistCount > 0 && <span>{shortlistCount}</span>}</button>
+      </nav>
       {step === 3 && vtoModal && (
         <div className="sf-modal-backdrop" onClick={closeVTO}>
           <section className="sf-tryon-dialog" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="tryon-title" tabIndex={-1} onClick={event => event.stopPropagation()}>

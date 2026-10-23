@@ -55,7 +55,24 @@ try {
   for (const width of [320, 375, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `home overflows at ${width}`);
+    // The phone bar is locked: pinned to the viewport bottom at scroll 0 and after deep scroll.
+    const navLocked = await page.evaluate(() => {
+      const nav = document.querySelector(".sf-bottom-nav");
+      if (!nav || getComputedStyle(nav).display === "none") return null;
+      const rect = nav.getBoundingClientRect();
+      return Math.round(rect.bottom) === Math.round(innerHeight) && getComputedStyle(nav).position === "fixed";
+    });
+    if (width === 768 || width === 1440) assert.equal(navLocked, null, "desktop widths must not show the phone bar");
+    else {
+      assert(navLocked !== null && navLocked, `phone bar must sit pinned at viewport bottom at ${width}px`);
+      await page.mouse.wheel(0, 1200);
+      await page.waitForTimeout(150);
+      assert(await page.evaluate(() => { const r = document.querySelector(".sf-bottom-nav").getBoundingClientRect(); return Math.round(r.bottom) === Math.round(innerHeight); }), `phone bar must stay locked after scroll at ${width}px`);
+      await page.mouse.wheel(0, -1200);
+      await page.waitForTimeout(150);
+    }
     if (width === 1440) {
+      assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector(".sf-season")).fontSize), "11px", "eyebrow scale must settle at the shared 11px token");
       const copy = await page.locator(".sf-welcome-copy").boundingBox();
       const images = await page.locator(".sf-campaign-images").boundingBox();
       assert(copy && images && images.x >= copy.x + copy.width - 1, "desktop hero images must sit beside the copy");
@@ -69,10 +86,21 @@ try {
   const stepHeading = await page.getByRole("heading", { name: "A little more you." }).boundingBox();
   const navbar = await page.locator(".sf-navbar").boundingBox();
   assert(stepHeading && navbar && stepHeading.y >= navbar.height, "step heading must be visible below the sticky navbar");
+  await page.getByRole("button", { name: "Use camera instead" }).click();
+  assert(await page.getByRole("navigation", { name: "App navigation" }).isVisible(), "phone navigation must remain available during selfie capture");
+  await page.getByRole("navigation", { name: "App navigation" }).getByRole("button", { name: "For you" }).click();
+  await page.getByRole("button", { name: "Reception", exact: true }).click();
+  await page.getByRole("heading", { name: "A little more you." }).waitFor();
+  assert(await page.getByRole("button", { name: "Use camera instead" }).isVisible(), "returning to the selfie step must require a fresh camera action");
+  assert.equal(await page.locator(".cap-stage").count(), 0, "leaving the selfie step must close the camera");
   await page.getByRole("button", { name: "Skip for now, explore outfits" }).click();
   await page.waitForTimeout(150);
   assert.equal(await page.evaluate(() => Math.round(window.scrollY)), 0, "gallery step must reset the previous scroll offset");
   await page.getByRole("heading", { name: "Start with something you own." }).waitFor();
+  await page.setViewportSize({ width: 320, height: 844 });
+  const audienceRows = await page.locator(".sf-audiences button").evaluateAll(buttons => buttons.map(button => Math.round(button.getBoundingClientRect().top)));
+  assert.equal(new Set(audienceRows).size, 1, "all audience filters must stay in one row on a 320px phone");
+  await page.setViewportSize({ width: 375, height: 812 });
   assert.equal(await page.locator(".sf-outfit-card").count(), 0, "unreviewed references must not masquerade as recommendations");
   assert.equal(skinRequests, 0);
   await noNewTasks(0, "browse and optional-analysis skip submit nothing");
