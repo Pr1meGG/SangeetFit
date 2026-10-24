@@ -59,9 +59,9 @@ try {
   const receptionBounds = await occasions.getByRole("button", { name: "Reception" }).boundingBox();
   assert(receptionBounds && receptionBounds.x >= 0 && receptionBounds.x + receptionBounds.width <= 320, "all occasions must be visible without horizontal swiping on a narrow phone");
   assert.equal(await page.getByRole("article").count(), 26);
-  const firstCard = await page.getByRole("article").nth(0).boundingBox();
-  const secondCard = await page.getByRole("article").nth(1).boundingBox();
-  assert(firstCard && secondCard && Math.abs(secondCard.x - firstCard.x) <= 1 && secondCard.y >= firstCard.y + firstCard.height - 1, "narrow phones must show readable single-column outfit cards");
+  // Smooth scrolling can move the viewport between separate geometry reads.
+  const [firstCard, secondCard] = await page.getByRole("article").evaluateAll(cards => cards.slice(0, 2).map(card => card.getBoundingClientRect().toJSON()));
+  assert(firstCard && secondCard && firstCard.width > 0 && firstCard.height > 0 && secondCard.width > 0 && secondCard.height > 0 && Math.abs(secondCard.x - firstCard.x) <= 1 && secondCard.y >= firstCard.y + firstCard.height - 1, "narrow phones must show readable single-column outfit cards");
   assert.equal(await page.getByText("AI outfit concept", { exact: true }).count(), 26);
   assert.equal(await page.getByText("Sourced with attribution", { exact: true }).count(), 0, "AI concepts must not be labelled as sourced photos");
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
