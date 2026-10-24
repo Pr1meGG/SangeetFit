@@ -3,12 +3,14 @@
 ## Verified Facts (from official sources)
 
 ### Event Details
+
+Schedule and submission requirements rechecked against the [official rules](https://youcam-api-skin-ai-ecommerce.devpost.com/rules) and [overview](https://youcam-api-skin-ai-ecommerce.devpost.com/) on **24 October 2026**. The accepted sprint targets **30 October**, with **31 October–1 November** held as recovery time.
 - **Title:** YouCam API Skin AI & eCommerce VTO Hackathon
 - **Organizer:** Perfect Corp (YouCam)
-- **Deadline:** November 2, 2026, 11:45 AM EST
+- **Deadline:** November 2, 2026, 11:45 AM EST / **22:15 IST**
 - **Judging Period:** Nov 3–20, 2026
 - **Winners Announced:** On or around Nov 24, 2026
-- **Participants:** 918+
+- **Participants:** 918+ in the 15 October research snapshot; not a current count
 - **Prize Pool:** $6,000 total ($2,500 / $1,000 / $500)
 - **Special Awards:** $1,000 Women in Tech; $1,000 Rising Star (Student)
 - **Free API Allocation:** 1,000 units per participant + social sharing bonus
@@ -17,7 +19,7 @@
 1. **Skin AI** — skin analysis, skincare guidance, product matching
 2. **eCommerce VTO** — virtual try-on, styling, fashion e-commerce
 
-### Judging Dimensions (equal weight, 0–10 each)
+### Judging Dimensions (equal weight; any 0–10 scoring is our internal rubric)
 1. **Technological Implementation** — depth of API integration, consumer/retail value, genuine non-trivial implementation
 2. **Design** — complete coherent product experience (not just a PoC)
 3. **Potential Impact** — credible case for solving a real problem for a real audience
@@ -40,7 +42,9 @@
 - Third-party SDKs/APIs must be properly authorized
 - Winners may be featured in blog articles and marketing
 
-### YouCam API — Verified Endpoints & Costs
+### Historical API research — not current release configuration or pricing proof
+
+The API notes below were collected on 15 October and have not been reverified here. Use current working routes and official API documentation for contracts; obtain specifically authorized fresh price/balance checks before live work. This section is not approval to use any endpoint or spend units.
 
 Source: https://yce.makeupar.com/ai-api + verified from winning project (aloud, anywear)
 
@@ -63,7 +67,7 @@ Source: https://yce.makeupar.com/ai-api + verified from winning project (aloud, 
 ## Assumptions (Unverified)
 
 - [ ] Exact unit cost per additional skin-analysis parameter set
-- [ ] Whether mock-mode results are acceptable for demo video (likely yes — aloud used live API)
+- [ ] Final submitted footage must accurately label mock content; mock footage alone does not prove genuine live integration
 - [ ] Maximum concurrent API requests / rate limits
 - [ ] Whether 1,000 units is sufficient for a full demo with multiple users
 - [ ] Exact API response schema for cloth-v4 output format
@@ -71,5 +75,5 @@ Source: https://yce.makeupar.com/ai-api + verified from winning project (aloud, 
 
 ---
 
-*Last updated: 2026-10-15*
+*Schedule/submission update: 2026-10-24; historical API research: 2026-10-15*
 *Sources: devpost.com rules page, github.com/uiharu-kazari/anywear README, github.com/StephenSook/aloud README*

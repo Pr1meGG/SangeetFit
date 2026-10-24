@@ -2,11 +2,26 @@
 
 Compact prioritized backlog. Update after material task-status changes. No item is complete without verified evidence — do not mark anything done solely on a prior report.
 
+## Final-week execution — 24–30 October 2026
+
+Follow the [accepted plan](../plans/2026-10-24-final-week-release.md); older queues below retain their dated scope. Target **30 October**; buffer **31 October–1 November**; official deadline **2 November, 22:15 IST**. No guest study or new feature track is scheduled.
+
+| Priority / day | Work | Current gate |
+|---|---|---|
+| P0 / 1 | Isolated baseline and mock verification | `codex/final-week-release` from `853f955`, CC-P preserved. Full verify exited 0: 15 executed offline suites/Redis skip, TypeScript/build, 0 lint errors/22 warnings, 10 browser suites; actual synthetic PDF and responsive evidence in [readiness](../testing/FINAL_WEEK_READINESS_2026-10-24.md). Review/Git sync/CI tracked separately. |
+| P0 / 1–2 | One licensed source and two owned references | Exact input and processing/public derived-output/footage receipts pending. Upper_body + full_body, same demo source. |
+| P0 / 2 | Physical-phone mock journey / freeze | Native result/PDF save/open and permission/picker recovery pending; own phone only, emulation is separate. |
+| P0 / 3–4 | Approved release, two live attempts, go/no-go | Deployment/live/budget approvals pending. Same two attempts supply quality/runtime-cap/recording evidence. User evaluator likeness/fidelity ≥4/5 each; preserve failures, narrow claims or block signoff, stop on 429, no retry. |
+| P1 / 5–7 | Video, five screenshots, rehearsal and submission | Drafts updated; final assets/private repo and credential sharing/final URLs/submission require specific approvals. No extra recording calls. |
+| P0 / through 20 Nov | Judge availability / allowance | User-owned manual checks. Proposed 20 judging attempts need fresh tariff/unit cap/reserve approval; no auto-refill/reset/top-up/automation. |
+
+Vercel Preview tracks all unassigned branches. Release branch now has an exact local deployment-disable rule; no Vercel setting/deployment changed. Real-Redis CI on release SHA and clean-browser judging access remain distinct gates.
+
 ## Wardrobe decision follow-through — 23 October 2026
 
 Local app work is implemented and verified: baseline errors repaired; comparison assigns events; owned-only planned rewear counters and private text-only PDF export work. Final full mock verification exited 0 (16 offline suites enumerated, real Redis skipped; TypeScript/build; 0 lint errors/22 warnings; 10 browser suites). Code/TypeScript review and the repaired React finding are recorded in [the verification record](../testing/WARDROBE_DECISION_CHECK_2026-10-23.md).
 
-Next gates: declare/approve the [two owned-garment live cases](../testing/OWN_GARMENT_PILOT.md), arrange [3–5 real guest sessions](../testing/WARDROBE_GUEST_PLAYTEST.md), and complete the separately approved [judging release/budget/device preflight](../testing/JUDGING_ACCESS_PREFLIGHT.md). These outcomes are pending; prepared protocols are not evidence of a successful live pilot, user study or deployment. Recording permitted final footage and submission remain pending.
+The 24 October plan supersedes this checkpoint's next-step list: declare/approve the [two demo-source owned-garment cases](../testing/OWN_GARMENT_PILOT.md) and complete the separately approved [judging release/budget/device preflight](../testing/JUDGING_ACCESS_PREFLIGHT.md). The [guest protocol](../testing/WARDROBE_GUEST_PLAYTEST.md) is deferred research. These outcomes and permitted recording/submission remain pending; prepared protocols are not successful live or release evidence.
 
 ## UI-v2 checkpoint — 22 October 2026
 

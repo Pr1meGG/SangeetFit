@@ -1,8 +1,8 @@
 # Judge access and release preflight
 
-Prepared 23 October 2026. **Not executed.** This is a record template for a separately approved release, live activation and bounded provider-task batch. It authorizes none of those actions. Existing [cloud](CLOUD_CHECKPOINT.md), [mock Preview](MOCK_PREVIEW_CHECK.json), [budget](BUDGET_INITIALIZATION_CHECK.json) and [Android](ANDROID_CHECK.md) records remain historical evidence, not passes for the next build.
+Updated 24 October 2026 for the [accepted final-week plan](../plans/2026-10-24-final-week-release.md). **Live release preflight not executed.** Local evidence and the read-only Git integration inspection are tracked separately in [current readiness](FINAL_WEEK_READINESS_2026-10-24.md). This template does not authorize deployment, live activation or a provider-task batch. Existing [cloud](CLOUD_CHECKPOINT.md), [mock Preview](MOCK_PREVIEW_CHECK.json), [budget](BUDGET_INITIALIZATION_CHECK.json) and [Android](ANDROID_CHECK.md) records remain historical evidence, not passes for the next build.
 
-The recorded [competition facts](../research/competition-facts.md) list a **2 November 2026, 11:45 AM Eastern** deadline and **3–20 November** judging. Target submission **1 November**; keep the application, permitted assets, access instructions and approved allowance usable through **20 November**. Recheck [official rules](https://youcam-api-skin-ai-ecommerce.devpost.com/rules) and the final submission form before publication, including repository sharing and video requirements.
+The [official rules](https://youcam-api-skin-ai-ecommerce.devpost.com/rules), rechecked 24 October, give a **2 November 2026, 22:15 IST / 11:45 EST** deadline and **3–20 November** judging. Target submission **30 October**, with **31 October–1 November** as recovery buffer; keep the application, permitted assets, access instructions and approved allowance usable through **20 November**. Recheck the final submission form before publication, including repository sharing and video requirements.
 
 ## Declare the release and separate approvals
 
@@ -12,9 +12,9 @@ The recorded [competition facts](../research/competition-facts.md) list a **2 No
 | Date, environment, actual `/api/mode` | Pending |
 | Deployment approval, including environment changes | Pending |
 | Live-activation approval | Pending |
-| Exactly two fresh preview attempts: declared inputs/source, publication scope | Pending |
+| Exactly two fresh preview attempts: user-owned upper-body garment and complete outfit, same licensed demo-person source, processing/publication receipts | Pending — reuse these outputs for validation and public recording; no additional recording tasks |
 | Live task approval: count, maximum units and stop conditions | Pending |
-| Judging allowance approval: cap, reserve, intended use/window | Pending — separate from starter allowance and release smoke batch |
+| Judging allowance approval: cap, reserve, intended use/window | Pending — propose 20 VTO attempts, calculate unit cap from newly verified prices; separate from the two pilot attempts and historical starter allowance |
 | Private judge credential delivery method | Pending — no code/secret in this document or URL |
 | Host/resource owner, availability through 20 November, rollback target | Pending |
 
@@ -23,6 +23,8 @@ Verify secret configuration by presence/scope only; never read `.env.local`, pri
 ## Gate 1 — exact build and runtime
 
 - [ ] Final source passes `npm run verify` and `git diff --check`; record commands, exit codes, source SHA, skipped checks and relevant review findings. Recheck after changes. These checks are mock/local unless explicitly recorded otherwise.
+- [ ] Before pushing, confirm the active release branch has an effective `git.deploymentEnabled: false` rule. Preview branch tracking is enabled for all unassigned branches in the 24 October read-only inspection; source control sync must not cause an unapproved deployment. Keep this separate from manual deployment approval.
+- [ ] Require successful real-Redis CI on the release SHA. A local skip and an older commit's CI pass do not meet this gate.
 - [ ] Deployment is authorized and its source matches the reviewed SHA. Confirm actual mode on that URL. An old production page or protected mock Preview does not validate this release.
 - [ ] Confirm deployed Vercel **Fluid Compute** and actual function duration settings. Current photo routes declare `maxDuration = 300` with an internal 180-second request deadline; verify the deployed configuration supports it rather than assuming source declarations override platform limits.
 - [ ] Record recovery behavior for timeout, expired image link and exhausted allowance. A timeout may leave an accepted task running: no automatic resubmission, refund or hidden mock replacement.
@@ -39,7 +41,7 @@ Verify secret configuration by presence/scope only; never read `.env.local`, pri
 
 ## Gate 3 — exactly two fresh approved previews
 
-Declare the two garments, exact source version and permitted use before Generate. If this is also the owned-garment pilot, use the exact `upper_body`/`full_body` cases in [OWN_GARMENT_PILOT](OWN_GARMENT_PILOT.md); do not silently add tasks or reuse expired consent. Use the same source for a fair two-look comparison. No optional skin task.
+Declare the two user-owned garments, exact licensed demo-person source version and permitted use before Generate. These are the same `upper_body`/`full_body` cases in [OWN_GARMENT_PILOT](OWN_GARMENT_PILOT.md), not an additional smoke batch. Verify rights to process the person/garment images and publish derived outputs/footage. User evaluator scores source likeness and garment fidelity ≥4/5 for both visibly rendered results; these are not participant ratings. Use the same source for comparison. No optional skin task or automatic retry.
 
 | Attempt | Build / mode | Input/source receipt | Generate-to-visible-render seconds / displayed time | Outcome | Ledger reservation change | Phone save/open |
 |---|---|---|---|---|---|---|
@@ -47,14 +49,16 @@ Declare the two garments, exact source version and permitted use before Generate
 | 2 | Not run | Pending | — | Not run | — | Not run |
 
 - [ ] Each explicit Generate makes one app request; record known task count or `unknown` after an uncertain submission. Log failures and image-load failures as outcomes. **Stop on 429; never retry automatically.** Additional tasks require separate approval.
+- [ ] Capture raw footage of upload, explicit generation, comparison, assignment and actual PDF saving during this same session. Save permitted outputs immediately; a lost page session or expired link does not authorize regenerating for recording.
 - [ ] Compare, inspect and select **Plan for {occasion}**. Confirm the board and **Planned for {occasion}** agree; planning, comparison and opening existing results create no extra generation requests.
 - [ ] On the actual target phone/browser, save or open a genuine permitted live result and verify that the file/image is usable. Record exact device/browser and outcome; mock JPEG downloads do not prove live signed-result saving. Check denied/expired links without starting another task.
 - [ ] Export a populated and a partially empty five-event plan. Inspect an actual PDF: event/garment names, owned/reference labels and empty slots only; no photos, results, invite code or provider links. Check mobile controls and keyboard access. Record untested devices explicitly.
+- [ ] Restrict device claims to the user's actual tested phone/browser. Desktop emulation is separate evidence; unavailable iPhone/other hardware is not silently marked passed.
 
 ## Gate 4 — access through judging and accurate package
 
-- [ ] Record host/resource availability through **20 November**, responsible operator and agreed balance/access review cadence. Any account inspection, allowance change or external notification follows its existing authorization boundary; this sheet creates no automation.
+- [ ] Record host/resource availability through **20 November**. The user is operator; manually check home/collection/access daily and, after specific inspection authorization, allowance status before judging and after usage. Record timestamp, outcome and unresolved failures without credentials. Escalate depleted allowance, broken access or expiring resources; do not auto-refill/reset, change settings, send external notifications or create automation.
 - [ ] Judge instructions identify the URL, private credential route, photo requirements, mode, shared limits and recovery contact route. Do not send credentials or contact judges from this checklist without specific authorization.
-- [ ] Verify repository/source licensing and access as the rules require. Check the final 1–3 minute video, screenshots and text match the exact tested release; retain mock labels and any private-image restrictions. Publication and submission remain separately authorized actions.
+- [ ] Keep the repository private and verify the organizer's specified private-sharing route before separately authorized sharing. Review code/asset rights without inventing an MIT licence. Check the final 1–3 minute English video, five screenshots and text match the exact tested release; retain mock labels and private-image restrictions. No guest-study outcome is required or claimed this week. Publication and submission remain separately authorized actions.
 
 Final outcome: **pending** · verified SHA: **pending** · passes/failures/skips: **pending** · remaining allowance as of timestamp: **not checked** · release owner decision: **pending**. Never mark the released flow verified solely from historical CI, a developer-authenticated browser or a task returning a URL.

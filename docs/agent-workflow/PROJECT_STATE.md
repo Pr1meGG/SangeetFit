@@ -2,6 +2,16 @@
 
 Durable, verified facts about SangeetFit. Prior-generation results not rechecked in the current working tree are explicitly labeled **[prior report]**. Update this file when durable facts, verified outcomes, major decisions, or blockers change — not as a running log.
 
+## Final-week release baseline — 24 October 2026
+
+- Accepted [seven-day plan](../plans/2026-10-24-final-week-release.md): 24–30 October, submission target 30 October, buffer 31 October–1 November; official deadline 2 November at 22:15 IST, judging through 20 November. User has 4–6 hours/day and their own phone; guest research is deferred.
+- Created isolated `codex/final-week-release` at `853f955492df727df6abe5475798cef086b0d128`; original dirty `CC-P` settings, AGENTS/API edits, branding, scripts and traces were preserved. The unverified polling experiment is excluded. No app feature/API/storage change was needed.
+- Fresh `TEST_PORT=3540 npm run verify` exited 0: 15 offline suites executed/16 enumerated (real Redis skipped), canonical TypeScript, lint with 0 errors/22 warnings, mock build and all 10 browser suites. Actual synthetic PDF read-back found one page, all five events, no images/annotations/private markers; PDF rendered and visually inspected. Responsive/keyboard coverage includes 320/390/1440px. See [retained evidence and pending gates](../testing/FINAL_WEEK_READINESS_2026-10-24.md).
+- Authenticated Vercel inspection confirmed the repository is connected and Preview branch tracking covers all unassigned branches. Added only an exact local deployment-disable rule for this release branch, preserving `codex/ui-revamp`; no cloud setting/environment was changed. The dashboard also showed an existing newer UI-v2 preview, so older cloud snapshots below remain historical rather than current release proof.
+- Pilot/demo/submission/preflight records now specify two total attempts on one licensed demo-person source with user-owned upper/full garments, user evaluator likeness/fidelity scores, and same-session recording/save/export. Exact inputs, rights and all new live outcomes remain pending. Proposed 20 judging attempts is unapproved planning capacity. This is not participant satisfaction or independent usability evidence.
+- Physical-phone checks remain pending: no adb in PATH or the standard local SDK location. No provider balance call, budget write, deployment, public sharing, video publication or submission occurred. Release-SHA CI/Redis, judge access, permitted inputs and native saving remain gates; do not mark the sprint complete.
+- Final integrated `TEST_PORT=3541 npm run verify` also exited 0 with the same suite counts/skips/warnings; `sf-reviewer` and `code-reviewer` found no actionable findings. All changed Markdown links/artifacts and final whitespace checks passed. Source-control/CI receipt is recorded separately from live release signoff.
+
 ## Wardrobe decision checkpoint — 23 October 2026
 
 - Comparison now assigns an outfit to the named current event. Assignment is parent-owned by outfit ID, shared across photo versions; result removal preserves it, garment removal clears it, session reset clears the plan. Deliberate out-of-tag references remain representable in selectors with an explicit note.

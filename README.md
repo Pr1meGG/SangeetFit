@@ -86,7 +86,9 @@ git diff --check
 
 [Milestones](docs/plans/2026-10-20-personal-stylist-milestones.md), [project state](docs/agent-workflow/PROJECT_STATE.md), [user validation](docs/testing/REAL_USER_VALIDATION.md), [release procedure](docs/testing/RELEASE.md), [Android checklist](docs/testing/ANDROID_CHECK.md), [demo script](docs/submission/DEMO_SCRIPT.md) and [submission checklist](docs/submission/PITCH_CHECKLIST.md) track implementation separately from live/release evidence.
 
-Next evidence gates: the [two-owned-garment pilot](docs/testing/OWN_GARMENT_PILOT.md), [3–5 guest playtest](docs/testing/WARDROBE_GUEST_PLAYTEST.md) and [judge-access preflight](docs/testing/JUDGING_ACCESS_PREFLIGHT.md). These are prepared protocols, not completed live runs, user studies or release verification.
+The [accepted final-week plan](docs/plans/2026-10-24-final-week-release.md) targets submission on **30 October**, before the official **2 November 2026, 22:15 IST** deadline. Track actual outcomes in the [release readiness record](docs/testing/FINAL_WEEK_READINESS_2026-10-24.md).
+
+Next evidence gates: the [two-owned-garment demo-source pilot](docs/testing/OWN_GARMENT_PILOT.md) and [judge-access preflight](docs/testing/JUDGING_ACCESS_PREFLIGHT.md). Both garments will use one licensed demo-person source and the same two outputs for testing/recording; processing and publication rights still need confirmation. User evaluator scores are not participant satisfaction or independent usability. The historical [guest-study protocol](docs/testing/WARDROBE_GUEST_PLAYTEST.md) is deferred, not a final-week dependency. These documents do not establish completed live runs or release verification.
 
 Budget snapshot verified after the 21 October pilot: 910 remaining units; Cloth V4 cost 2 units/call and optional facial colour analysis cost 20. The 25% reserve, rounded up, is 228 units. The two completed pilot tasks used 4 units; the other 14 distinct men's references require separate authorization. Recheck balance and pricing before any task; this snapshot is not approval to spend. See [budget evidence](docs/testing/BENCHMARKS.md).
 
