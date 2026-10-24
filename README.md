@@ -94,9 +94,9 @@ Budget snapshot verified after the 21 October pilot: 910 remaining units; Cloth 
 
 The separately approved two-look live pilot rendered Emerald Silk Kurta and Sapphire Embroidered Sherwani on one private full-body source. Both images remain outside the repository; the participant rated face and garment fidelity 5/5 for each, so the two-look pilot gate passed for this one source. Another observer rated the overall AI appearance 4/5. The other 14 distinct men's references require separate authorization even if the pilot is rated usable. The 16-case scorecard is engineering evidence for one person, not independent usability or own-garment proof. Actual Android Chrome/iPhone Safari checks, judge access and the final genuine demo/submission also remain pending. Keep personal photos/results out of GitHub and the public demo. Existing screenshots are historical mock evidence until refreshed. No demo video has been recorded. Public live deployment needs controlled judging access and a credit reserve; the client one-request guard is not server-wide quota protection.
 
-Working target: submit 1 November, keep 2 November as buffer, preserve judging availability through 20 November. Reverify exact requirements, dates/timezone and access with the [official rules](https://youcam-api-skin-ai-ecommerce.devpost.com/rules).
+Working target: submit 30 October, keep 31 October–1 November as recovery buffer, preserve judging availability through 20 November. Reverify exact requirements, dates/timezone and access with the [official rules](https://youcam-api-skin-ai-ecommerce.devpost.com/rules).
 
-Working policy: commit and push verified checkpoints to `codex/ui-revamp`. Its `vercel.json` branch rule disables automatic Git deployments; a separately approved deployment can be prepared later. Machine-local settings, traces, draft branding and private photos/results are excluded from checkpoints.
+Working policy: commit and push verified checkpoints to `codex/final-week-release`. Its `vercel.json` branch rule disables automatic Git deployments; a separately approved deployment can be prepared later. Machine-local settings, traces, draft branding and private photos/results are excluded from checkpoints.
 
 ## License
 
