@@ -7,7 +7,7 @@ Execution record for the [accepted 24–30 October plan](../plans/2026-10-24-fin
 - Managed release worktree: `codex/final-week-release`, isolated from `CC-P`, based on `853f955492df727df6abe5475798cef086b0d128`.
 - Original checkout retained its local settings, generated AGENTS edits, three pending API-route edits, draft branding, planning skill, images, scripts and traces. No reset/clean or bulk restoration occurred.
 - Release application remains the reviewed baseline, including its original three-second polling cadence. No API contract, storage or feature expansion was needed to establish the baseline.
-- Reviewed application/config checkpoint: `82b33c1b0a385cd5c75e0901031a7b7bf27c0afe`, pushed to `origin/codex/final-week-release`; `git ls-remote` matched the full local SHA. This record identifies that application/config source separately from subsequent evidence-only documentation commits. Release-SHA real-Redis CI receipt is recorded below when verified.
+- Initial application/config checkpoint: `82b33c1b0a385cd5c75e0901031a7b7bf27c0afe`; corrected release candidate: **`a41fb5a25f476edea04cf4c11f800932aacbffe5`**. Both were pushed to `origin/codex/final-week-release` with exact remote SHA read-back. The candidate includes the focused test correction below; later receipt-only documentation does not change its app/test/config source.
 
 ## Fresh local evidence
 
@@ -54,6 +54,8 @@ The browser suite failed `garment-library.browser.test.mjs:64`: “narrow phones
 
 Correction: sample both rectangles in one `evaluateAll`, retain alignment/non-overlap and additionally require positive dimensions. No CSS/UI change, longer wait or weakened expectation. `TEST_ORIGIN=http://127.0.0.1:3540 node tests/garment-library.browser.test.mjs`, focused ESLint and whitespace checks exited 0; code and JavaScript/TypeScript reviewers found no actionable findings. Final integrated mock verification after the fix exited 0 with all 10 browser suites. Subsequent CI status is available in the [release branch workflow runs](https://github.com/Pr1meGG/SangeetFit/actions?query=branch%3Acodex%2Ffinal-week-release); initial CI failure remains retained rather than overwritten.
 
+**Verified corrected candidate:** [run 40067780093](https://github.com/Pr1meGG/SangeetFit/actions/runs/40067780093) completed **successfully** on exact SHA `a41fb5a25f476edea04cf4c11f800932aacbffe5`. All **16 offline suites executed**, including the four real-Redis groups above; canonical TypeScript, lint (0 errors/22 warnings), production build and **all 10 mock browser suites passed**. The corrected narrow-card test passed on Linux. CI used an isolated Redis service and cleared provider credentials; no YouCam task or deployed-ledger mutation was involved. This closes the software/CI gate for this candidate, not the physical-phone/live/judge/publication gates.
+
 ## Demo-source discovery — local inspection only
 
 At the user's request, located four SangeetFit mock PNGs in Downloads. Validated all four PNGs and inspected the two full-body candidates once. The user confirmed they are fictional AI-generated assets; the creation tool/account was not supplied and processing/public derived-output rights remain to be verified. No image was copied into Git/public folders or sent to YouCam.
@@ -65,7 +67,7 @@ At the user's request, located four SangeetFit mock PNGs in Downloads. Validated
 
 Hashes and exact local paths are kept only in ignored `out/final-week-inputs/source-candidates.json`; file metadata contains no creation/provenance fields. Face crops were validated but are outside the clothing pilot. Do not interpret a filename, successful decode or user confirmation of fictional generation as evidence that a particular output has passed live quality. Select one source version to match the eventual two garment references before declaring the live batch.
 
-The male candidate was also prepared through the actual app's local file chooser in mock mode: JPEG875×2048, encoded data URL152,655 bytes, visible “Photo ready. Uploading did not start a task.” No Generate action was pressed. This ad-hoc check did not instrument request counts; the server remained mock, and zero-task upload behavior is separately covered by the passing browser suites. No source/output image was added to public assets.
+The male candidate was also prepared through the actual app's local file chooser in mock mode: JPEG **875×2048**, encoded data URL **152,655 bytes**, visible “Photo ready. Uploading did not start a task.” No Generate action was pressed. This ad-hoc check did not instrument request counts; the server remained mock, and zero-task upload behavior is separately covered by the passing browser suites. No source/output image was added to public assets. The temporary browser tab became unresponsive after its clear-session confirmation, so that ad-hoc clear was not independently verified; a fresh clean mock preview was opened. Automated session-clear regressions passed separately.
 
 ## Remaining gates and exact next inputs
 
