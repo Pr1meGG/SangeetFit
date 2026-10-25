@@ -33,8 +33,10 @@ async function submitTask(apiKey: string, fileId: string, signal: AbortSignal): 
 
 async function pollTask(apiKey: string, taskId: string, signal: AbortSignal, timeout = 180000): Promise<string> {
   const start = Date.now();
+  let attempts = 0;
   while (Date.now() - start < timeout) {
     signal.throwIfAborted();
+    attempts++;
     const res = await fetch(`${YOUCAM_BASE}/task/skin-tone-analysis/${taskId}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
       signal,
@@ -49,7 +51,10 @@ async function pollTask(apiKey: string, taskId: string, signal: AbortSignal, tim
       return data.data.results.color.skin_color;
     }
     if (data.data.task_status === "error") throw new Error("YouCam could not analyze this selfie");
-    await wait(Math.min(3000, Math.max(0, timeout - (Date.now() - start))), undefined, { signal });
+
+    // Adaptive polling: check quickly at first (fast API tasks), then back off.
+    const delay = attempts <= 2 ? 500 : attempts <= 5 ? 1000 : attempts <= 10 ? 2000 : 3000;
+    await wait(Math.min(delay, Math.max(0, timeout - (Date.now() - start))), undefined, { signal });
   }
   throw new Error("Timeout waiting for skin-tone result");
 }

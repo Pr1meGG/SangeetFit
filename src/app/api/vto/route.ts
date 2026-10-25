@@ -76,6 +76,7 @@ async function pollTask(apiKey: string, taskId: string, signal: AbortSignal, tim
   const start = Date.now();
   while (Date.now() - start < timeout) {
     signal.throwIfAborted();
+
     const res = await fetch(`${YOUCAM_BASE}/task/cloth-v4/${taskId}`, {
       headers: { "Authorization": `Bearer ${apiKey}` },
       signal,
@@ -102,7 +103,11 @@ async function pollTask(apiKey: string, taskId: string, signal: AbortSignal, tim
       throw new Error("YouCam could not generate this outfit");
     }
 
-    await wait(Math.min(3000, Math.max(0, timeout - (Date.now() - start))), undefined, { signal });
+    // Adaptive polling: check quickly at first (most VTO tasks finish within 30-60s),
+    // then back off, never sleeping past the shared deadline.
+    const elapsed = Date.now() - start;
+    const pollInterval = elapsed < 5000 ? 500 : elapsed < 15000 ? 1000 : elapsed < 30000 ? 2000 : 3000;
+    await wait(Math.min(pollInterval, Math.max(0, timeout - elapsed)), undefined, { signal });
   }
 
   throw new Error("Timeout waiting for VTO result");

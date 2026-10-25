@@ -2,6 +2,15 @@
 
 Durable, verified facts about SangeetFit. Prior-generation results not rechecked in the current working tree are explicitly labeled **[prior report]**. Update this file when durable facts, verified outcomes, major decisions, or blockers change — not as a running log.
 
+## Repository organisation checkpoint — 25 October 2026
+
+- Layout consolidated without deleting anything. Scratch and superseded material now lives in a gitignored local `archive/` (screenshots, one-off scripts, seven earlier brand generations); only its [index](../../archive/README.md) is tracked. File counts and SHA-256 hashes of the moved files were checked against a pre-move inventory: branding 19 canonical plus 111 archived files equals the original 130, and the eleven scratch/screenshot hashes match.
+- `branding/identity/` is the single canonical identity source (25 October redraw, 344 KB, 18 assets plus README). The app still serves the older disc from `public/brand/`; adopting the new mark needs its own 16/40 px and phone visual check and was deliberately not done here.
+- Root documents moved with history: `HACKATHON_RECOMMENDATION.md` to `docs/research/`, `UI-v2-plan.md` to `docs/plans/2026-10-22-ui-v2-plan.md`, `demo_script_vto.md` to `docs/archive/`, plus two stale diagnostic docs. New [`docs/README.md`](../README.md) indexes folders and conventions; all 162 relative links across 111 Markdown files resolve after the move.
+- `docs/plans/2026-10-23-signature-ui-polish.md`, the 25 October logo brief and the UI-v2 polish captures are now tracked. `.claude/settings.local.json` is untracked but preserved on disk; 20 third-party video-generation skill packs are ignored by pattern while the eight packs this project uses stay tracked.
+- Route cleanup: the `mode` route's `|| false` no-op and DEV NOTE are gone, so that file matches its committed content; `vto` keeps adaptive polling with a clamped wait and its misleading attempt-count comment removed. `src/app/api/skin/route.ts` retains the same cadence.
+- Verified after the change: `TEST_PORT=3533 npm run verify` exited 0 with 16 offline suites (real-Redis suite skipped locally), canonical TypeScript, mock production build and all 10 mock browser suites; lint 0 errors/22 pre-existing warnings; `git diff --check` clean. No live YouCam task, deployment or push occurred.
+
 ## Wardrobe decision checkpoint — 23 October 2026
 
 - Comparison now assigns an outfit to the named current event. Assignment is parent-owned by outfit ID, shared across photo versions; result removal preserves it, garment removal clears it, session reset clears the plan. Deliberate out-of-tag references remain representable in selectors with an explicit note.

@@ -162,7 +162,7 @@ With mock mode for demo and 3–4 real test sessions: well within budget.
 | `docs/research/concepts.md` | 12 product concepts with scores |
 | `docs/research/evaluation.md` | Full scoring matrix and ranking |
 | `docs/research/red-team.md` | Red-team analysis of top 3 concepts |
-| `HACKATHON_RECOMMENDATION.md` | This file — final recommendation and plan |
+| `docs/research/hackathon-recommendation.md` | This file — final recommendation and plan |
 
 ---
 

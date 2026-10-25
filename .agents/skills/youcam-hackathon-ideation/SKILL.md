@@ -202,7 +202,7 @@ Save all research to `docs/research/` as persistent Markdown files.
 - Never select an idea solely because it sounds futuristic or uses multiple APIs.
 - Optimize for a **differentiated working product and memorable demo**, not feature count.
 - Persist major research findings, source links, and the final recommendation to Markdown files in `docs/research/`.
-- Avoid overwriting existing project documents (`HACKATHON_RECOMMENDATION.md`, `demo_script_vto.md`).
+- Avoid overwriting existing project documents (`docs/research/hackathon-recommendation.md` and the retired `docs/archive/2026-10-demo-script-vto-legacy.md`).
 - **Do not generate implementation code during ideation.** This skill stops at recommendation.
 
 ---

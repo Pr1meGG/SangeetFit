@@ -9,7 +9,7 @@ RUN TIME: ~2:30 | FORMAT: screen-record + voiceover | TARGET: hackathon judge / 
 ---
 
 0:00 - 0:15 | PROBLEM (15s)
-SCREEN: Title card "Proof — Garment VTO" / subtitle "Skin analysis → pivoted to clothes (noise killed signal)" + noise-test.md bullet: spread 3pt > shift 2pt
+SCREEN: Title card "Proof — Garment VTO" / subtitle "Skin analysis → pivoted to clothes (noise killed signal)" + 2026-10-noise-test.md bullet: spread 3pt > shift 2pt
 VOICE: "Proof started as skin-analysis. Noise was too high — 3-point spread, 2-point shift, not a real change proxy. We pivoted to garment virtual try-on: upload a body, pick a garment, see it on you.
 KEY LINE (subtitle): Pivot reason in 2 lines — no speculation.
 
@@ -51,4 +51,4 @@ PRODUCTION NOTES (for recorder — not in video):
 - If demo runs live: do not pre-run `garment_test.py` as the current flow — it uses the legacy upload contract. Use the app's own `/api/vto` only with `MOCK_MODE=false` and a valid API key, and only after live VTO is verified.
 - Voiceover tone: direct, no fluff — matches ponytail mode (lazy/efficient; explain only what's asked).
 - No over-built animation: static splits + simple fade. Code snippet from real garment_test.py (line 31 submit_task, 42 poll).
-- Pivot context (noise-test.md) shown only once at 0:00 — explains why we're here, not history for history's sake.
+- Pivot context (2026-10-noise-test.md) shown only once at 0:00 — explains why we're here, not history for history's sake.

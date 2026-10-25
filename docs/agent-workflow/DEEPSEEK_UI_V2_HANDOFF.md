@@ -17,7 +17,7 @@ The current catalogue contains 26 original AI outfit concepts with multi-occasio
 ### Inspect before changing
 
 1. Confirm repository root, branch, `git status --short`, current diff and running servers. Preserve every pre-existing change. Do not reset, clean, switch branches, kill unrelated processes or overwrite another agent's work.
-2. Read `UI-v2-plan.md`, `docs/agent-workflow/PROJECT_STATE.md`, `TASK_BOARD.md`, and relevant existing components/tests. If another agent is editing your files, give a read-only review until ownership is explicitly handed over. Use a single writer per file.
+2. Read `docs/plans/2026-10-22-ui-v2-plan.md`, `docs/agent-workflow/PROJECT_STATE.md`, `TASK_BOARD.md`, and relevant existing components/tests. If another agent is editing your files, give a read-only review until ownership is explicitly handed over. Use a single writer per file.
 3. Inspect the running app and `http://localhost:5174/` if available. The latter is a designer portfolio. Borrow its consistent spacing, restrained controls, type hierarchy and aligned photography. Keep SangeetFit's product journey compact; do not transplant the portfolio's long empty hero, marquee, contact form or project sections.
 4. State a short plan with exact files, existing defects, proposed changes and acceptance checks. Then implement within these boundaries without redundant clarification loops.
 

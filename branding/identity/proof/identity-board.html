@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SangeetFit logo identity</title>
+  <style>
+    @font-face { font-family: Bodoni; src: url('../../public/fonts/bodoni-moda/BodoniModa-Regular.ttf'); }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fcf8f6; color: #271a22; font-family: Arial, sans-serif; }
+    main { width: min(100%, 1500px); margin: auto; padding: 48px; }
+    header { display: flex; justify-content: space-between; align-items: start; gap: 24px; padding-bottom: 30px; }
+    .eyebrow { color: #6b1e3a; font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { font: 400 clamp(42px, 5vw, 70px)/1.02 Bodoni, Georgia, serif; letter-spacing: -.04em; margin: 10px 0 0; }
+    header p { max-width: 380px; margin: 4px 0 0; line-height: 1.55; color: #76616c; }
+    .grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; }
+    section { border: 1px solid #e7dade; border-radius: 12px; overflow: hidden; background: #fffdfa; }
+    .hero { min-height: 480px; display: grid; place-items: center; position: relative; }
+    .hero img { width: min(58%, 330px); }
+    .label { position: absolute; top: 22px; left: 24px; font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: #76616c; }
+    .dark { min-height: 480px; display: grid; place-items: center; position: relative; background: #6b1e3a; border-color: #6b1e3a; }
+    .dark .label { color: #f7f1e5; }
+    .dark img { width: 84%; }
+    .lower { display: grid; grid-template-columns: 260px 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .app { min-height: 300px; display: grid; place-items: center; }
+    .app img { width: 180px; height: 180px; }
+    .copy, .scale { padding: 28px; }
+    h2 { font: 400 32px/1.05 Bodoni, Georgia, serif; margin: 28px 0 12px; }
+    .copy p { margin: 0; max-width: 300px; color: #6e5a64; line-height: 1.5; }
+    .sizes { display: flex; align-items: end; gap: 28px; margin-top: 52px; }
+    .sizes span { display: grid; gap: 9px; justify-items: center; font-size: 11px; color: #76616c; }
+    .swatches { display: flex; margin-top: 28px; gap: 10px; }
+    .swatches i { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #e7dade; }
+    footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 20px; color: #76616c; font-size: 12px; }
+    @media (max-width: 850px) { main { padding: 20px; } header { display: block; } .grid, .lower { grid-template-columns: 1fr; } .hero, .dark { min-height: 300px; } .lower { margin-top: 16px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div><div class="eyebrow">SangeetFit · identity study</div><h1>One fold. Many celebrations.</h1></div>
+      <p>A celebration disc with an S-shaped fabric opening. The mark joins festive warmth with the personal choice at the heart of SangeetFit.</p>
+    </header>
+    <div class="grid">
+      <section class="hero"><span class="label">Symbol · on light</span><img src="symbol.svg" alt="Burgundy disc with an open fabric-fold S"></section>
+      <section class="dark"><span class="label">Lockup · on burgundy</span><img src="lockup-dark.svg" alt="Marigold SangeetFit symbol with ivory wordmark"></section>
+    </div>
+    <div class="lower">
+      <section class="app"><img src="app-icon.svg" alt="SangeetFit burgundy and marigold app icon"></section>
+      <section class="copy"><div class="eyebrow">The idea</div><h2>Celebration, made yours.</h2><p>The round form recalls a marigold. Its open fold carries the initial without wedding decoration or a body silhouette.</p><div class="swatches"><i style="background:#6b1e3a" title="Burgundy"></i><i style="background:#e4a33c" title="Marigold"></i><i style="background:#f7f1e5" title="Ivory"></i></div></section>
+      <section class="scale"><div class="eyebrow">Size proof</div><h2>Small still reads.</h2><div class="sizes"><span><img src="symbol.svg" width="64" height="64" alt="">64 px</span><span><img src="symbol.svg" width="40" height="40" alt="">40 px</span><span><img src="symbol.svg" width="32" height="32" alt="">32 px</span><span><img src="symbol.svg" width="16" height="16" alt="">16 px</span></div></section>
+    </div>
+    <footer><span>Flat vector · transparent opening · outlined wordmark</span><span>25 October 2026</span></footer>
+  </main>
+</body>
+</html>

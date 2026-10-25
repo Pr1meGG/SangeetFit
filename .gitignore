@@ -12,3 +12,25 @@ tsconfig.tsbuildinfo
 .playwright-mcp/
 /face-capture-ui.png
 .env*
+
+# Local archive of retired material — contents stay on disk, only the index is tracked.
+archive/*
+!archive/README.md
+
+# Machine-local state
+.freebuff/
+.ruff_cache/
+.next-start.log.d/
+.claude/settings.local.json
+
+# Third-party skill packs that are not part of this project.
+# The packs this project actually uses are re-included below.
+/.claude/skills/*
+!/.claude/skills/brainstorming/
+!/.claude/skills/deep-research/
+!/.claude/skills/product-discovery/
+!/.claude/skills/sangeetfit-workflow/
+!/.claude/skills/systematic-debugging/
+!/.claude/skills/verification-before-completion/
+!/.claude/skills/writing-plans/
+!/.claude/skills/youcam-hackathon-ideation/
