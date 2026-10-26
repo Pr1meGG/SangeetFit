@@ -2,6 +2,38 @@
 
 Compact prioritized backlog. Update after material task-status changes. No item is complete without verified evidence — do not mark anything done solely on a prior report.
 
+## Direct generation — later 26 October 2026
+
+User-requested removal of the preview code is implemented across UI and VTO/skin/mode routes. Keep the explicit Generate click, photo preparation/disclosure, JSON/origin validation and unchanged shared budget. Complete current-source verification and restart the loopback live app at port3566 without a code; never spend a provider unit to verify this interaction. Hosted release and allowance changes remain separately gated. [Bounded plan](../plans/2026-10-26-direct-generation.md).
+
+## Next checkpoint — local demo package, 26 October 2026
+
+No new application feature is justified by this pass. The [release package](../submission/RELEASE_PACKAGE_2026-10-26.md) contains an exact proposed commit message/destination, available media and the deployment/runtime/access changes to review. **The current video is v2, 88 seconds**, replacing the static silent draft with moving UI, source/result wipes, synthetic draft narration and original locally synthesized music. Export/frame/audio/subtitle and ZIP checks passed; creative/listening approval and user quality scores remain pending. Reference planner capture and actual PDF exports remain local preparation. After media review, the scoped source checkpoint still needs exact prose approval and current-source CI. Hosting Node24 versus tested Node22 and Vercel-login dependence need resolution before judging release. No further generations; owned garments remain held.
+
+## Catalogue AI-source proof — later 26 October 2026
+
+The separately authorized two-case catalogue run **rendered and saved both outputs** through the local live app, at15.712s/15.959s. Exactly two requests deducted four units: provider906, shared allowance6 remaining. [Verified receipt and limitations](../testing/CATALOGUE_AI_PILOT_2026_10_26.md). User visual ratings are pending. These two different-source catalogue outcomes do not complete the held owned-garment pilot, current-source CI, deployed runtime/judge access or physical-phone live saving. Temporary live server stopped; no new task allowance was created.
+
+## Active release queue — 26 October 2026
+
+Use the [current audit](../testing/READINESS_AUDIT_2026_10_26.md) and [execution plan](../plans/feature_spec_release_readiness_2026-10-26.md); these supersede older queues below. Target **30 October**, recovery **31 October–1 November**, deadline **2 November, 22:15 IST**. No guest study or fourteen-reference expansion is required this sprint. The same **two** owned-garment attempts supply validation, release evidence and recording.
+
+| Priority | Work | Status / next proof |
+|---|---|---|
+| 1 | Current local candidate | Final integrated full mock verification passed; release test/CI/deployment safeguards integrated locally. Final verification/review recorded in audit; exact checkpoint publication and current-source real-Redis CI remain pending |
+| 2 | Exact demo inputs and rights | User-cleared AI demo source; exact version receipt outstanding. Garment selection and garment rights are **on hold at user request** |
+| 3 | Release and budget package | Pending: reviewed SHA/environment/URL/rollback, effective hosting rules and duration, approved current account/ledger inspection, exact two-attempt unit bound, separately approved judging cap |
+| 4 | Two-attempt live capture | **On hold with garments; not run:** both visible renders, timings, request/reservation counts, user's likeness/fidelity ratings, phone live-image save/open, comparison/plan and PDF save/open; no extra smoke/recording tasks or automatic retry |
+| 5 | Final package and submission | Drafts only: permitted 2:30 English video, five refreshed screenshots, private source-sharing route and judge instructions, exact public-text/media approval, confirmed submission; manual availability through 20 November |
+
+Local work continues without external side effects. The current branch is `experiments`; preserve the release worktree and all pre-existing UI/branding edits. Nothing is deployed or submitted by this audit.
+
+## Impeccable polish — 25 October 2026
+
+Implemented and locally verified: responsive hero/type refinements, readable form and review text, shared-token control/wardrobe polish, skip-link focus, named gallery filters and accessible colour samples. Final `TEST_PORT=3541 npm run verify` exited 0 (16 offline suites enumerated with real Redis skipped; TypeScript/build; lint 0 errors/22 existing warnings; 10 browser suites). Six-width home/gallery/library checks, Impeccable's static scan and independent code/React reviews passed. See [verification and local artifacts](../testing/IMPECCABLE_POLISH_2026_10_25.md).
+
+Remaining: physical-device checks and optional Impeccable project-context initialization. Live YouCam work, deployment, commit and push were outside this pass. The existing development server remains on port3500; the separate mock preview is on port3540.
+
 ## Wardrobe decision follow-through — 23 October 2026
 
 Local app work is implemented and verified: baseline errors repaired; comparison assigns events; owned-only planned rewear counters and private text-only PDF export work. Final full mock verification exited 0 (16 offline suites enumerated, real Redis skipped; TypeScript/build; 0 lint errors/22 warnings; 10 browser suites). Code/TypeScript review and the repaired React finding are recorded in [the verification record](../testing/WARDROBE_DECISION_CHECK_2026-10-23.md).

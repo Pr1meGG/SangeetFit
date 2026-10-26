@@ -1,22 +1,24 @@
-# Two owned garments, one source photo — pilot sheet
+# Two owned garments, one AI demo source — technical validation
 
-Prepared 23 October 2026. **Not run; no task, live activation or publication is authorized by this sheet.** This tests uploaded clothes separately from the two completed catalogue cases in [REAL_USER_VALIDATION](REAL_USER_VALIDATION.md). Those private catalogue results do not prove owned-garment quality or supply public footage.
+Updated 26 October 2026. **Garments and the live pilot are on hold at the user’s request; no attempts run.** The user reports creating the demo-person image with AI and clears its use. Identify the exact source/version receipt before execution; do not claim independent licence verification or real-participant consent. Garment inputs/rights and scoped task approval remain pending. This sheet does not authorize account inspection, deployment, live activation, tasks or publication. The approved 24–30 October sprint targets submission on **30 October**, with **31 October–1 November** for recovery. This validation and public demo reuse the same two attempts; there is no additional release-smoke batch.
+
+This is **demo-source technical validation**, scored by the user. It is not a consenting-participant pilot or independent usability study. The two completed catalogue cases in [REAL_USER_VALIDATION](REAL_USER_VALIDATION.md) remain historical: their private photos/results do not prove owned-garment quality or supply public footage.
 
 ## Declare inputs and permissions before approval
 
-Use one consenting participant, identified here only as `p01`, and the **same person-photo version for both cases**. Keep photos, references and results outside GitHub/public folders. Record private input receipts separately; do not put names, personal file paths, signed links or image contents here.
+Use the user's two owned garments and the **same user-created AI demo-person source version for both cases**, identified only as `demo-source-v1`. Before approval, retain private receipts identifying the exact three inputs and permission evidence. Keep input/result files outside GitHub/public folders until their intended publication is separately approved. Do not put names, personal file paths, signed links or image contents here.
 
 | Case | Exactly declared owned reference | App category | Source version | Status |
 |---|---|---|---|---|
-| OWN-01 | Participant-owned upper-body garment; private input receipt pending | `upper_body` | p01-v1; receipt pending | Not run |
-| OWN-02 | Different participant-owned complete outfit; private input receipt pending | `full_body` | Same p01-v1 | Not run |
+| OWN-01 | User-owned upper-body garment; private input receipt pending | `upper_body` | demo-source-v1; user-cleared AI image, exact version receipt pending | Not run |
+| OWN-02 | Different user-owned complete outfit; private input receipt pending | `full_body` | Same demo-source-v1 | Not run |
 
-- [ ] Confirm both actual garments and source version before requesting approval. Do not substitute a catalogue image or change category mid-batch. If suitable inputs are unavailable, revise this declaration and obtain approval for the revised batch first.
-- [ ] Record informed permission for **transmission to YouCam** of this source and both references for exactly these two tasks. Earlier catalogue consent covers no new task. Explain provider processing is separate from the app's page-session storage.
-- [ ] Record the user's explicit authorization for exactly two Cloth V4 attempts, the intended build/environment and bounded allowance. No optional skin task or retries are included.
-- [ ] Record **publication permission separately** for any intended demo photo, reference, output or footage. Transmission consent does not authorize publication. Existing private pilot imagery remains excluded from public assets; use a separately permitted demonstration source.
+- [ ] After the user resumes garments, confirm both actual garments and source version before requesting approval. Do not substitute a catalogue image or change category mid-batch. If suitable inputs are unavailable, revise this declaration and obtain approval for the revised batch first.
+- [ ] Retain the user’s source-use clearance and identify the exact AI-created source/version. Record available creation provenance without inventing generator/model or licence details. Confirm processing/transformation rights for the two garment photos when garment work resumes; no stock image or private participant source is substituted.
+- [ ] Verify **public use of the source, references, derived outputs and recorded footage** separately. Record licence scope/evidence; transmission permission does not authorize publication. Existing private catalogue imagery remains excluded.
+- [ ] Record the user's explicit authorization for **exactly two Cloth V4 attempts total**, the exact inputs, intended build/environment, maximum units and stop conditions. These two attempts also supply release evidence and demo footage. No optional skin task, replacement attempt or retry is included.
 
-Permission evidence references, date and scope (no personal data): transmission **pending**; two-task approval **pending**; publication **not granted by this sheet**.
+Permission evidence references, date and scope (no personal data): AI demo-source use **cleared by user on 26 October; exact version receipt pending**; garment processing/public-use rights **on hold/pending**; two-task approval **pending**; publication action **not authorized by this sheet**.
 
 ## Preflight
 
@@ -24,6 +26,7 @@ Permission evidence references, date and scope (no personal data): transmission 
 2. Prepare the source and each reference through the app. Confirm orientation, declared category and combined serialized request below 4,000,000 bytes. Upload alone must start no task.
 3. With specific authorization for any account inspection, recheck current provider cost, balance, remaining shared allowance and reserve before the batch. The [22 October initialization](BUDGET_INITIALIZATION_CHECK.json) is a historical 10-unit/five-VTO starter allowance, **not a current balance or judging budget**. Failed/uncertain submissions retain reservations.
 4. Verify the approved running build/environment, access control, deployed budget enforcement and visible live mode using [JUDGING_ACCESS_PREFLIGHT](JUDGING_ACCESS_PREFLIGHT.md). A mock deployment or `mode:live` label alone cannot establish live task success. Live activation/deployment need their own approval.
+5. Prepare recording and saving on the user's own phone/browser. Capture the **raw complete journey during this two-attempt session**, including loading, rendered results, comparison, assignment, five-event plan, actual result save/open and actual PDF save/open. Do not postpone capture or expect later access: results and page-session state are temporary. Confirm recording can exclude credentials and private provider URLs without another generation.
 
 ## Run exactly once per declared case
 
@@ -31,7 +34,7 @@ Use the app's explicit **Generate try-on** action. Start the stopwatch at that p
 
 **Stop the batch on any 429. Do not automatically retry or replace any failed attempt.** Diagnose and obtain separate approval for any later retest; retain original outcomes.
 
-| Case / attempt | Mode + build | Generate / visible-render times | Elapsed / displayed seconds | Outcome or failure | App requests / known task submissions | Identity /5 | Garment /5 | Participant decision |
+| Case / attempt | Mode + build | Generate / visible-render times | Elapsed / displayed seconds | Outcome or failure | App requests / known task submissions | User: source likeness /5 | User: garment fidelity /5 | User: planning decision |
 |---|---|---|---|---|---|---|---|---|
 | OWN-01 / 1 | Not run | — | — | Not run | — | — | — | — |
 | OWN-02 / 1 | Not run | — | — | Not run | — | — | — | — |
@@ -40,10 +43,10 @@ Use `unknown` for an uncertain provider-submission count rather than assuming ze
 
 ## Review and decision gate
 
-The actual participant scores **identity** and **garment fidelity** independently against the source and exact reference: **5** clearly preserved; **4** minor differences without distracting distortion; **3 or below** differences that affect trust. Missing output is a failure, not an omitted case.
+The user is the sole evaluator and scores **source likeness** and **garment fidelity** as two separate measures against the user-cleared AI source and exact garment reference: **5** clearly preserved; **4** minor differences without distracting distortion; **3 or below** differences that affect trust. Missing output is a failure, not an omitted case. These are single-evaluator ratings, not ratings supplied by the person depicted.
 
-Both outputs must visibly render and receive **at least 4/5 for both measures** before using them as successful owned-garment demo evidence. Then compare the two existing results, choose **Plan for Sangeet** (or the selected occasion), confirm the board assignment, and save/open the image without another generation request. Record comparison/assignment and save behavior separately from image-quality scores; their current implementation verification is pending.
+Both outputs must visibly render and receive **at least 4/5 for both measures** to pass the two-case gate. During the same session, compare the existing results, choose **Plan for Sangeet** (or the selected occasion), confirm the board assignment, complete all five event choices and save/open the genuine result and text-only PDF without another generation request. Record source SHA, device/browser, save/open outcomes and private footage receipts separately from image-quality scores. Local mock assignment/PDF checks already exist in [wardrobe verification](WARDROBE_DECISION_CHECK_2026-10-23.md); physical-phone and released live outcomes remain pending.
 
-If either result fails, preserve it, inspect source framing/reference/category/preparation and narrow supported inputs or claims. Two passing cases support only these garments and this source; they do not establish sizing, broad reliability, independent usability or reduced purchases. A passing private pilot still needs separate permitted imagery for public footage.
+If one case fails, preserve its record and narrow the demonstration/claims to the successful case; do not imply the two-case gate passed. If neither passes, do not sign off an owned-clothes live claim. Diagnose framing/reference/category/preparation and present any retest as a separately bounded proposal requiring new approval. Two passing cases support only these garments and this AI-created source. They establish neither participant satisfaction, independent usability, sizing, broad reliability nor reduced purchases.
 
-**Still pending:** declared private inputs, permissions, fresh approved budget inspection, live-release approval, both attempts, ratings, decision/save checks and public footage. Independent guest usability uses [WARDROBE_GUEST_PLAYTEST](WARDROBE_GUEST_PLAYTEST.md); no guest session is completed by this sheet.
+**On hold with garments:** exact garment receipts/rights and live attempts. **Other outstanding receipts:** exact AI source/version, approved budget inspection, live-release/task approvals, both attempts, ratings, phone decision/save/PDF checks and permitted footage. No guests are planned this week. The historical [guest-study protocol](WARDROBE_GUEST_PLAYTEST.md) is retained as deferred research, not a release dependency.

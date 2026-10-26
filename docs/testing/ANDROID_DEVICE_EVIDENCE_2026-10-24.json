@@ -1,0 +1,132 @@
+{
+  "date": "2026-10-24",
+  "sourceSha": "e2eb6cdf690f6870385b774fced3d47a37a1a11c",
+  "mode": "mock",
+  "device": {
+    "model": "I2126",
+    "android": "14",
+    "width": 392,
+    "height": 761,
+    "chrome": "155.0.8059.84"
+  },
+  "checks": {
+    "home": {
+      "secure": true,
+      "overflow": false
+    },
+    "gallery": {
+      "overflow": false
+    },
+    "nativeGarmentPicker": {
+      "received": true,
+      "preparedWidth": 900,
+      "preparedHeight": 1600,
+      "generationRequests": 0,
+      "syntheticFixtureNotConfirmed": true,
+      "imageRetained": false
+    },
+    "syntheticOwnedUploads": {
+      "count": 2,
+      "method": "Playwright File payload on actual Android Chrome; not native picker",
+      "requests": 0
+    },
+    "firstMock": {
+      "rendered": true,
+      "requests": 1,
+      "saveBytes": 4564,
+      "saveSha256": "2bffecab3763b298441a2c8ec0a8334dc7466f12355420ef9884230ecf45bb8a"
+    },
+    "compareAndPlan": {
+      "mockResults": 2,
+      "sourceReused": true,
+      "summary": "5 of 5 planned\n2 owned outfits used\n2 planned rewears",
+      "extraGeneration": 0,
+      "overflow": false
+    },
+    "nativePrintPreview": {
+      "observedPackage": "com.android.printspooler",
+      "destination": "Save as PDF",
+      "saved": true,
+      "reopenMethod": "normal on-device file app; direct ADB document URI lacked permission"
+    },
+    "nativeMockDownload": {
+      "bytes": 4564,
+      "sha256Matched": true,
+      "format": "JPEG"
+    },
+    "originalAndZoom": {
+      "passed": true,
+      "extraRequests": 0
+    },
+    "sourceReplacement": {
+      "method": "File payload on physical browser",
+      "prepared": {
+        "width": 400,
+        "height": 600
+      },
+      "resultCleared": true,
+      "requestsUnchanged": true,
+      "oldResultVisibleBeforeReplacement": true
+    },
+    "invalidUpload": {
+      "usableError": "Please choose a valid JPG or PNG image.",
+      "requestsUnchanged": true,
+      "validReplacementRecovered": true
+    },
+    "sessionClear": {
+      "ownedClothesRemoved": true,
+      "comparisonRemoved": true,
+      "planReset": true,
+      "consentReset": true,
+      "requestsUnchanged": true
+    },
+    "reload": {
+      "noSource": true,
+      "noResults": true,
+      "noOwnedFixtures": true
+    },
+    "cameraDenied": {
+      "method": "CDP browser permission override on physical Chrome; not a native OS-dialog test",
+      "message": "Camera permission denied. Allow access in the address bar, or upload a photo instead.",
+      "captured": false,
+      "uploadFallbackAvailable": true,
+      "cancelClosedCamera": true,
+      "skinRequests": 0,
+      "permissionRestored": true
+    },
+    "nativePdfOpen": {
+      "passed": true,
+      "method": "Tester confirmed opening the saved PDF in the normal phone file app and reading all five events"
+    },
+    "nativePdfSave": {
+      "passed": true,
+      "pages": 1,
+      "bytes": 8898,
+      "sha256": "7666418f1355092553f8f78b054af0b563c7a256bccae292070be1715d9e215a",
+      "events": [
+        "Mehendi",
+        "Haldi",
+        "Sangeet",
+        "Wedding",
+        "Reception"
+      ],
+      "ownedOutfits": 2,
+      "plannedRewears": 2,
+      "images": 0,
+      "annotations": 0,
+      "privateMarkersFound": false,
+      "renderVisuallyInspected": true
+    }
+  },
+  "mockRequests": 2,
+  "skinRequests": 0,
+  "pageErrors": [],
+  "scope": "Physical Android portrait journey on local USB-forwarded mock build; no live YouCam tasks.",
+  "limitations": [
+    "Native garment picker delivered an image, but synthetic provenance was not confirmed; the image was discarded without generation or retention.",
+    "Main uploads and distinct-source replacement used synthetic File payloads on physical Chrome, not the native picker.",
+    "Camera denial used a browser permission override; native OS prompt denial/reopen was not tested.",
+    "Landscape, iPhone, cloud-on-phone, live signed-result saving and owned-garment live quality remain unverified.",
+    "PDF reopening and five-event readability were confirmed by the tester in the normal phone file app."
+  ]
+}

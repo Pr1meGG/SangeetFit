@@ -41,6 +41,11 @@ try {
   assert.deepEqual(await page.request.get(`${base}/api/mode`).then(r => r.json()), { mode: "mock" }, "this suite must only use an isolated mock server");
   await page.goto(base);
   await page.getByRole("heading", { name: /Five moments\. One wardrobe\./ }).waitFor();
+  await page.getByRole("link", { name: "Skip to content", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  assert(await page.locator("#main-content").evaluate(el => el === document.activeElement && !el.querySelector(".sf-navbar")), "skip link must focus content after navigation");
+  await page.keyboard.press("Tab");
+  assert(await page.getByRole("button", { name: "Plan my five looks", exact: true }).evaluate(el => el === document.activeElement), "Tab after skipping must enter the primary task");
   const photos = await page.evaluate(() => {
     const image = (width, height, color, mime) => {
       const canvas = Object.assign(document.createElement("canvas"), { width, height });
@@ -55,6 +60,7 @@ try {
   for (const width of [320, 375, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `home overflows at ${width}`);
+    assert(await page.locator(".sf-editorial-hero h1").evaluate(el => el.getBoundingClientRect().height <= parseFloat(getComputedStyle(el).lineHeight) * 2.1), `headline must fit its two intended lines at ${width}px`);
     // The phone bar is locked: pinned to the viewport bottom at scroll 0 and after deep scroll.
     const navLocked = await page.evaluate(() => {
       const nav = document.querySelector(".sf-bottom-nav");
@@ -97,6 +103,9 @@ try {
   await page.waitForTimeout(150);
   assert.equal(await page.evaluate(() => Math.round(window.scrollY)), 0, "gallery step must reset the previous scroll offset");
   await page.getByRole("heading", { name: "Start with something you own." }).waitFor();
+  assert.equal(await page.getByRole("group", { name: "Choose occasion", exact: true }).getByRole("button").count(), 5);
+  assert.equal(await page.getByRole("group", { name: "Collection", exact: true }).getByRole("button").count(), 3);
+  assert(await page.locator(".sf-search input").evaluate(el => parseFloat(getComputedStyle(el).fontSize) >= 16), "mobile search text must avoid iOS focus zoom");
   await page.setViewportSize({ width: 320, height: 844 });
   const audienceRows = await page.locator(".sf-audiences button").evaluateAll(buttons => buttons.map(button => Math.round(button.getBoundingClientRect().top)));
   assert.equal(new Set(audienceRows).size, 1, "all audience filters must stay in one row on a 320px phone");
@@ -321,6 +330,12 @@ try {
   assert.equal(skinRequests, 0, "selfie upload must not submit analysis");
   await page.getByRole("button", { name: "Analyze selfie", exact: true }).click();
   await page.getByText(/Mock sample/).waitFor();
+  const colourSamples = page.locator(".sf-palette-row").getByRole("img");
+  assert.equal(await colourSamples.count(), 6, "all colour samples must expose an image role");
+  for (const sample of await colourSamples.all()) {
+    const name = await sample.getAttribute("aria-label");
+    assert(name && name === await sample.getAttribute("title"), "each colour sample must expose its visible colour name");
+  }
   await page.getByRole("button", { name: "Continue to gallery" }).click();
   assert.equal(skinRequests, 1);
   await noNewTasks(3, "optional skin analysis does not generate clothing");

@@ -7,6 +7,17 @@ export function privateJson(body: unknown, status = 200) {
 
 export async function readPhotoJson(req: Request, signal: AbortSignal): Promise<unknown> {
   signal.throwIfAborted();
+  const origin = req.headers.get("origin");
+  const url = new URL(req.url);
+  const host = req.headers.get("host");
+  // Next can normalize the internal URL to localhost while the browser uses 127.0.0.1.
+  const requestOrigin = host ? new URL(`${url.protocol}//${host}`).origin : url.origin;
+  if (origin !== null && origin !== requestOrigin) {
+    throw new VtoInputError("Photo requests must come from this app", 403);
+  }
+  if (req.headers.get("content-type")?.split(";")[0].trim().toLowerCase() !== "application/json") {
+    throw new VtoInputError("Photo requests must use application/json", 415);
+  }
   const declared = req.headers.get("content-length");
   if (declared && /^\d+$/.test(declared) && Number(declared) >= MAX_VTO_REQUEST_BYTES) {
     throw new VtoInputError("Photo request must be under 4 MB", 413);

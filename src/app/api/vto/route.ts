@@ -6,7 +6,6 @@ import { setTimeout as wait } from "node:timers/promises";
 import { isRecord, uploadYouCamFile, YouCamHttpError } from "@/lib/youcam";
 import { parseVtoInput, VtoInputError } from "@/lib/vto-input";
 import { privateJson, readPhotoJson } from "@/lib/request";
-import { liveAccessError } from "@/lib/live-access";
 import { LiveBudgetError, reserveLiveBudget } from "@/lib/live-budget";
 import { INDIAN_WEAR_LIBRARY } from "@/data/indian-wear";
 import { EDITORIAL_LOOKS } from "@/data/editorial";
@@ -201,10 +200,6 @@ function timedOutResponse() {
 }
 
 export async function POST(req: NextRequest) {
-  if (!MOCK_MODE) {
-    const denied = liveAccessError(req);
-    if (denied) return privateJson({ success: false, error: denied.error, mode: "live" }, denied.status);
-  }
   const signal = AbortSignal.any([req.signal, AbortSignal.timeout(180_000)]);
   let onAbort = () => {};
   const cancelled = new Promise<NextResponse>(resolve => {

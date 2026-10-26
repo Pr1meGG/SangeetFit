@@ -11,7 +11,7 @@ let requests = 0;
 let rejectBudget = true;
 try {
   assert.deepEqual(await page.request.get(`${base}/api/mode`).then(response => response.json()), { mode: "mock" });
-  await page.route("**/api/mode", route => route.fulfill({ json: { mode: "live", accessRequired: true } }));
+  await page.route("**/api/mode", route => route.fulfill({ json: { mode: "live" } }));
   await page.route("**/api/vto", route => {
     requests++;
     return route.fulfill(rejectBudget
@@ -36,8 +36,9 @@ try {
   await dialog.getByLabel("Full-body photo", { exact: true }).setInputFiles({ name: "synthetic.jpg", mimeType: "image/jpeg", buffer: Buffer.from(data, "base64") });
   await dialog.getByText("Photo ready. Uploading did not start a task.").waitFor();
   assert.equal(requests, 0);
-  await dialog.getByLabel("Preview access code", { exact: false }).fill("synthetic-mobile-preview-code");
   const generate = dialog.getByRole("button", { name: "Generate try-on", exact: true });
+  assert(await generate.isEnabled(), "prepared photo enables Generate without a code");
+  assert.equal(await dialog.getByLabel("Preview access code", { exact: false }).count(), 0);
   assert((await generate.boundingBox()).height >= 44, "primary touch target must be at least 44px");
   await generate.tap();
   await dialog.getByText("Live generation allowance reached. Browsing is still available.", { exact: true }).waitFor();

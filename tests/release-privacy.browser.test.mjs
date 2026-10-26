@@ -14,23 +14,24 @@ let onSkinStarted;
 const skinStarted = new Promise(resolve => { onSkinStarted = resolve; });
 try {
   assert.deepEqual(await page.request.get(`${base}/api/mode`).then(response => response.json()), { mode: "mock" });
-  await page.route("**/api/mode", route => modeFails ? route.abort() : route.fulfill({ json: { mode: "live", accessRequired: true } }));
+  await page.route("**/api/mode", route => modeFails ? route.abort() : route.fulfill({ json: { mode: "live" } }));
   await page.route("**/api/skin", async route => {
     skinRequests++;
-    assert.equal(route.request().headers()["x-sangeetfit-access-code"], "synthetic-preview-access-code");
+    assert.equal(route.request().headers()["x-sangeetfit-access-code"], undefined);
     await new Promise(resolve => { finishSkin = resolve; onSkinStarted(); });
     await route.fulfill({ json: { success: true, mode: "live", skin_color: "#b9947c" } }).catch(() => {});
   });
   await page.route("**/api/vto", async route => {
     vtoRequests++;
-    assert.equal(route.request().headers()["x-sangeetfit-access-code"], "synthetic-preview-access-code");
+    assert.equal(route.request().headers()["x-sangeetfit-access-code"], undefined);
     await route.fulfill({ json: { success: true, mode: "live", resultUrl: `${base}/garment_test/editorial/emerald-kurta.jpg` } });
   });
   await page.goto(`${base}/?step=2`);
   await page.getByText("Could not check generation availability.").waitFor();
   modeFails = false;
   await page.getByRole("button", { name: "Check availability again" }).click();
-  await page.getByLabel("Preview access code", { exact: false }).waitFor();
+  await page.getByText("Could not check generation availability.").waitFor({ state: "hidden" });
+  assert.equal(await page.getByLabel("Preview access code", { exact: false }).count(), 0);
   const person = await page.evaluate(() => {
     const canvas = Object.assign(document.createElement("canvas"), { width: 400, height: 600 });
     canvas.getContext("2d").fillRect(0, 0, 400, 600);
@@ -40,8 +41,7 @@ try {
   await page.getByLabel("Selfie photo", { exact: true }).setInputFiles(file);
   await page.getByText("Selfie ready. Uploading did not start an analysis.").waitFor();
   assert.equal(skinRequests, 0);
-  assert(await page.getByRole("button", { name: "Analyze selfie", exact: true }).isDisabled());
-  await page.getByLabel("Preview access code", { exact: false }).fill("synthetic-preview-access-code");
+  assert(await page.getByRole("button", { name: "Analyze selfie", exact: true }).isEnabled());
   await page.getByRole("button", { name: "Analyze selfie", exact: true }).click();
   await page.getByText("Analyzing with YouCam API…").waitFor();
   await skinStarted;
@@ -51,7 +51,7 @@ try {
   await page.getByRole("button", { name: "Analyze selfie", exact: true }).waitFor();
   assert.equal(await page.getByAltText("Your prepared selfie").count(), 0);
   assert.equal(await page.getByText("Detected skin tone", { exact: true }).count(), 0);
-  assert.equal(await page.getByLabel("Preview access code", { exact: false }).inputValue(), "");
+  assert.equal(await page.getByLabel("Preview access code", { exact: false }).count(), 0);
   assert.equal(skinRequests, 1);
   await page.goto(`${base}/?step=3&occasion=sangeet&vto=concept-emerald-kurta`);
   const dialog = page.getByRole("dialog", { name: "Make this look yours." });
@@ -60,9 +60,15 @@ try {
   await page.addStyleTag({ content: ".sf-consent { display: none !important; }" });
   assert(await dialog.getByRole("button", { name: "I understand — continue" }).isVisible(), "photo permission must survive cookie-banner cosmetic filters");
   await dialog.getByRole("button", { name: "I understand — continue" }).click();
+  assert(await dialog.getByRole("button", { name: "Generate try-on", exact: true }).isDisabled());
+  await dialog.getByLabel("Full-body photo", { exact: true }).setInputFiles({ name: "invalid.txt", mimeType: "text/plain", buffer: Buffer.from("not an image") });
+  await dialog.getByText("Please upload an image file", { exact: true }).waitFor();
+  assert(await dialog.getByRole("button", { name: "Generate try-on", exact: true }).isDisabled());
   await dialog.getByLabel("Full-body photo", { exact: true }).setInputFiles(file);
   await dialog.getByText("Photo ready. Uploading did not start a task.").waitFor();
-  await dialog.getByLabel("Preview access code", { exact: false }).fill("synthetic-preview-access-code");
+  assert.equal(await dialog.getByLabel("Preview access code", { exact: false }).count(), 0);
+  assert.equal(vtoRequests, 0, "selecting a photo must not submit");
+  assert(await dialog.getByRole("button", { name: "Generate try-on", exact: true }).isEnabled());
   await dialog.getByRole("button", { name: "Generate try-on", exact: true }).click();
   await dialog.getByRole("slider").waitFor();
   await dialog.getByRole("button", { name: "Close try-on" }).click();
@@ -80,7 +86,6 @@ try {
   await dialog.getByRole("button", { name: "I understand — continue" }).click();
   await dialog.getByLabel("Full-body photo", { exact: true }).setInputFiles(file);
   await dialog.getByText("Photo ready. Uploading did not start a task.").waitFor();
-  await dialog.getByLabel("Preview access code", { exact: false }).fill("synthetic-preview-access-code");
   await dialog.getByRole("button", { name: "Generate try-on", exact: true }).click();
   await dialog.getByRole("slider").waitFor();
   await dialog.getByRole("button", { name: "Close try-on" }).click();
@@ -99,7 +104,7 @@ try {
   const missing = await page.request.get(`${base}/missing-page`);
   assert.equal(missing.status(), 404);
   assert.equal(missing.headers()["x-content-type-options"], "nosniff");
-  console.log("PASS: availability recovery, explicit analysis, invite header, stale-result/session clearing, safe leave and404 recovery");
+  console.log("PASS: availability recovery, explicit code-free generation, stale-result/session clearing, safe leave and404 recovery");
 } finally {
   finishSkin?.();
   await browser.close();

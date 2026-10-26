@@ -22,6 +22,52 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx --no-install playwright install --with-deps chromium
-      - run: npm run verify
+      - id: verify
+        run: npm run verify
         env:
           TEST_REDIS_CONTAINER: ${{ job.services.redis.id }}
+          TMPDIR: ${{ runner.temp }}
+      - name: Stage synthetic mock evidence
+        if: always()
+        env:
+          VERIFY_OUTCOME: ${{ steps.verify.outcome }}
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          STAGE_DIR="$RUNNER_TEMP/mock-synthetic-evidence"
+          mkdir -p "$STAGE_DIR"
+          EXPECTED_FILES=(
+            "board-320.png"
+            "board-390.png"
+            "board-1440.png"
+            "print-view.png"
+            "wardrobe-plan.pdf"
+          )
+          EVIDENCE_DIR=$(ls -td "$RUNNER_TEMP"/sangeetfit-wardrobe-* 2>/dev/null | head -n 1) || EVIDENCE_DIR=""
+          MISSING=0
+          if [ -z "$EVIDENCE_DIR" ] || [ ! -d "$EVIDENCE_DIR" ]; then
+            echo "::warning::No sangeetfit-wardrobe evidence directory found in $RUNNER_TEMP"
+            MISSING=${#EXPECTED_FILES[@]}
+          else
+            echo "Found synthetic evidence directory: $EVIDENCE_DIR"
+            for file in "${EXPECTED_FILES[@]}"; do
+              if [ -s "$EVIDENCE_DIR/$file" ]; then
+                cp "$EVIDENCE_DIR/$file" "$STAGE_DIR/$file"
+                echo "Staged synthetic artifact: $file ($(wc -c < "$STAGE_DIR/$file" | tr -d ' ') bytes)"
+              else
+                echo "::warning::Missing or empty synthetic evidence file: $file"
+                MISSING=$((MISSING + 1))
+              fi
+            done
+          fi
+          if [ "$VERIFY_OUTCOME" = "success" ] && [ "$MISSING" -gt 0 ]; then
+            echo "::error::Verification passed but $MISSING synthetic evidence file(s) are missing. Partial artifacts cannot establish a passing journey."
+            exit 1
+          fi
+      - name: Upload synthetic mock evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sangeetfit-mock-synthetic-evidence-${{ github.sha }}
+          path: ${{ runner.temp }}/mock-synthetic-evidence/
+          if-no-files-found: warn
+          retention-days: 7

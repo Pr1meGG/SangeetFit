@@ -25,7 +25,6 @@ void (async () => {
   assert.equal(process.env.REQUIRE_REDIS_TEST, "true", "Set REQUIRE_REDIS_TEST=true only for a disposable Redis instance");
   process.env.MOCK_MODE = "false";
   process.env.YOUCAM_API_KEY = "offline-test-key";
-  process.env.LIVE_ACCESS_CODE = "offline-preview-code-at-least-24-characters";
   process.env.UPSTASH_REDIS_REST_URL = "https://offline-budget.upstash.io";
   process.env.UPSTASH_REDIS_REST_TOKEN = "offline-budget-token";
   const realFetch = globalThis.fetch;
@@ -77,7 +76,7 @@ void (async () => {
 
     await seed();
     const { POST } = await import("../src/app/api/skin/route.ts");
-    const response = await POST(new Request("http://localhost/api/skin", { method: "POST", headers: { "x-sangeetfit-access-code": process.env.LIVE_ACCESS_CODE }, body: JSON.stringify({ imageDataUrl: pngDataUrl() }) }) as never);
+    const response = await POST(new Request("http://localhost/api/skin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ imageDataUrl: pngDataUrl() }) }) as never);
     assert.equal(response.status, 502);
     assert.equal(providerCalls, 1);
     assert.equal(await redis("HGET", LIVE_BUDGET_KEY, "used"), "300", "a failed upload keeps its reservation");

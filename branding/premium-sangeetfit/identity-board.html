@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SangeetFit · Premium Logo Iterations</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    background: #FBF7F1;
+    color: #1A1216;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .header {
+    padding: 60px 60px 40px;
+    border-bottom: 1px solid rgba(91, 23, 48, 0.08);
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 400;
+    font-size: 52px;
+    letter-spacing: -0.5px;
+    color: #5B1730;
+    line-height: 1.1;
+  }
+  .header .tagline {
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #B08D4F;
+    margin-top: 10px;
+  }
+  .header .desc {
+    max-width: 640px;
+    margin-top: 18px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #777;
+  }
+
+  .section {
+    padding: 56px 60px;
+    border-bottom: 1px solid rgba(91, 23, 48, 0.06);
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #B08D4F;
+    margin-bottom: 28px;
+  }
+
+  /* Two-column layout */
+  .cols {
+    display: flex;
+    gap: 48px;
+    align-items: flex-start;
+  }
+  .col {
+    flex: 1;
+    min-width: 0;
+  }
+  .col-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: #5B1730;
+    margin-bottom: 4px;
+  }
+  .col-sub {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #B08D4F;
+    margin-bottom: 20px;
+  }
+  .col-desc {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #666;
+    margin-bottom: 24px;
+  }
+
+  .box-light {
+    background: #fff;
+    border-radius: 14px;
+    padding: 32px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .box-dark {
+    background: #5B1730;
+    border-radius: 14px;
+    padding: 32px;
+    box-shadow: 0 4px 28px rgba(91,23,48,0.2);
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .box-dark .size-label { color: rgba(247,241,229,0.5); }
+
+  .sym-row {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .size-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(91, 23, 48, 0.06);
+  }
+  .size-item { text-align: center; }
+  .size-label {
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: #bbb;
+    margin-top: 4px;
+  }
+  .size-label.gold { color: #B08D4F; }
+
+  .palette { display: flex; gap: 16px; flex-wrap: wrap; }
+  .swatch {
+    width: 100px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  }
+  .swatch-color { height: 64px; }
+  .swatch-info { padding: 10px; }
+  .swatch-name { font-size: 11px; font-weight: 500; color: #333; }
+  .swatch-hex { font-size: 10px; color: #999; }
+
+  .lockup-card-light {
+    background: #fff;
+    border-radius: 14px;
+    padding: 28px 40px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+  }
+  .lockup-card-dark {
+    background: #5B1730;
+    border-radius: 14px;
+    padding: 28px 40px;
+    box-shadow: 0 4px 28px rgba(91,23,48,0.2);
+  }
+  .lockup-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #B08D4F;
+    color: #fff;
+    margin-top: 12px;
+  }
+  .badge.outline {
+    background: transparent;
+    border: 1px solid #B08D4F;
+    color: #B08D4F;
+  }
+
+  .weakness {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: rgba(91,23,48,0.04);
+    border-left: 2px solid #B08D4F;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #666;
+  }
+
+  .footer {
+    padding: 40px 60px;
+    text-align: center;
+    color: #B08D4F;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Sangeet<span style="font-weight:300;color:#5B1730;">Fit</span></h1>
+  <div class="tagline">Premium Logo Iterations · 25 October 2026</div>
+  <div class="desc">
+    Two refined directions iterated from the <strong>October 2026 premium exploration</strong>.
+    Both share the same couture vocabulary: high-contrast Didone strokes, one gold dot as the 
+    rhythm signature, no disc, no paisley, no gradient.
+  </div>
+</div>
+
+<!-- Two Directions Side by Side -->
+<div class="section">
+  <div class="section-title">Symbol Mark · Two Directions</div>
+
+  <div class="cols">
+    
+    <!-- DIRECTION A: Drape S -->
+    <div class="col">
+      <div class="col-title">A · Drape S</div>
+      <div class="col-sub">Iteration on Direction II · Dupatta</div>
+      <div class="col-desc">
+        Fabric falling from a shoulder, folding into an S. The bold+fine 
+        stroke pair gives it Didone contrast — reads as couture, not craft.
+        <strong>Legible at 16 px.</strong>
+      </div>
+      
+      <div class="box-light">
+        <svg width="200" height="200" viewBox="0 0 256 256">
+          <g transform="translate(128 128) rotate(-8) translate(-128 -128)">
+            <path d="M176 30 C200 30 214 46 214 68 C214 90 196 104 172 104 C138 104 108 80 88 64 C68 48 46 38 30 44 C14 50 10 68 14 86 C18 104 38 118 64 134 C90 150 126 170 146 196 C160 214 160 234 144 240 C128 246 108 240 92 228 C76 216 64 198 54 184" fill="none" stroke="#5B1730" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M176 36 C196 36 206 50 206 68 C206 86 190 98 172 98 C142 98 114 76 94 62 C74 48 52 42 38 48 C24 54 18 68 22 86 C26 104 44 116 68 130 C92 144 126 162 142 186 C152 200 152 224 140 230 C128 236 110 232 96 222 C82 212 70 196 60 184" fill="none" stroke="#5B1730" stroke-width="1.6" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <circle cx="14" cy="86" r="4" fill="#B08D4F"/>
+        </svg>
+        <div class="size-row">
+          <div class="size-item">
+            <svg width="44" height="44" viewBox="0 0 256 256">
+              <g transform="translate(128 128) rotate(-8) translate(-128 -128)"><path d="M176 30 C200 30 214 46 214 68 C214 90 196 104 172 104 C138 104 108 80 88 64 C68 48 46 38 30 44 C14 50 10 68 14 86 C18 104 38 118 64 134 C90 150 126 170 146 196 C160 214 160 234 144 240 C128 246 108 240 92 228 C76 216 64 198 54 184" fill="none" stroke="#5B1730" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M176 36 C196 36 206 50 206 68 C206 86 190 98 172 98 C142 98 114 76 94 62 C74 48 52 42 38 48 C24 54 18 68 22 86 C26 104 44 116 68 130 C92 144 126 162 142 186 C152 200 152 224 140 230 C128 236 110 232 96 222 C82 212 70 196 60 184" fill="none" stroke="#5B1730" stroke-width="1.6" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/></g><circle cx="14" cy="86" r="4" fill="#B08D4F"/>
+            </svg><div class="size-label">44</div>
+          </div>
+          <div class="size-item">
+            <svg width="32" height="32" viewBox="0 0 256 256">
+              <g transform="translate(128 128) rotate(-8) translate(-128 -128)"><path d="M176 30 C200 30 214 46 214 68 C214 90 196 104 172 104 C138 104 108 80 88 64 C68 48 46 38 30 44 C14 50 10 68 14 86 C18 104 38 118 64 134 C90 150 126 170 146 196 C160 214 160 234 144 240 C128 246 108 240 92 228 C76 216 64 198 54 184" fill="none" stroke="#5B1730" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M176 36 C196 36 206 50 206 68 C206 86 190 98 172 98 C142 98 114 76 94 62 C74 48 52 42 38 48 C24 54 18 68 22 86 C26 104 44 116 68 130 C92 144 126 162 142 186 C152 200 152 224 140 230 C128 236 110 232 96 222 C82 212 70 196 60 184" fill="none" stroke="#5B1730" stroke-width="1.6" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/></g><circle cx="14" cy="86" r="4" fill="#B08D4F"/>
+            </svg><div class="size-label">32</div>
+          </div>
+          <div class="size-item">
+            <svg width="22" height="22" viewBox="0 0 256 256">
+              <g transform="translate(128 128) rotate(-8) translate(-128 -128)"><path d="M176 30 C200 30 214 46 214 68 C214 90 196 104 172 104 C138 104 108 80 88 64 C68 48 46 38 30 44 C14 50 10 68 14 86 C18 104 38 118 64 134 C90 150 126 170 146 196 C160 214 160 234 144 240 C128 246 108 240 92 228 C76 216 64 198 54 184" fill="none" stroke="#5B1730" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M176 36 C196 36 206 50 206 68 C206 86 190 98 172 98 C142 98 114 76 94 62 C74 48 52 42 38 48 C24 54 18 68 22 86 C26 104 44 116 68 130 C92 144 126 162 142 186 C152 200 152 224 140 230 C128 236 110 232 96 222 C82 212 70 196 60 184" fill="none" stroke="#5B1730" stroke-width="1.6" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/></g><circle cx="14" cy="86" r="4" fill="#B08D4F"/>
+            </svg><div class="size-label">22</div>
+          </div>
+          <div class="size-item">
+            <svg width="16" height="16" viewBox="0 0 256 256">
+              <g transform="translate(128 128) rotate(-8) translate(-128 -128)"><path d="M176 30 C200 30 214 46 214 68 C214 90 196 104 172 104 C138 104 108 80 88 64 C68 48 46 38 30 44 C14 50 10 68 14 86 C18 104 38 118 64 134 C90 150 126 170 146 196 C160 214 160 234 144 240 C128 246 108 240 92 228 C76 216 64 198 54 184" fill="none" stroke="#5B1730" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M176 36 C196 36 206 50 206 68 C206 86 190 98 172 98 C142 98 114 76 94 62 C74 48 52 42 38 48 C24 54 18 68 22 86 C26 104 44 116 68 130 C92 144 126 162 142 186 C152 200 152 224 140 230 C128 236 110 232 96 222 C82 212 70 196 60 184" fill="none" stroke="#5B1730" stroke-width="1.6" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/></g><circle cx="14" cy="86" r="4" fill="#B08D4F"/>
+            </svg><div class="size-label">16</div>
+          </div>
+        </div>
+      </div>
+      <div class="weakness">
+        <strong>Original weakness (addressed):</strong> The original Dupatta hairline became a squiggle at 16 px. 
+        <em>Now:</em> Bold 5 px outer stroke keeps the S readable at any size; the inner fine line preserves the couture sensitivity.
+      </div>
+    </div>
+
+    <!-- DIRECTION B: Kundan S -->
+    <div class="col">
+      <div class="col-title">B · Kundan S</div>
+      <div class="col-sub">Iteration on Direction III · Kundan</div>
+      <div class="col-desc">
+        A kundan marquise split into two lobes that trace an S. The gold 
+        seed at centre becomes the note. Reads as heirloom jewellery 
+        reimagined as a monogram.
+      </div>
+      
+      <div class="box-light">
+        <svg width="200" height="200" viewBox="0 0 256 256">
+          <g transform="translate(128 128) rotate(6) translate(-128 -128)">
+            <path d="M60 8 C92 28 98 80 60 106 C22 80 28 28 60 8 Z" fill="none" stroke="#5B1730" stroke-width="3.4" stroke-linejoin="round"/>
+            <path d="M60 18 C84 34 88 74 60 94 C32 74 36 34 60 18 Z" fill="none" stroke="#5B1730" stroke-width="1.2" stroke-opacity="0.4" stroke-linejoin="round"/>
+            <path d="M60 8 C60 30 50 50 40 58 C30 66 30 78 40 86 C50 94 60 100 60 106" fill="none" stroke="#5B1730" stroke-width="1" stroke-linecap="round"/>
+          </g>
+          <circle cx="128" cy="128" r="3.5" fill="#B08D4F"/>
+        </svg>
+        <div class="size-row">
+          <div class="size-item">
+            <svg width="44" height="44" viewBox="0 0 256 256">
+              <g transform="translate(128 128) rotate(6) translate(-128 -128)"><path d="M60 8 C92 28 98 80 60 106 C22 80 28 28 60 8 Z" fill="none" stroke="#5B1730" stroke-width="3.4" stroke-linejoin="round"/><path d="M60 18 C84 34 88 74 60 94 C32 74 36 34 60 18 Z" fill="none" stroke="#5B1730" stroke-width="1.2" stroke-opacity="0.4" stroke-linejoin="round"/></g><circle cx="128" cy="128" r="3.5" fill="#B08D4F"/>
+            </svg><div class="size-label">44</div>
+          </div>
+          <div class="size-item">
+            <svg width="32" height="32" viewBox="0 0 256 256">
+              <g transform="translate(128 128) rotate(6) translate(-128 -128)"><path d="M60 8 C92 28 98 80 60 106 C22 80 28 28 60 8 Z" fill="none" stroke="#5B1730" stroke-width="3.4" stroke-linejoin="round"/><path d="M60 18 C84 34 88 74 60 94 C32 74 36 34 60 18 Z" fill="none" stroke="#5B1730" stroke-width="1.2" stroke-opacity="0.4" stroke-linejoin="round"/></g><circle cx="128" cy="128" r="3.5" fill="#B08D4F"/>
+            </svg><div class="size-label">32</div>
+          </div>
+          <div class="size-item">
+            <svg width="22" height="22" viewBox="0 0 256 256">
+              <g transform="translate(128 128) rotate(6) translate(-128 -128)"><path d="M60 8 C92 28 98 80 60 106 C22 80 28 28 60 8 Z" fill="none" stroke="#5B1730" stroke-width="3.4" stroke-linejoin="round"/><path d="M60 18 C84 34 88 74 60 94 C32 74 36 34 60 18 Z" fill="none" stroke="#5B1730" stroke-width="1.2" stroke-opacity="0.4" stroke-linejoin="round"/></g><circle cx="128" cy="128" r="3.5" fill="#B08D4F"/>
+            </svg><div class="size-label">22</div>
+          </div>
+          <div class="size-item">
+            <svg width="16" height="16" viewBox="0 0 256 256">
+              <g transform="translate(128 128) rotate(6) translate(-128 -128)"><path d="M60 8 C92 28 98 80 60 106 C22 80 28 28 60 8 Z" fill="none" stroke="#5B1730" stroke-width="3.4" stroke-linejoin="round"/><path d="M60 18 C84 34 88 74 60 94 C32 74 36 34 60 18 Z" fill="none" stroke="#5B1730" stroke-width="1.2" stroke-opacity="0.4" stroke-linejoin="round"/></g><circle cx="128" cy="128" r="3.5" fill="#B08D4F"/>
+            </svg><div class="size-label">16</div>
+          </div>
+        </div>
+      </div>
+      <div class="weakness">
+        <strong>Original weakness (addressed):</strong> The original Kundan said "gem" not "wardrobe." 
+        <em>Now:</em> The S-embedded marquise reads as a monogram first, heirloom second — still holds shape beautifully at 16 px.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lockup -->
+<div class="section">
+  <div class="section-title">Lockup · Drape S + Wordmark</div>
+  <div class="cols">
+    <div class="col">
+      <div class="lockup-card-light">
+        <div class="lockup-row">
+          <svg width="70" height="70" viewBox="0 0 256 256">
+            <g transform="translate(128 128) rotate(-8) translate(-128 -128)">
+              <path d="M176 30 C200 30 214 46 214 68 C214 90 196 104 172 104 C138 104 108 80 88 64 C68 48 46 38 30 44 C14 50 10 68 14 86 C18 104 38 118 64 134 C90 150 126 170 146 196 C160 214 160 234 144 240 C128 246 108 240 92 228 C76 216 64 198 54 184" fill="none" stroke="#5B1730" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M176 36 C196 36 206 50 206 68 C206 86 190 98 172 98 C142 98 114 76 94 62 C74 48 52 42 38 48 C24 54 18 68 22 86 C26 104 44 116 68 130 C92 144 126 162 142 186 C152 200 152 224 140 230 C128 236 110 232 96 222 C82 212 70 196 60 184" fill="none" stroke="#5B1730" stroke-width="1.6" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <circle cx="14" cy="86" r="4" fill="#B08D4F"/>
+          </svg>
+          <span style="font-family:'Playfair Display',serif;font-size:38px;color:#5B1730;font-weight:400;letter-spacing:1;">Sangeet</span>
+          <span style="font-size:6px;color:#B08D4F;">●</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:38px;color:#5B1730;font-weight:300;letter-spacing:4;">Fit</span>
+        </div>
+        <div class="size-label" style="margin-top:16px;text-align:center;">Light Surface</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="lockup-card-dark">
+        <div class="lockup-row">
+          <svg width="70" height="70" viewBox="0 0 256 256">
+            <g transform="translate(128 128) rotate(-8) translate(-128 -128)">
+              <path d="M176 30 C200 30 214 46 214 68 C214 90 196 104 172 104 C138 104 108 80 88 64 C68 48 46 38 30 44 C14 50 10 68 14 86 C18 104 38 118 64 134 C90 150 126 170 146 196 C160 214 160 234 144 240 C128 246 108 240 92 228 C76 216 64 198 54 184" fill="none" stroke="#F7F1E5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M176 36 C196 36 206 50 206 68 C206 86 190 98 172 98 C142 98 114 76 94 62 C74 48 52 42 38 48 C24 54 18 68 22 86 C26 104 44 116 68 130 C92 144 126 162 142 186 C152 200 152 224 140 230 C128 236 110 232 96 222 C82 212 70 196 60 184" fill="none" stroke="#F7F1E5" stroke-width="1.6" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <circle cx="14" cy="86" r="4" fill="#B08D4F"/>
+          </svg>
+          <span style="font-family:'Playfair Display',serif;font-size:38px;color:#F7F1E5;font-weight:400;letter-spacing:1;">Sangeet</span>
+          <span style="font-size:6px;color:#B08D4F;">●</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:38px;color:#F7F1E5;font-weight:300;letter-spacing:4;">Fit</span>
+        </div>
+        <div class="size-label" style="margin-top:16px;text-align:center;color:rgba(247,241,229,0.5);">Dark Surface (Burgundy)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Palette -->
+<div class="section">
+  <div class="section-title">Color Palette</div>
+  <div class="palette">
+    <div class="swatch"><div class="swatch-color" style="background:#5B1730;"></div><div class="swatch-info"><div class="swatch-name">Burgundy</div><div class="swatch-hex">#5B1730</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#B08D4F;"></div><div class="swatch-info"><div class="swatch-name">Gold</div><div class="swatch-hex">#B08D4F</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#F7F1E5;"></div><div class="swatch-info"><div class="swatch-name">Ivory</div><div class="swatch-hex">#F7F1E5</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#FBF7F1;"></div><div class="swatch-info"><div class="swatch-name">Paper</div><div class="swatch-hex">#FBF7F1</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#E3CFC7;"></div><div class="swatch-info"><div class="swatch-name">Blush</div><div class="swatch-hex">#E3CFC7</div></div></div>
+  </div>
+
+  <div style="margin-top:24px;display:flex;gap:32px;font-size:12px;color:#888;line-height:1.7;">
+    <div><strong style="color:#5B1730;">Shared vocabulary</strong><br>One gold dot · High-contrast Didone strokes · No disc · No gradient · No body silhouette</div>
+    <div><strong style="color:#5B1730;">Typography</strong><br>"Sangeet" in Playfair Display (serif) · "Fit" in DM Sans Light (sans-serif) · Separated by gold dot</div>
+  </div>
+</div>
+
+<div class="footer">
+  · music moves you ·
+</div>
+
+</body>
+</html>

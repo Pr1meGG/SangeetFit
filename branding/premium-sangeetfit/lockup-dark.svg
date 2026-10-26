@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 256" role="img" aria-label="SangeetFit premium logo for dark backgrounds">
+  <title>SangeetFit premium logo on dark</title>
+  
+  <!-- Drape S symbol in ivory -->
+  <g transform="translate(60 128) translate(-128 -128)">
+    <g transform="translate(128 128) rotate(-8) translate(-128 -128)">
+      <path d="M176 30 C200 30 214 46 214 68 C214 90 196 104 172 104 C138 104 108 80 88 64 C68 48 46 38 30 44 C14 50 10 68 14 86 C18 104 38 118 64 134 C90 150 126 170 146 196 C160 214 160 234 144 240 C128 246 108 240 92 228 C76 216 64 198 54 184" fill="none" stroke="#F7F1E5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M176 36 C196 36 206 50 206 68 C206 86 190 98 172 98 C142 98 114 76 94 62 C74 48 52 42 38 48 C24 54 18 68 22 86 C26 104 44 116 68 130 C92 144 126 162 142 186 C152 200 152 224 140 230 C128 236 110 232 96 222 C82 212 70 196 60 184" fill="none" stroke="#F7F1E5" stroke-width="1.6" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <circle cx="14" cy="86" r="4" fill="#B08D4F"/>
+  </g>
+  
+  <!-- Wordmark in ivory -->
+  <g transform="translate(260 170)" fill="#F7F1E5">
+    <g transform="scale(0.9)">
+      <path d="M12 30 C12 4 30 -12 50 -12 C74 -12 86 6 86 26 C86 46 72 60 50 60 C32 60 22 54 16 48 L28 34 C32 40 38 46 48 46 C60 46 68 38 68 26 C68 14 60 6 48 6 C32 6 22 16 18 26 Z"/>
+      <path d="M104 -48 L130 60 L114 60 L108 34 L86 34 L80 60 L64 60 Z M97 -20 L92 20 L102 20 Z"/>
+      <path d="M146 -48 L146 60 L130 60 L130 -16 L108 60 L98 60 L98 -48 L114 -48 L114 10 L136 -48 Z"/>
+      <path d="M176 26 C176 2 192 -16 218 -16 C236 -16 248 -6 250 6 L232 6 L232 22 L214 22 L214 14 L248 14 C246 0 234 -6 218 -6 C200 -6 190 6 190 26 C190 46 200 58 218 58 C236 58 246 48 250 36 L264 36 C260 56 242 70 218 70 C192 70 176 54 176 26 Z"/>
+      <path d="M280 -48 L280 60 L264 60 L264 -48 Z M270 4 L294 4 L294 -8 L270 -8 Z M268 46 L292 46 L292 34 L268 34 Z"/>
+      <path d="M312 -48 L312 60 L296 60 L296 -48 Z M302 4 L326 4 L326 -8 L302 -8 Z M300 46 L324 46 L324 34 L300 34 Z"/>
+      <path d="M344 -48 L344 60 L328 60 L328 -48 Z M318 -48 L356 -48 L356 -36 L318 -36 Z"/>
+    </g>
+    <circle cx="360" cy="14" r="3.5" fill="#B08D4F"/>
+    <g fill="#F7F1E5" transform="translate(388 0)">
+      <path d="M4 60 L4 -48 L32 -48 L32 -34 L18 -34 L18 4 L30 4 L30 16 L18 16 Z"/>
+      <path d="M44 60 L44 -20 L56 -20 L56 60 Z M50 -44 Q50 -50 54 -50 Q58 -50 58 -44 L58 -36 Q58 -30 54 -30 Q50 -30 50 -36 Z"/>
+      <path d="M72 60 L72 -32 L88 -32 L88 -20 L84 -20 L84 60 Z M82 0 L102 0 L102 12 L94 12 L94 60 L82 60 Z"/>
+    </g>
+  </g>
+</svg>

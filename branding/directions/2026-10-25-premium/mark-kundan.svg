@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="SangeetFit kundan symbol">
+  <title>SangeetFit kundan symbol</title>
+  <path d="M60 10 C86 32 88 84 60 110 C32 84 34 32 60 10 Z"
+        fill="none" stroke="#5B1730" stroke-width="2.6" stroke-linejoin="round"/>
+  <path d="M60 10 C86 32 88 84 60 110 C32 84 34 32 60 10 Z"
+        fill="none" stroke="#5B1730" stroke-width="1" stroke-opacity="0.45"
+        transform="translate(60 60) scale(0.8) translate(-60 -60)"/>
+  <circle cx="60" cy="60" r="2.8" fill="#B08D4F"/>
+</svg>

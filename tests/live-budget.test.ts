@@ -6,7 +6,6 @@ import { spawnSync } from "node:child_process";
 void (async () => {
   process.env.MOCK_MODE = "false";
   process.env.YOUCAM_API_KEY = "offline-test-key";
-  process.env.LIVE_ACCESS_CODE = "offline-preview-code-at-least-24-characters";
   delete process.env.UPSTASH_REDIS_REST_URL;
   delete process.env.UPSTASH_REDIS_REST_TOKEN;
   delete process.env.KV_REST_API_URL;
@@ -21,7 +20,7 @@ void (async () => {
     const { GET: mode } = await import("../src/app/api/mode/route.ts");
     const png = pngDataUrl();
     for (const [endpoint, body] of [[skin, { imageDataUrl: png }], [vto, { fullBodyDataUrl: png, garmentImageDataUrl: png, garmentCategory: "upper_body" }]] as const) {
-      const response: Response = await endpoint(new Request("http://localhost/api/photo", { method: "POST", headers: { "x-sangeetfit-access-code": process.env.LIVE_ACCESS_CODE }, body: JSON.stringify(body) }) as never);
+      const response: Response = await endpoint(new Request("http://localhost/api/photo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }) as never);
       assert.equal(response.status, 503, "missing shared budget must fail closed");
       assert.match((await response.json()).error, /budget/i);
     }
@@ -51,7 +50,7 @@ void (async () => {
     process.env.KV_REST_API_TOKEN = "offline-kv-token";
     process.env.KV_REST_API_READ_ONLY_TOKEN = "offline-read-only-token";
     assert.equal(liveBudgetConfigured(), true, "a complete Vercel KV pair must configure the shared budget");
-    assert.deepEqual(await mode().then(r => r.json()), { mode: "live", accessRequired: true });
+    assert.deepEqual(await mode().then(r => r.json()), { mode: "live" });
     await reserveLiveBudget("skin", new AbortController().signal);
     assert.equal(calls, 1, "KV-only configuration must use the existing reservation transport");
 
@@ -86,7 +85,7 @@ void (async () => {
     expectedUrl = "https://offline-budget.upstash.io/";
     expectedToken = "offline-budget-token";
     assert.equal(liveBudgetConfigured(), true);
-    assert.deepEqual(await mode().then(r => r.json()), { mode: "live", accessRequired: true });
+    assert.deepEqual(await mode().then(r => r.json()), { mode: "live" });
     calls = 0;
     await reserveLiveBudget("vto", new AbortController().signal);
     assert.equal(calls, 1, "explicit Upstash credentials must take precedence when both families are configured");
@@ -96,7 +95,7 @@ void (async () => {
       reply = badReply;
       for (const [endpoint, body] of [[skin, { imageDataUrl: png }], [vto, { fullBodyDataUrl: png, garmentImageDataUrl: png, garmentCategory: "upper_body" }]] as const) {
         calls = 0;
-        const response: Response = await endpoint(new Request("http://localhost/api/photo", { method: "POST", headers: { "x-sangeetfit-access-code": process.env.LIVE_ACCESS_CODE }, body: JSON.stringify(body) }) as never);
+        const response: Response = await endpoint(new Request("http://localhost/api/photo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }) as never);
         assert.equal(response.status, 503);
         assert.equal(response.headers.get("cache-control"), "no-store");
         assert.equal(calls, 1, "denied reservation must never retry");

@@ -5,7 +5,6 @@ import { fileURLToPath } from "node:url";
 import { pngDataUrl } from "./fixtures/png.ts";
 import { configureOfflineBudget, offlineBudgetResponse } from "./fixtures/budget.ts";
 
-const accessCode = "offline-preview-code-at-least-24-characters";
 const png = pngDataUrl();
 const mock = process.argv.includes("--mock");
 
@@ -14,11 +13,11 @@ void (async () => {
   configureOfflineBudget();
   process.env.YOUCAM_API_KEY = "offline-test-key";
   process.env.YOUCAM_BASE_URL = "https://example.test/s2s/v2.0";
-  process.env.LIVE_ACCESS_CODE = accessCode;
   const { POST: skin } = await import("../src/app/api/skin/route.ts");
   const { POST: vto } = await import("../src/app/api/vto/route.ts");
   const { GET: mode } = await import("../src/app/api/mode/route.ts");
   const realFetch = globalThis.fetch;
+  let fetchCalls = 0;
   let calls: string[] = [];
   let tasks = 0;
   let failure = "";
@@ -26,12 +25,13 @@ void (async () => {
   let deadline: AbortController | null = null;
   let sharedSignal: AbortSignal | null = null;
   let resultUrl = "https://example.test/result.jpg";
-  const request = (body: unknown, code = accessCode, extraHeaders: Record<string, string> = {}) => new Request("http://localhost/api/photo", {
+  const request = (body: unknown, extraHeaders: Record<string, string> = {}) => new Request("http://localhost/api/photo", {
     method: "POST",
-    headers: { "Content-Type": "application/json", "x-sangeetfit-access-code": code, ...extraHeaders },
+    headers: { "Content-Type": "application/json", ...extraHeaders },
     body: JSON.stringify(body),
   });
   globalThis.fetch = (async (input, init) => {
+    fetchCalls++;
     const budget = offlineBudgetResponse(input, init);
     if (budget) return budget;
     const url = String(input);
@@ -54,33 +54,54 @@ void (async () => {
     return Response.json({ data: { task_status: "success", results: url.includes("cloth-v4") ? { url: resultUrl } : { color: { skin_color: "#A97F61" } } } });
   }) as typeof fetch;
   try {
-    assert.deepEqual(await mode().then(response => response.json()), mock ? { mode: "mock" } : { mode: "live", accessRequired: true });
+    assert.deepEqual(await mode().then(response => response.json()), mock ? { mode: "mock" } : { mode: "live" });
+    for (const [endpoint, body] of [[skin, { imageDataUrl: png }], [vto, { fullBodyDataUrl: png, garmentImageDataUrl: png, garmentCategory: "upper_body" }]] as const) {
+      for (const [headers, status] of [
+        [{ Origin: "https://foreign.example" }, 403],
+        [{ Origin: "null" }, 403],
+        [{ "Content-Type": "text/plain" }, 415],
+        [{ "Content-Type": "application/x-www-form-urlencoded" }, 415],
+      ] as const) {
+        const req = request(body, headers);
+        const response = await endpoint(req as never);
+        assert.equal(response.status, status, "foreign origins and non-JSON bodies must be rejected");
+        assert.equal(req.bodyUsed, false, "rejected requests must not read photos");
+        assert.equal(response.headers.get("cache-control"), "no-store");
+        assert.equal(fetchCalls, 0, "rejected requests must not reserve budget or reach the provider");
+      }
+    }
+    console.log("PASS: foreign/null origins and non-JSON photo requests reject before reading photos or making any fetch");
+    for (const endpoint of [skin, vto]) {
+      for (const [origin, status] of [["http://127.0.0.1:3566", 400], ["http://localhost:3566", 403]] as const) {
+        const req = new Request("http://localhost:3566/api/photo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Host: "127.0.0.1:3566", Origin: origin, "X-Forwarded-Host": "localhost:3566" },
+          body: JSON.stringify({}),
+        });
+        const response = await endpoint(req as never);
+        assert.equal(response.status, status, "origin must match the actual Host, not Next's internal URL or forwarded host");
+        assert.equal(req.bodyUsed, status === 400);
+        assert.equal(fetchCalls, 0);
+      }
+    }
+    console.log("PASS: actual Host origin survives Next internal localhost normalization; foreign and forwarded host origins reject");
     if (mock) {
-      const response = await skin(request({ imageDataUrl: png }, "") as never);
+      const response = await skin(request({ imageDataUrl: png }) as never);
       assert.deepEqual(await response.json(), { success: true, skin_color: "#b9947c", mode: "mock" });
       assert.equal(response.headers.get("cache-control"), "no-store");
       assert.equal(calls.length, 0);
-      console.log("PASS: mock bypasses preview access, remains labelled and never calls provider");
+      console.log("PASS: mock remains labelled and never calls provider");
       return;
     }
     for (const endpoint of [skin, vto]) {
-      for (const code of ["", "wrong-code"]) {
-        const req = request({ imageDataUrl: png }, code);
-        const response = await endpoint(req as never);
-        assert.equal(response.status, 401);
-        assert.equal(req.bodyUsed, false, "unauthorized photos are not read");
-        assert.equal(response.headers.get("cache-control"), "no-store");
-      }
-      process.env.LIVE_ACCESS_CODE = "too-short";
-      assert.equal((await endpoint(request({}) as never)).status, 503);
-      assert.deepEqual(await mode().then(response => response.json()), { mode: "unconfigured" }, "mode must not advertise unusable live access");
-      delete process.env.LIVE_ACCESS_CODE;
-      assert.equal((await endpoint(request({}) as never)).status, 503);
-      assert.deepEqual(await mode().then(response => response.json()), { mode: "unconfigured" });
-      process.env.LIVE_ACCESS_CODE = accessCode;
+      const req = request({}, { Origin: "http://localhost", "Content-Type": "application/json; charset=utf-8" });
+      const response = await endpoint(req as never);
+      assert.equal(response.status, 400, "requests without an access code must reach image validation");
+      assert.equal(req.bodyUsed, true);
+      assert.equal(response.headers.get("cache-control"), "no-store");
     }
     assert.equal(calls.length, 0);
-    console.log("PASS: live routes fail closed for missing configuration or invalid access before reading photos/fetching");
+    console.log("PASS: live routes accept requests without a code while invalid images stop before provider work");
 
     for (const endpoint of [skin, vto]) {
       let chunk = 0;
@@ -89,12 +110,12 @@ void (async () => {
         pull(controller) { controller.enqueue(new Uint8Array(++chunk === 1 ? 3_000_000 : 1_000_000)); },
         cancel() { cancelled = true; },
       }, { highWaterMark: 0 });
-      const init = { method: "POST", headers: { "x-sangeetfit-access-code": accessCode }, body: stream, duplex: "half" };
+      const init = { method: "POST", headers: { "Content-Type": "application/json" }, body: stream, duplex: "half" };
       const response = await endpoint(new Request("http://localhost/api/photo", init) as never);
       assert.equal(response.status, 413);
       assert.equal(chunk, 2, "reader stops at the byte limit instead of buffering an unbounded body");
       assert(cancelled);
-      const declared = request({}, accessCode, { "Content-Length": "4000000" });
+      const declared = request({}, { "Content-Length": "4000000" });
       assert.equal((await endpoint(declared as never)).status, 413);
       assert.equal(declared.bodyUsed, false);
     }
@@ -104,7 +125,7 @@ void (async () => {
     assert.equal(calls.length, 0);
     console.log("PASS: declared/chunked oversized bodies, malformed JSON objects and spoofed selfie images reject before provider calls");
 
-    let response = await skin(request({ imageDataUrl: png }) as never);
+    let response = await skin(request({ imageDataUrl: png }, { Origin: "http://localhost", "Content-Type": "application/json; charset=utf-8" }) as never);
     assert.deepEqual(await response.json(), { success: true, skin_color: "#A97F61", mode: "live" });
     assert.equal(response.headers.get("cache-control"), "no-store");
     assert.equal(tasks, 1);

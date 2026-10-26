@@ -1,5 +1,28 @@
 # Android Chrome manual verification
 
+## Current release check — 24 October 2026
+
+**Core portrait mock journey passed on physical Android; remaining coverage is listed below.** Tested release checkout: `e2eb6cdf690f6870385b774fced3d47a37a1a11c`. Device I2126, Android 14, Chrome 155.0.8059.84, viewport 392×761. The authorized USB connection served `http://localhost:3560/` from an explicitly mock local server; `/api/mode` confirmed mock and Chrome reported a secure context. No live YouCam tasks were submitted.
+
+| Check | Observed result and method |
+|---|---|
+| Browse and add two owned outfits | Home/gallery had no horizontal overflow. Two labelled synthetic garments were added with File payloads on physical Chrome; preparation created zero generation requests. This is not native-picker coverage. |
+| Explicit generation and comparison | Exactly two local mock VTO requests, zero skin requests. Both labelled reference results rendered; comparison, original, zoom and planning added zero requests. |
+| Five-event plan | Five of five events assigned, two distinct owned outfits, two planned rewears; the Haldi reference remained labelled AI inspiration/unreviewed. |
+| Native result saving | Android saved a 4,564-byte JPEG whose SHA-256 matched the mock result. This does not prove live signed-result saving. |
+| Native PDF saving and reopening | Android's Save as PDF produced the retained [one-page PDF](final-week-2026-10-24/android-phone-plan.pdf). The tester independently opened it in the normal phone file app and confirmed all five events readable. Read-back and visual inspection found correct outfits/counts, zero images/annotations and no URLs or checked private markers. [Extracted text](final-week-2026-10-24/android-phone-plan.txt). |
+| Invalid input and source replacement | Invalid JPEG bytes produced a usable JPG/PNG error; valid synthetic replacement recovered. A distinct synthetic source prepared at 400×600 and cleared the old modal result. These used File payloads; neither created generation requests. |
+| Clear private session and reload | Owned uploads, comparison, plan and consent reset; reload retained no source/results/owned fixtures. |
+| Camera-denied recovery | A browser permission override on physical Chrome produced the permission-denied guidance, Cancel and upload fallback, without capture or analysis. The original permission was restored. Native OS prompt denial/reopen was not tested. |
+
+The native garment picker delivered a 900×1600 prepared image, but the intended synthetic fixture was not confirmed. The image was discarded without viewing, retention or generation. Do not count this as a verified synthetic native-picker journey. No page errors were observed.
+
+Two harness issues were isolated without app changes: smooth-scroll touch targets needed stable coordinates, and the initial CDP connection overrode downloads. Restoring the browser's default download behavior allowed the existing result to save without another generation. A direct ADB PDF-open attempt lacked Android document permission; the tester used the normal file app instead.
+
+Sanitized observations and hashes: [24 October device evidence](ANDROID_DEVICE_EVIDENCE_2026-10-24.json). Landscape, iPhone, cloud-on-phone, verified native full-body picker, native camera prompt/reopen and live quality/saving remain unverified. This is single-device mock evidence, not independent usability or fit validation. Historical checks below retain their original scope and dates.
+
+## Historical check — 22 October 2026
+
 Status: **partial physical-device pass, 22 October 2026**. After initially selecting manual testing, the user connected the phone by USB, enabled debugging and authorized this Mac. ADB and Chrome remote debugging inspected only the local SangeetFit tab. Phone: model I2126, Android 14, Chrome 155.0.8059.84; portrait viewport 392×761, five touch points. USB reverse forwarding served the latest verified local mock build at `http://localhost:3500`; Chrome reported a secure context. Device serial and personal content were not recorded.
 
 The initial hardware check covered portrait layout without overflow, a synthetic `File` injected into the page, one explicit mock request, choice/original inspection and a real 1280×1280 camera stream whose tracks stopped on Cancel. That initial run did not establish native picker or download behavior. No camera image was captured or sent.
@@ -18,9 +41,9 @@ A subsequently approved [mock Preview](https://sangeet-f9wblyyha-ryuk-codes.verc
 
 The existing public app is [sangeet-fit.vercel.app](https://sangeet-fit.vercel.app/). A read-only check on 22 October found production deployment `dpl_4inrWPNEV24ExC7CR8TPcMwQP6dc`, commit `b3cadb62def2687db6129e95c363e11546e660fe` on `work/sangeetfit-mvp`. The home responds 200; `/library` and `/api/mode` respond 404. This is an older build, 20 commits behind release checkpoint `283d27a` before the budget work. Testing it does not validate current changes.
 
-Use an approved HTTPS mock preview or the current USB-reversed `http://localhost:3500` for the checklist below. Confirm `/api/mode` reports `{"mode":"mock"}` before uploading. Ordinarily the local loopback server belongs to its own device; USB reverse forwarding connects the phone's port 3500 to the Mac's port 3500. An ordinary LAN HTTP URL cannot verify camera access because browsers require a secure context. The USB localhost setup was verified as secure on this phone.
+The 22 October checklist below used USB-reversed `http://localhost:3500`; the 24 October run used port3560. Confirm `/api/mode` reports `{"mode":"mock"}` before uploading to either an approved HTTPS preview or USB-reversed localhost. Ordinarily loopback belongs to its own device; USB reverse forwarding connects the phone's chosen port to the same port on the Mac. An ordinary LAN HTTP URL cannot verify camera access because browsers require a secure context. USB localhost was verified as secure on this phone.
 
-## Checklist — no live YouCam calls
+## Historical checklist — 22 October, no live YouCam calls
 
 Record phone model, Android version, Chrome version, build SHA and date. Do not record names, private photo copies, access codes or signed result URLs in GitHub.
 

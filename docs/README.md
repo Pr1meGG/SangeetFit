@@ -6,6 +6,8 @@ Entry points, then how the folders are organised.
 
 | Document | What it answers |
 |---|---|
+| [`testing/READINESS_AUDIT_2026_10_26.md`](testing/READINESS_AUDIT_2026_10_26.md) | Current local/remote evidence, branch reconciliation and remaining release gates |
+| [`plans/feature_spec_release_readiness_2026-10-26.md`](plans/feature_spec_release_readiness_2026-10-26.md) | Accepted scope, prioritized execution tasks, verification and external-action boundaries |
 | [`PRODUCT_SPEC.md`](PRODUCT_SPEC.md) | What the product is, the intended journey, input architecture, acceptance criteria |
 | [`agent-workflow/PROJECT_STATE.md`](agent-workflow/PROJECT_STATE.md) | Verified facts by checkpoint, what is live versus mock, what remains unproven |
 | [`agent-workflow/TASK_BOARD.md`](agent-workflow/TASK_BOARD.md) | Current milestone queue and open gates |

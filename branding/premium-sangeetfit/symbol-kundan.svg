@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="SangeetFit kundan S symbol for light backgrounds">
+  <title>SangeetFit kundan S</title>
+  <!-- 
+    Iteration on Direction III (Kundan) from 25 Oct 2026 premium round.
+    
+    Original: a marquise gem silhouette that said "jewellery" not 
+    "wardrobe." This iteration embeds the S into the marquise — the 
+    gem's two lobes form the upper and lower curves of a subtle S,
+    while the central gold seed becomes the note/beat.
+    
+    The marquise outline is drawn at hairline weight with an inner 
+    echo (the "facet" where light catches), keeping the jewellery 
+    feel but giving it a clear S reading. Holds its shape beautifully 
+    at 16 px — the original direction's strength preserved.
+    
+    Palette: Burgundy #5B1730 · Gold #B08D4F
+  -->
+  <g transform="translate(128 128) rotate(6) translate(-128 -128)">
+    <!-- Outer marquise — the kundan stone silhouette -->
+    <path d="M60 8 
+             C92 28 98 80 60 106 
+             C22 80 28 28 60 8 Z"
+          fill="none" stroke="#5B1730" stroke-width="3.4" stroke-linejoin="round"/>
+    
+    <!-- Inner facet echo — light catching the gem -->
+    <path d="M60 18 
+             C84 34 88 74 60 94 
+             C32 74 36 34 60 18 Z"
+          fill="none" stroke="#5B1730" stroke-width="1.2" stroke-opacity="0.4" stroke-linejoin="round"/>
+    
+    <!-- S-bridge — connects the marquise lobes to read as S -->
+    <path d="M60 8 
+             C60 30 50 50 40 58
+             C30 66 30 78 40 86
+             C50 94 60 100 60 106"
+          fill="none" stroke="#5B1730" stroke-width="1" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Gold seed — the rhythm note at the centre -->
+  <circle cx="128" cy="128" r="3.5" fill="#B08D4F"/>
+</svg>

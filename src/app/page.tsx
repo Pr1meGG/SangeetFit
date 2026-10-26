@@ -7,7 +7,8 @@ import { useState, useCallback, useMemo, useEffect, useRef, Suspense } from "rea
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { X, CheckCircle, Shirt, ArrowLeft, ArrowRight, ArrowUpRight, Palette, Heart, Loader2, AlertCircle, Download, Share2, MessageCircle, Camera, Upload, ShieldCheck, Music2, Leaf, Sun, Sparkles, House, Search } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import Navbar, { type NavigationView } from "@/components/Navbar";
+import HomeGuide from "@/components/HomeGuide";
 import { OUTFITS, type Outfit, type Occasion, type Audience, type StyleLevel } from "@/data/outfits";
 import { recommendOutfits, recommendReferenceOutfits, getVerifiedSellerUrl } from "@/lib/styling";
 import { getColorName, getRecommendedColors } from "@/lib/palette";
@@ -20,10 +21,6 @@ import { FaceCameraCapture } from "@/components/FaceCameraCapture";
 import GarmentCredit from "@/components/GarmentCredit";
 import WeddingWeekBoard from "@/components/WeddingWeekBoard";
 import WardrobePlanPrint from "@/components/WardrobePlanPrint";
-
-function PreviewAccess({ value, onChange }: { value: string; onChange: (value: string) => void }) {
-  return <label className="sf-access">Preview access code<input type="password" value={value} onChange={event => onChange(event.target.value)} autoComplete="off" spellCheck={false} maxLength={256} /><span>Your invite code stays in this page session. Browsing does not need a code.</span></label>;
-}
 
 const OCCASIONS: { id: Occasion; label: string }[] = [
   { id: "sangeet", label: "Sangeet" },
@@ -50,7 +47,7 @@ const AUDIENCES: { id: Audience | "all"; label: string }[] = [
 ];
 
 type Step = 1 | 2 | 3;
-type RestoreParams = { step?: Step; occasion?: Occasion; skin?: string; vto?: string; view?: "clothes" | "shortlist" };
+type RestoreParams = { step?: Step; occasion?: Occasion; skin?: string; vto?: string; view?: "clothes" | "shortlist" | "plan" };
 
 interface SkinResult {
   success: boolean;
@@ -86,7 +83,7 @@ function SearchParamHandler({
     if (s === "2") result.step = 2;
     else if (s === "3") result.step = 3;
     if (v) result.vto = v;
-    if (view === "clothes" || view === "shortlist") { result.step = 3; result.view = view; }
+    if (view === "clothes" || view === "shortlist" || view === "plan") { result.step = 3; result.view = view; }
 
     if (Object.keys(result).length > 0) onRestore(result);
   }, [searchParams, onRestore]);
@@ -106,8 +103,6 @@ export default function Home() {
   const [skinLoading, setSkinLoading] = useState(false);
   const [selfieDataUrl, setSelfieDataUrl] = useState<string | null>(null);
   const [skinPreparing, setSkinPreparing] = useState(false);
-  const [accessRequired, setAccessRequired] = useState(false);
-  const [accessCode, setAccessCode] = useState("");
   const [apiState, setApiState] = useState("checking");
   const [showFaceCamera, setShowFaceCamera] = useState(false);
   const [owned, setOwned] = useState<SessionOutfit[]>([]);
@@ -129,6 +124,7 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [resultImageError, setResultImageError] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
+  const [navigationTarget, setNavigationTarget] = useState<{ id: string } | null>(null);
   const dialogRef = useRef<HTMLElement>(null);
   const wardrobeAnchor = useRef<HTMLDivElement>(null);
   const referenceSection = useRef<HTMLElement>(null);
@@ -141,7 +137,7 @@ export default function Home() {
   const skinController = useRef<AbortController | null>(null);
   const currentSession = sessionEpoch.current;
   const modalId = step === 3 ? vtoModal?.outfit.id : undefined;
-  const hasSession = Boolean(fullBodyDataUrl || selfieDataUrl || owned.length || looks.length || favorites.size || Object.keys(weekPlan).length || accessCode || photoProcessing || skinPreparing || vtoLoading || skinLoading);
+  const hasSession = Boolean(fullBodyDataUrl || selfieDataUrl || owned.length || looks.length || favorites.size || Object.keys(weekPlan).length || photoProcessing || skinPreparing || vtoLoading || skinLoading);
   const generationUnavailable = apiState !== "live" && apiState !== "mock";
   const cancelPending = useCallback(() => {
     photoSelection.current++; skinSelection.current++;
@@ -154,7 +150,7 @@ export default function Home() {
       const response = await fetch("/api/mode");
       const data = await response.json();
       if (!response.ok || !["mock", "live", "unconfigured"].includes(data.mode)) throw new Error("Mode unavailable");
-      setAccessRequired(data.accessRequired === true); setApiState(data.mode);
+      setApiState(data.mode);
     } catch { setApiState("error"); }
   }, []);
 
@@ -182,12 +178,29 @@ export default function Home() {
     if (showUpload) wardrobeAnchor.current?.scrollIntoView({ block: "start", behavior: "instant" });
   }, [showUpload]);
 
+  useEffect(() => {
+    const id = navigationTarget?.id || window.location.hash.slice(1);
+    if (!id) return;
+    const target = document.getElementById(id);
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView({ block: "start", behavior: "instant" });
+  }, [navigationTarget]);
+
+  const navigateTo = (view: NavigationView) => {
+    setShowFaceCamera(false);
+    setShowUpload(view === "clothes");
+    setShowShortlist(view === "shortlist");
+    setStep(view === "home" || view === "how-it-works" || view === "faq" ? 1 : 3);
+    if (view === "shortlist") { setQuery(""); setAudience("all"); }
+    setNavigationTarget({ id: view === "plan" ? "wedding-plan" : view === "clothes" ? "my-wardrobe" : view === "how-it-works" || view === "faq" ? view : "main-content" });
+  };
+
   const clearSession = () => {
     if (!window.confirm("Clear your photos, outfits, plan and results from this page? A submitted YouCam task may still finish; clearing this page does not delete provider copies.")) return;
     sessionEpoch.current++; cancelPending();
     inFlight.current = false; skinInFlight.current = false;
     setFullBodyDataUrl(null); setSelfieDataUrl(null); setOwned([]); setLooks([]); setWeekPlan({}); setFavorites(new Set());
-    setVtoModal(null); setShowUpload(false); setShowFaceCamera(false); setConsentGiven(false); setAccessCode("");
+    setVtoModal(null); setShowUpload(false); setShowFaceCamera(false); setConsentGiven(false);
     setSkinColor(null); setSkinMode(""); setSkinError(null); setFullBodyError(null); setVtoError(null);
     setVtoLoading(false); setSkinLoading(false); setPhotoProcessing(false); setSkinPreparing(false);
     setCopyStatus("idle"); setShowOriginal(false); setResultImageError(false); setPhotoVersion(0);
@@ -247,7 +260,7 @@ export default function Home() {
     vtoController.current = controller;
     inFlight.current = true; setVtoLoading(true); setVtoError(null); setResultImageError(false); setShowOriginal(false);
     try {
-      const res = await fetch("/api/vto", { method: "POST", headers: { "Content-Type": "application/json", "x-sangeetfit-access-code": accessCode }, body: JSON.stringify(payload), signal: controller.signal });
+      const res = await fetch("/api/vto", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), signal: controller.signal });
       if (epoch !== sessionEpoch.current) return;
       if (res.status === 429) setRateLimited(true);
       const data: VTOResult = await res.json().catch(() => ({ success: false, error: res.status === 429 ? "Rate limit reached. Wait before another attempt." : "The try-on server returned an unreadable response." }));
@@ -264,7 +277,7 @@ export default function Home() {
       if (epoch !== sessionEpoch.current) return;
       setVtoError({ outfitId: outfit.id, message: error instanceof Error ? error.message : "VTO request failed" });
     } finally { if (epoch === sessionEpoch.current) { inFlight.current = false; setVtoLoading(false); } }
-  }, [fullBodyDataUrl, photoProcessing, photoVersion, rateLimited, accessCode]);
+  }, [fullBodyDataUrl, photoProcessing, photoVersion, rateLimited]);
 
   const handleRestore = useCallback((params: RestoreParams) => {
     if (params.occasion) setOccasion(params.occasion);
@@ -272,6 +285,7 @@ export default function Home() {
     if (params.step) setStep(params.step);
     if (params.view === "clothes") { setShowShortlist(false); setShowUpload(true); setStep(3); }
     if (params.view === "shortlist") { setShowUpload(false); setShowShortlist(true); setQuery(""); setAudience("all"); setStep(3); }
+    if (params.view === "plan") { setShowUpload(false); setShowShortlist(false); setStep(3); setNavigationTarget({ id: "wedding-plan" }); }
     if (params.vto) {
       const outfit = OUTFITS.find(item => item.id === params.vto && item.vtoSupported && item.tryOnStatus !== "blocked");
       if (outfit) { setStep(3); setVtoModal({ outfit, resultUrl: "", mode: "" }); }
@@ -300,7 +314,7 @@ export default function Home() {
     skinController.current = controller; skinInFlight.current = true;
     setSkinError(null); setSkinLoading(true);
     try {
-      const res = await fetch("/api/skin", { method: "POST", headers: { "Content-Type": "application/json", "x-sangeetfit-access-code": accessCode }, body: JSON.stringify({ imageDataUrl: dataUrl }), signal: controller.signal });
+      const res = await fetch("/api/skin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ imageDataUrl: dataUrl }), signal: controller.signal });
       if (epoch !== sessionEpoch.current) return;
       if (res.status === 429) setRateLimited(true);
       const data: SkinResult = await res.json().catch(() => ({ success: false, error: "The analysis server returned an unreadable response." }));
@@ -389,17 +403,17 @@ export default function Home() {
   };
 
   return (<>
-    <main className="sf-app" id="main-content" onClickCapture={event => {
+    <main className={`sf-app${step === 1 ? " sf-home" : ""}`} onClickCapture={event => {
       const anchor = (event.target as HTMLElement).closest?.("a[href]");
       if (!hasSession || !(anchor instanceof HTMLAnchorElement) || anchor.target === "_blank" || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       const url = new URL(anchor.href);
       if (url.origin === window.location.origin && url.pathname !== window.location.pathname && !window.confirm("Leaving clears this session's clothes, photos and results. Save any result images first. Continue?")) event.preventDefault();
     }}>
       <Suspense fallback={null}><SearchParamHandler onRestore={handleRestore} /></Suspense>
-      <Navbar />
+      <Navbar activeView={step === 1 ? "home" : showShortlist ? "shortlist" : showUpload ? "clothes" : "plan"} onNavigate={navigateTo} shortlistCount={shortlistCount} />
       {hasSession && <div className="sf-session-strip"><span><ShieldCheck size={16} />On this device, your photos and looks stay in this page session.</span><button className="sf-text-link" onClick={clearSession}>Clear private session</button></div>}
       {(apiState === "error" || apiState === "unconfigured") && <div className="sf-session-strip" role="status"><span>{apiState === "error" ? "Could not check generation availability." : "Generation is unavailable on this preview. You can still browse and plan looks."}</span><button className="sf-text-link" onClick={() => { void loadMode(); }}>Check availability again</button></div>}
-      <div className="sf-main">
+      <div className="sf-main" id="main-content" tabIndex={-1}>
         {step === 1 && (
           <>
             <section className="sf-editorial-wrap sf-home-enter">
@@ -413,13 +427,15 @@ export default function Home() {
                     <Link className="sf-text-link" href="/library">Explore outfits <ArrowRight size={17} /></Link>
                   </div>
                   <button className="sf-text-link sf-own-clothes-link" onClick={() => { setStep(3); setShowUpload(true); }}><Shirt size={16} />Try my own clothes <ArrowRight size={17} /></button>
+                  <p className="sf-hero-note"><ShieldCheck size={15} aria-hidden="true" />Start planning without a photo.</p>
                 </div>
                 <div className="sf-campaign-images" aria-label="Indian celebration outfit inspiration">
-                  <figure><img src="/garment_test/editorial/midnight-lehenga.jpg" alt="AI outfit concept: midnight and gold lehenga" fetchPriority="high" width={768} height={1024} /><figcaption>The evening edit</figcaption></figure>
-                  <figure><img src="/garment_test/editorial/emerald-kurta.jpg" alt="AI outfit concept: emerald silk kurta" width={768} height={1024} /><figcaption>A little festive</figcaption></figure>
+                  <figure><img src="/garment_test/editorial/midnight-lehenga.jpg" alt="AI outfit concept: midnight and gold lehenga" fetchPriority="high" width={768} height={1024} /><figcaption><span>The evening edit</span><small>AI outfit concept</small></figcaption></figure>
+                  <figure><img src="/garment_test/editorial/emerald-kurta.jpg" alt="AI outfit concept: emerald silk kurta" width={768} height={1024} /><figcaption><span>A little festive</span><small>AI outfit concept</small></figcaption></figure>
                 </div>
               </div>
             </section>
+            <div className="sf-promise-strip" aria-label="Styling tools"><span><Shirt size={16} aria-hidden="true" />Your own wardrobe</span><span><Sparkles size={16} aria-hidden="true" />Personal virtual try-on</span><span><Heart size={16} aria-hidden="true" />A shortlist you love</span><span><Music2 size={16} aria-hidden="true" />Five events, one plan</span></div>
             <section id="occasions" className="sf-editorial-wrap sf-occasion-section" aria-labelledby="occasion-heading">
               <div className="sf-section-heading"><div id="occasion-heading"><h2>What are we dressing for?</h2><p>Pick a function. We’ll bring the outfit ideas.</p></div><span className="sf-small-note">Your plans, your style</span></div>
               <div className="sf-occasions">
@@ -432,13 +448,7 @@ export default function Home() {
                 })}
               </div>
             </section>
-            <section className="sf-editorial-break" aria-label="How it works">
-              <strong>Your photo. One try-on. Five events.</strong>
-              <p>Browse curated concepts, add your own clothes, then see a look on you before you decide. Every look keeps its review status.</p>
-              <button className="sf-text-link" onClick={() => { setShowShortlist(false); setStep(3); }}>Start with a look <ArrowRight size={17} /></button>
-            </section>
-            <section className="sf-editorial-wrap sf-home-footer sf-editorial-aside"><div><Sparkles size={20} /><p><strong>Just looking for inspiration?</strong><span>Explore the reference collection. No selfie needed.</span></p></div><Link href="/library" className="sf-text-link">See full collection <ArrowRight size={17} /></Link></section>
-            <div className="sf-photo-attribution"><p>AI-generated outfit concepts · review status shown per look</p></div>
+            <HomeGuide onNavigate={navigateTo} onBrowse={() => { setShowShortlist(false); setShowUpload(false); setStep(3); setNavigationTarget({ id: "main-content" }); }} />
           </>
         )}
 
@@ -468,8 +478,7 @@ export default function Home() {
               {selfieDataUrl && <img className="sf-selfie-ready" src={selfieDataUrl} alt="Your prepared selfie" />}
               {skinPreparing && <p role="status" className="sf-form-help">Preparing your selfie…</p>}
               {selfieDataUrl && !skinPreparing && <p className="sf-form-help">Selfie ready. Uploading did not start an analysis.</p>}
-              {accessRequired && <PreviewAccess value={accessCode} onChange={setAccessCode} />}
-              <button className="sf-button sf-button-primary sf-full" disabled={generationUnavailable || !selfieDataUrl || skinPreparing || skinLoading || vtoLoading || rateLimited || (accessRequired && !accessCode)} onClick={() => { void analyzeSkin(); }}>Analyze selfie</button>
+              <button className="sf-button sf-button-primary sf-full" disabled={generationUnavailable || !selfieDataUrl || skinPreparing || skinLoading || vtoLoading || rateLimited} onClick={() => { void analyzeSkin(); }}>Analyze selfie</button>
               <p className="sf-privacy"><ShieldCheck size={15} /> Analyze sends this selfie to YouCam in live mode. The photo stays in this page session on our side; provider retention is separate.</p>
               {skinError && <p role="alert" className="sf-alert sf-alert-error"><AlertCircle size={17} />{skinError}</p>}
               {skinLoading && <p role="status" className="sf-alert"><Loader2 size={18} className="animate-spin" />Analyzing with YouCam API…</p>}
@@ -496,6 +505,8 @@ export default function Home() {
                         <span
                           key={i}
                           className="sf-palette-swatch"
+                          role="img"
+                          aria-label={getColorName(color)}
                           style={{ backgroundColor: color }}
                           title={getColorName(color)}
                         />
@@ -514,9 +525,9 @@ export default function Home() {
             <button className="sf-back" onClick={() => { setShowShortlist(false); setStep(1); }}><ArrowLeft size={17} /> Occasions</button>
             <div className="sf-gallery-heading"><div><span className="sf-context">{showShortlist ? "Saved by you, this session" : `Getting dressed for ${occasion}`}</span><h1>{showShortlist ? "Your shortlist." : "Your clothes. Your kind of look."}</h1><p>Choose from your clothes or browse reference previews. Try a look on your photo, compare two results, and keep your favourite.</p></div><div className="sf-action-row"><button className="sf-button sf-button-primary" onClick={() => setShowUpload(true)}><Upload size={17} />Add my outfit</button><button className="sf-button sf-button-secondary" disabled={showShortlist || references.length === 0} onClick={() => { setShowShortlist(false); jumpToReferences(); }}>Explore reference outfits</button><button className="sf-button sf-button-secondary" aria-pressed={showShortlist} onClick={() => setShowShortlist(value => !value)}><Heart size={17} />Shortlist ({shortlistCount})</button></div></div>
             {vtoError && failedOutfit && modalId !== failedOutfit.id && <div role="alert" className="sf-alert sf-alert-error"><span>Try-on for {failedOutfit.name}: {vtoError.message}</span><button className="sf-text-link" onClick={() => openVTO(failedOutfit)}>Review try-on</button></div>}
-            {showUpload && <div ref={wardrobeAnchor}><WardrobeUpload occasion={occasion} onClose={() => setShowUpload(false)} onAdd={outfit => { if (currentSession !== sessionEpoch.current) return; setOwned(previous => [...previous, outfit]); setWeekPlan(previous => previous[occasion] ? previous : { ...previous, [occasion]: outfit.id }); setShowUpload(false); setShowShortlist(false); }} /></div>}
-            <div className="sf-occasion-tabs" aria-label="Choose occasion">{OCCASIONS.map(item => <button key={item.id} aria-pressed={occasion === item.id} className={`sf-chip ${occasion === item.id ? "is-active" : ""}`} onClick={() => setOccasion(item.id)}>{item.label}</button>)}</div>
-            <div className="sf-gallery-toolbar"><div className="sf-audiences" aria-label="Collection">{AUDIENCES.map(item => <button key={item.id} className={audience === item.id ? "is-active" : ""} aria-pressed={audience === item.id} onClick={() => setAudience(item.id)}>{item.label}</button>)}</div><label className="sf-search"><Search size={17} /><span className="sr-only">Search outfit ideas</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Find one of your outfits…" type="search" /></label></div>
+            {showUpload && <div id="my-wardrobe" tabIndex={-1} ref={wardrobeAnchor}><WardrobeUpload occasion={occasion} onClose={() => setShowUpload(false)} onAdd={outfit => { if (currentSession !== sessionEpoch.current) return; setOwned(previous => [...previous, outfit]); setWeekPlan(previous => previous[occasion] ? previous : { ...previous, [occasion]: outfit.id }); setShowUpload(false); setShowShortlist(false); }} /></div>}
+            <div className="sf-occasion-tabs" role="group" aria-label="Choose occasion">{OCCASIONS.map(item => <button key={item.id} aria-pressed={occasion === item.id} className={`sf-chip ${occasion === item.id ? "is-active" : ""}`} onClick={() => setOccasion(item.id)}>{item.label}</button>)}</div>
+            <div className="sf-gallery-toolbar"><div className="sf-audiences" role="group" aria-label="Collection">{AUDIENCES.map(item => <button key={item.id} className={audience === item.id ? "is-active" : ""} aria-pressed={audience === item.id} onClick={() => setAudience(item.id)}>{item.label}</button>)}</div><label className="sf-search"><Search size={17} /><span className="sr-only">Search outfit ideas</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Find one of your outfits…" type="search" /></label></div>
             <div className="sf-preferences"><label>Style preference<select value={stylePreference} onChange={event => setStylePreference(event.target.value as StyleLevel | "")}><option value="">Any style</option><option value="minimal">Minimal</option><option value="festive">Festive</option><option value="statement">Statement</option></select></label><label>Preferred colour<select value={preferredColor} onChange={event => setPreferredColor(event.target.value)}><option value="">Any colour</option><option value="#6b1e3a">Burgundy</option><option value="#d4af37">Gold</option><option value="#1f3a5f">Navy</option><option value="#f7f1e5">Ivory</option><option value="#111111">Black</option><option value="#35634c">Green</option></select></label><button className="sf-text-link" onClick={() => setStep(2)}><Palette size={16} />{skinColor ? "View skin-tone reference" : "Optional skin-tone analysis"}</button></div>
             <div className="sf-gallery-meta"><span>{showShortlist ? `${curated.length} saved` : `${curated.length} recommended · ${references.length} reference outfits`}</span><span>Occasion tags · your style · your colours</span></div>
             {!showShortlist && <p className="sf-reference-note">Each look keeps its review status. Live-reviewed looks have one-source pilot evidence; unreviewed candidates have not been visually reviewed.</p>}
@@ -525,16 +536,16 @@ export default function Home() {
             {!showShortlist && references.length > 0 && <section ref={referenceSection} tabIndex={-1} className="sf-reference-section" aria-labelledby="reference-outfits-heading"><div className="sf-section-heading"><div><span className="sf-context">The wider edit</span><h2 id="reference-outfits-heading">Reference outfits for {occasion.charAt(0).toUpperCase() + occasion.slice(1)}</h2><p>Unreviewed candidates, kept separate from reviewed recommendations. Nothing is generated until you tap Generate.</p></div><span className="sf-small-note">{references.length} candidate{references.length === 1 ? "" : "s"}</span></div><div className="sf-editorial-wrap sf-editorial-grid">{references.map(({ outfit: item, reason }) => renderLookCard(item, reason, "reference"))}</div></section>}
             {owned.length > 0 && <details className="sf-my-clothes"><summary>All my clothes ({owned.length})</summary><p>Your outfits stay here even when they don’t match this occasion’s tags. You can always try one manually.</p><div className="sf-owned-list">{owned.map(item => <div key={item.id}><img src={item.imageUrl} alt="" /><div><strong>{item.name}</strong><span>{item.occasionTags.join(", ")}</span></div><button className="sf-text-link" onClick={() => openVTO(item)}>Try my {item.name}</button><button className="sf-icon-button" aria-label={`Remove garment ${item.name}`} disabled={vtoLoading} onClick={() => removeOwned(item.id)}><X size={17} /></button></div>)}</div></details>}
             <LookComparison key={currentSession} looks={looks} onRemove={id => setLooks(previous => previous.filter(look => look.id !== id))} occasionLabel={OCCASIONS.find(event => event.id === occasion)!.label} plannedOutfitId={weekPlan[occasion]} onPlanOutfit={outfitId => setWeekPlan(previous => ({ ...previous, [occasion]: outfitId }))} />
-            <WeddingWeekBoard occasions={OCCASIONS} outfits={allOutfits} plan={weekPlan} onChoose={(event, outfitId) => setWeekPlan(previous => ({ ...previous, [event]: outfitId }))} onTryOn={(event, outfit) => { setOccasion(event); openVTO(outfit); }} onAddOwn={event => { setOccasion(event); setShowUpload(true); }} />
+            <div id="wedding-plan" tabIndex={-1}><WeddingWeekBoard occasions={OCCASIONS} outfits={allOutfits} plan={weekPlan} onChoose={(event, outfitId) => setWeekPlan(previous => ({ ...previous, [event]: outfitId }))} onTryOn={(event, outfit) => { setOccasion(event); openVTO(outfit); }} onAddOwn={event => { setOccasion(event); setShowUpload(true); }} /></div>
             <p className="sf-gallery-footnote"><Sparkles size={16} />Recommendations use confirmed tags and preferences. Your personal style gets the final say.</p>
           </section>
         )}
       </div>
       <nav className="sf-bottom-nav" aria-label="App navigation">
-        <button aria-current={step === 1 ? "page" : undefined} onClick={() => { setShowFaceCamera(false); setStep(1); setShowShortlist(false); }}><House size={20} />For you</button>
+        <button aria-current={step === 1 ? "page" : undefined} onClick={() => navigateTo("home")}><House size={20} />For you</button>
         <Link href="/library"><Search size={20} />Explore</Link>
-        <button aria-current={step === 3 && showUpload && !showShortlist ? "page" : undefined} onClick={() => { setShowFaceCamera(false); setStep(3); setShowUpload(true); setShowShortlist(false); }}><Shirt size={20} />My clothes</button>
-        <button aria-current={step === 3 && showShortlist ? "page" : undefined} onClick={() => { setShowFaceCamera(false); setStep(3); setShowShortlist(true); setQuery(""); setAudience("all"); }}><Heart size={20} />Shortlist{shortlistCount > 0 && <span>{shortlistCount}</span>}</button>
+        <button aria-current={step === 3 && showUpload && !showShortlist ? "page" : undefined} onClick={() => navigateTo("clothes")}><Shirt size={20} />My clothes</button>
+        <button aria-current={step === 3 && showShortlist ? "page" : undefined} onClick={() => navigateTo("shortlist")}><Heart size={20} />Shortlist{shortlistCount > 0 && <span>{shortlistCount}</span>}</button>
       </nav>
       {step === 3 && vtoModal && (
         <div className="sf-modal-backdrop" onClick={closeVTO}>
@@ -542,7 +553,6 @@ export default function Home() {
             <header className="sf-dialog-header"><div><span className="sf-context">Your fitting room</span><h2 id="tryon-title">Make this look yours.</h2></div><button className="sf-icon-button" aria-label="Close try-on" onClick={closeVTO}><X size={21} /></button></header>
             <div className="sf-dialog-content">
               <div className="sf-selected-outfit"><img src={vtoModal.outfit.imageUrl} alt={vtoModal.outfit.name} /><div><strong>{vtoModal.outfit.name}</strong><span>{occasion} · {vtoModal.outfit.garmentType.replaceAll("-", " ")}</span><small>{vtoModal.outfit.origin === "upload" ? "Your garment reference" : vtoModal.outfit.generatedConcept ? "AI outfit concept · no retail listing" : "Catalogue reference"}</small></div></div>
-              {accessRequired && !vtoModal.resultUrl && <PreviewAccess value={accessCode} onChange={setAccessCode} />}
               {vtoLoading && <div className="sf-generating" role="status"><div className="sf-generating-icon"><Shirt size={34} strokeWidth={1.2} /><Loader2 className="animate-spin" size={20} /></div><h3>Putting your look together.</h3><p>One try-on is processing. You can close this view; the submitted task may still finish. No extra task will start while it is pending.</p></div>}
               {rateLimited && <p role="alert" className="sf-alert sf-alert-error">Rate limit reached. No task will be retried automatically. Wait before reloading to try again.</p>}
               {vtoError?.outfitId === vtoModal.outfit.id && !vtoLoading && <p className="sf-alert sf-alert-error" role="alert">{vtoError.message}</p>}
@@ -554,7 +564,7 @@ export default function Home() {
               <GarmentCredit source={vtoModal.outfit.source} />
             </div>
             <footer className="sf-dialog-actions">
-              {!vtoModal.resultUrl && <button className="sf-button sf-button-primary" disabled={generationUnavailable || !fullBodyDataUrl || !consentGiven || photoProcessing || vtoLoading || skinLoading || rateLimited || (accessRequired && !accessCode)} onClick={retryVTO}>{vtoLoading ? "Processing…" : "Generate try-on"}</button>}
+              {!vtoModal.resultUrl && <button className="sf-button sf-button-primary" disabled={generationUnavailable || !fullBodyDataUrl || !consentGiven || photoProcessing || vtoLoading || skinLoading || rateLimited} onClick={retryVTO}>{vtoLoading ? "Processing…" : "Generate try-on"}</button>}
               {consentGiven && fullBodyDataUrl && <button className="sf-button sf-button-secondary" disabled={photoProcessing || vtoLoading} onClick={() => document.getElementById("fullbody-file")?.click()}>Replace photo</button>}
               {vtoModal.resultUrl && !vtoLoading && <><a className="sf-button sf-button-primary" href={vtoModal.resultUrl} download={`vto-${vtoModal.outfit.id}.png`} target="_blank" rel="noopener noreferrer"><Download size={17} />Save / open image</a>{vtoModal.outfit.origin !== "upload" && <><button className="sf-button sf-button-secondary" onClick={shareWhatsApp}><MessageCircle size={17} />WhatsApp outfit</button><button className="sf-icon-button" onClick={copyShareLink} aria-label="Copy outfit link">{copyStatus === "copied" ? <CheckCircle size={19} /> : <Share2 size={19} />}</button></>}<p role="status">{copyStatus === "copied" ? "Outfit link copied." : copyStatus === "error" ? "Could not copy the link. Please try again." : vtoModal.outfit.origin === "upload" ? "Your clothes and results are session-only. Save/open the image to keep it; no public outfit link is created." : "Share links open this outfit, not your personal photo."}</p></>}
             </footer>

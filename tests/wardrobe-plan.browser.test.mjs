@@ -15,7 +15,7 @@ let tasks = 0;
 page.on("pageerror", error => errors.push(error.message));
 try {
   assert.deepEqual(await page.request.get(`${base}/api/mode`).then(response => response.json()), { mode: "mock" });
-  await page.route("**/api/mode", route => route.fulfill({ json: { mode: "mock", accessRequired: true } }));
+  await page.route("**/api/mode", route => route.fulfill({ json: { mode: "mock" } }));
   await page.route("**/api/skin", () => { throw new Error("Planning must not analyze skin"); });
   await page.route("**/api/vto", async route => {
     tasks++;
@@ -55,7 +55,6 @@ try {
       await dialog.locator("#fullbody-file").setInputFiles(file(source));
       await dialog.getByText("Photo ready. Uploading did not start a task.", { exact: true }).waitFor();
     }
-    await dialog.getByLabel("Preview access code", { exact: false }).fill("SYNTHETIC-DO-NOT-EXPORT-ACCESS");
     await dialog.getByRole("button", { name: "Generate try-on", exact: true }).click();
     await dialog.getByText("Mock preview — reference outfit, not a personal try-on").waitFor();
     await dialog.getByRole("button", { name: "Close try-on" }).click();

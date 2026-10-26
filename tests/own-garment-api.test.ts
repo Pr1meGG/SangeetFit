@@ -16,7 +16,6 @@ void (async () => {
   process.env.MOCK_MODE = String(mock);
   configureOfflineBudget();
   process.env.YOUCAM_API_KEY = "offline-test-key";
-  process.env.LIVE_ACCESS_CODE = "offline-preview-code-at-least-24-characters";
   process.env.YOUCAM_BASE_URL = "https://example.test/s2s/v2.0";
   let calls: string[] = [];
   let tasks: Record<string, unknown>[] = [];
@@ -64,7 +63,7 @@ void (async () => {
     const { POST } = await import("../src/app/api/vto/route.ts");
     const send = (body: unknown) => POST(new Request("http://localhost/api/vto", {
       method: "POST", body: typeof body === "string" ? body : JSON.stringify(body),
-      headers: { "Content-Type": "application/json", "x-sangeetfit-access-code": process.env.LIVE_ACCESS_CODE! },
+      headers: { "Content-Type": "application/json" },
     }) as never);
     const upload = { fullBodyDataUrl: png, garmentImageDataUrl: png, garmentCategory: "upper_body" };
     let response = await send(upload);

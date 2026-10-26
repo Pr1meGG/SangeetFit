@@ -4,7 +4,7 @@ import { readdirSync } from "node:fs";
 const suites = readdirSync("tests").filter(file => file.endsWith(".test.ts")).sort();
 for (const suite of suites) {
   const result = spawnSync(process.execPath, ["--import", "tsx", `tests/${suite}`], {
-    stdio: "inherit", env: { ...process.env, MOCK_MODE: "true", YOUCAM_API_KEY: "", LIVE_ACCESS_CODE: "" },
+    stdio: "inherit", env: { ...process.env, MOCK_MODE: "true", YOUCAM_API_KEY: "" },
   });
   if (result.status !== 0) process.exit(result.status ?? 1);
 }

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { liveAccessConfigured } from "@/lib/live-access";
 import { liveBudgetConfigured } from "@/lib/live-budget";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +9,6 @@ const YOUCAM_API_KEY = process.env.YOUCAM_API_KEY || "";
 const MOCK_MODE = process.env.MOCK_MODE === "true";
 
 export async function GET() {
-  const mode = MOCK_MODE ? "mock" : YOUCAM_API_KEY && liveAccessConfigured() && liveBudgetConfigured() ? "live" : "unconfigured";
-  return NextResponse.json(mode === "live" ? { mode, accessRequired: true } : { mode }, { headers: { "Cache-Control": "no-store" } });
+  const mode = MOCK_MODE ? "mock" : YOUCAM_API_KEY && liveBudgetConfigured() ? "live" : "unconfigured";
+  return NextResponse.json({ mode }, { headers: { "Cache-Control": "no-store" } });
 }

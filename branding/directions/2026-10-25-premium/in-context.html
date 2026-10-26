@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>SangeetFit — in place</title>
+<style>
+  @font-face {
+    font-family: "BodoniModa";
+    src: url("/Users/nitz/Code_Stuff/SAeCo/public/fonts/bodoni-moda/BodoniModa-Regular.ttf") format("truetype");
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #EFE7DD; font-family: "BodoniModa", Georgia, serif; -webkit-font-smoothing: antialiased; }
+  .wrap { width: 1400px; padding: 56px 64px 64px; }
+  .label { font-size: 12px; letter-spacing: .34em; text-transform: uppercase; color: #7E6F69; margin: 34px 0 12px; font-family: ui-sans-serif, system-ui, sans-serif; }
+  .surface { background: #FCF8F6; border: 1px solid #E7DCD2; }
+  .bar { display: flex; align-items: center; justify-content: space-between; padding: 18px 34px; }
+  .brand { display: flex; align-items: center; gap: 12px; color: #5B1730; }
+  .brand .name { font-size: 27px; letter-spacing: -0.005em; line-height: 1; }
+  .brand .name em { font-style: italic; }
+  .nav { display: flex; gap: 30px; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: #6B5A57; }
+  .nav b { font-weight: 600; color: #5B1730; }
+  .wordonly { text-align: center; padding: 34px 0; }
+  .wordonly .kicker { font-family: ui-sans-serif, system-ui, sans-serif; font-size: 10px; letter-spacing: .42em; text-transform: uppercase; color: #8A7B76; }
+  .wordonly .mark { font-size: 58px; line-height: 1.1; color: #5B1730; margin: 12px 0 6px; }
+  .wordonly .mark em { font-style: italic; }
+  .wordonly .mark i { font-style: normal; color: #B08D4F; }
+  .wordonly .rule { width: 260px; height: 1px; background: #DCCBBF; margin: 10px auto 12px; }
+  .icons { display: flex; gap: 26px; align-items: flex-end; }
+  .icon { text-align: center; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 10px; letter-spacing: .14em; color: #7E6F69; }
+  .icon span { display: block; margin-top: 6px; }
+  .foot { font-family: ui-sans-serif, system-ui, sans-serif; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #8A7B76; margin-top: 34px; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="label">Atelier · app header</div>
+  <div class="surface">
+    <div class="bar">
+      <div class="brand">
+        <span style="font-size:31px; line-height:.9;">S<i style="font-style:normal; color:#B08D4F">.</i></span>
+        <span class="name">Sangeet<em>Fit</em></span>
+      </div>
+      <div class="nav"><b>For you</b><span>Explore</span><span>My clothes</span></div>
+    </div>
+  </div>
+
+  <div class="label">Maison · app header</div>
+  <div class="surface">
+    <div class="bar">
+      <div class="brand"><span class="name">Sangeet<em>Fit</em><span style="color:#B08D4F">.</span></span></div>
+      <div class="nav"><b>For you</b><span>Explore</span><span>My clothes</span></div>
+    </div>
+  </div>
+
+  <div class="label">Maison · cover / share card</div>
+  <div class="surface">
+    <div class="wordonly">
+      <div class="kicker">Indian wedding wardrobe</div>
+      <div class="mark">Sangeet<em>Fit</em><i>.</i></div>
+      <div class="rule"></div>
+      <div class="kicker">Preview · Plan · Rewear</div>
+    </div>
+  </div>
+
+  <div class="label">Favicon at 16 px</div>
+  <div class="icons">
+    <div class="icon">
+      <svg width="16" height="16" viewBox="0 0 120 120" aria-hidden="true"><path d="M60 10 C86 32 88 84 60 110 C32 84 34 32 60 10 Z" fill="none" stroke="#5B1730" stroke-width="16"/></svg>
+      <span>16 · kundan</span>
+    </div>
+    <div class="icon">
+      <svg width="16" height="16" viewBox="0 0 120 120" aria-hidden="true"><g transform="rotate(-7 60 60)"><path d="M100 26 C82 14 46 18 43 41 C40 61 62 67 71 76 C80 85 75 98 58 99 C47 100 37 95 32 87" fill="none" stroke="#5B1730" stroke-width="15" stroke-linecap="round"/></g></svg>
+      <span>16 · dupatta</span>
+    </div>
+    <div class="icon">
+      <div style="font-size:16px; line-height:.9; color:#5B1730;">S<i style="color:#B08D4F">.</i></div>
+      <span>16 · atelier</span>
+    </div>
+    <div class="icon">
+      <div style="font-size:16px; line-height:1; color:#5B1730; font-family:BodoniModa, serif;">SF<i style="color:#B08D4F">.</i></div>
+      <span>16 · maison</span>
+    </div>
+  </div>
+
+  <div class="foot"><span>Bodoni Moda · burgundy #5B1730 · gold #B08D4F</span><span>25.10.2026</span></div>
+</div>
+</body>
+</html>

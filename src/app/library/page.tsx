@@ -42,12 +42,12 @@ export default function GarmentLibrary() {
     (!referencesOnly || outfit.vtoSupported) &&
     `${outfit.name} ${outfit.garmentType}`.toLowerCase().includes(query.trim().toLowerCase()),
   );
-  const fieldClass = "w-full min-h-12 rounded-xl border border-[var(--sf-line)] bg-white px-3 py-3 text-sm text-[var(--sf-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--sf-burgundy)]";
+  const fieldClass = "w-full min-h-12 rounded-[var(--sf-r-sm)] border border-[var(--sf-line)] bg-[var(--sf-paper)] px-3 py-3 text-base text-[var(--sf-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--sf-burgundy)]";
 
   return (
-    <main id="main-content" className="sf-app sf-library">
-      <Navbar />
-      <div className="sf-library-content max-w-7xl mx-auto px-4 py-6 sm:px-8 sm:py-10 space-y-7">
+    <main className="sf-app sf-library">
+      <Navbar activeView="collection" />
+      <div id="main-content" tabIndex={-1} className="sf-library-content max-w-7xl mx-auto px-4 py-6 sm:px-8 sm:py-10 space-y-7">
         <Link href="/" className="sf-text-link inline-flex gap-2 items-center min-h-11 py-2"><ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to your looks</Link>
         <header className="sf-library-header">
           <p className="sf-editorial-eyebrow">SangeetFit collection</p>
@@ -81,7 +81,7 @@ export default function GarmentLibrary() {
           </div>
         </div>
 
-        <details className="rounded-2xl border border-[var(--sf-line)] p-4 sm:p-5">
+        <details className="rounded-[var(--sf-panel-radius)] border border-[var(--sf-line)] p-4 sm:p-5">
           <summary className="cursor-pointer min-h-11 flex items-center font-medium text-[var(--sf-burgundy)]">Search and filter outfits</summary>
           <div className="grid gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-3">
             <label className="space-y-2 text-sm text-[var(--sf-muted)]">

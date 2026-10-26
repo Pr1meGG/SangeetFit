@@ -4,7 +4,7 @@ import { setTimeout as wait } from "node:timers/promises";
 
 const port = process.env.TEST_PORT || "3503";
 const base = `http://127.0.0.1:${port}`;
-const env = { ...process.env, MOCK_MODE: "true", YOUCAM_API_KEY: "", LIVE_ACCESS_CODE: "", TEST_ORIGIN: base, TEST_BASE_URL: base };
+const env = { ...process.env, MOCK_MODE: "true", YOUCAM_API_KEY: "", TEST_ORIGIN: base, TEST_BASE_URL: base };
 const server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "-H", "127.0.0.1", "-p", port], { env, stdio: ["ignore", "pipe", "pipe"] });
 let output = "";
 server.stdout.on("data", data => { output += data; });

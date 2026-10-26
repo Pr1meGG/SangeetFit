@@ -157,7 +157,7 @@ void (async () => {
   globalThis.fetch = (async () => { throw new Error("Mock must not call the network"); }) as typeof fetch;
   try {
     const { POST } = await import("../src/app/api/vto/route.ts");
-    const response = await POST(new Request("http://localhost/api/vto", { method: "POST", body: JSON.stringify({
+    const response = await POST(new Request("http://localhost/api/vto", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
       garmentId: supported.id, referenceAsset: supported.tryOnReference, vtoSupported: true, displayImage: "https://example.test/unrelated.png",
     }) }) as never);
     assert.equal(response.status, 200);

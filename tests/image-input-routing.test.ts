@@ -117,7 +117,6 @@ console.log(`PASS: face_selfie_test.png is ${width}x${height} native pixels (no 
 void (async () => {
   process.env.MOCK_MODE = "false";
   process.env.YOUCAM_API_KEY = "dummy-key-for-offline-test";
-  process.env.LIVE_ACCESS_CODE = "offline-preview-code-at-least-24-characters";
 
   let networkAttempted = false;
   const realFetch = globalThis.fetch;
@@ -134,7 +133,7 @@ void (async () => {
     const { POST } = await import("../src/app/api/vto/route.ts");
     const request = new Request("http://localhost/api/vto", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-sangeetfit-access-code": process.env.LIVE_ACCESS_CODE! },
+      headers: { "Content-Type": "application/json" },
       // Face-selfie-shaped body: no fullBodyDataUrl anywhere.
       body: JSON.stringify({
         imageDataUrl: "data:image/png;base64,aGVsbG8=",

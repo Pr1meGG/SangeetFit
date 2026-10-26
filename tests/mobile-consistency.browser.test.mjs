@@ -24,6 +24,12 @@ try {
     await page.goto(`${base}/library`);
     await page.getByRole("heading", { name: "The celebration edit." }).waitFor();
     await page.getByText("To try a look, add a clear head-to-toe photo").waitFor();
+    await page.getByRole("link", { name: "Skip to content", exact: true }).focus();
+    await page.keyboard.press("Enter");
+    assert(await page.locator("#main-content").evaluate(el => el === document.activeElement && !el.querySelector(".sf-navbar")), "library skip link must focus content after navigation");
+    await page.keyboard.press("Tab");
+    assert(await page.getByRole("link", { name: "Back to your looks", exact: true }).evaluate(el => el === document.activeElement), "Tab after skipping must enter library content");
+    assert(await page.locator('input[type="search"], select').evaluateAll(fields => fields.every(el => parseFloat(getComputedStyle(el).fontSize) >= 16)), "mobile library fields must avoid iOS focus zoom");
     const nav = page.getByRole("navigation", { name: "App navigation" });
     assert.deepEqual(await nav.locator("a").allTextContents().then(items => items.map(item => item.trim())), ["For you", "Explore", "My clothes", "Shortlist"]);
     assert.equal(await nav.getByRole("link", { name: "Explore" }).getAttribute("aria-current"), "page");

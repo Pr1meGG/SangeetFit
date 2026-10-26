@@ -2,7 +2,9 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
     "deploymentEnabled": {
-      "codex/ui-revamp": false
+      "codex/ui-revamp": false,
+      "codex/final-week-release": false,
+      "experiments": false
     }
   }
 }
