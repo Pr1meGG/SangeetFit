@@ -1,10 +1,36 @@
 # TASK_BOARD.md
 
+## Submission gates — 29 October 2026
+
+**Later execution:** stages1–2 local implementation and integrated checks complete:17offline suites (actual Redis included),13browser suites, typecheck/build/lint and independent reviews pass. Retention notice intentionally excluded per user and unchanged. Stage3 release candidate/manifest/branch deploy guard prepared; exact checkpoint/history approval, remote CI and matching deployment remain open. [Current verification](../testing/STAGES_1_3_VERIFICATION_2026_10_29.md).
+
+Use [the current audit](../testing/SUBMISSION_AUDIT_2026_10_29.md) before older queues. Ordered open gates: (1) private autosave authorization/index/retention/deletion/recovery; (2) three browser failures plus missing autosave tests and disposable-Redis verification; (3) reviewed source checkpoint/current CI and matching deployment; (4) current hosted phone save/reopen and protected judge allowance through November20; (5) approved final video/screenshots/copy and verified repository access; (6) Devpost submission confirmation by November2 22:15 IST. Production is reachable/live, but that does not certify generation or saved-photo security. No application fixes or new live tasks were performed by this audit.
+
+27 October 2026 UI hotfix: removed visible internal JSX comment from fitting-room results; build/TypeScript/reviews passed, production `dpl_8W4jgGSH93oxfMMjSbudyYxer3NG` READY.
+
+27 October 2026 allowance follow-up: production total allowance50, reserved40, remaining10 at read-back; final clean redeploy `dpl_F9HvraCXocm63TmAJPPxuzhoXKHC` READY with HTTP200 home/library/results/mode and live mode. No provider task. See PROJECT_STATE.md.
+
+Latest deployment checkpoint (27 October 2026): requested current local application redeployed to production; `dpl_Ad1xDtqgSBU55fi167NZFSDVpcKg` READY at https://sangeet-fit.vercel.app. Home/library/results/mode HTTP200; mode live. Local build/TypeScript passed; offline runner blocked by a stale deleted-catalogue fixture reference. No generation or saving test performed. See PROJECT_STATE.md.
+
 Compact prioritized backlog. Update after material task-status changes. No item is complete without verified evidence — do not mark anything done solely on a prior report.
+
+## Light polish and live deployment — 27 October 2026
+
+WhatsApp follow-through complete: the user approved the exact text; separate messages with the live URL and hackathon feedback request were sent to Malhar and T10 Player. Actual friend try-on outcomes remain unverified. This supersedes the approval task below.
+
+One icon-link CSS selector corrected; all feature/autosave code preserved at the user's request. Local build/typecheck and11 mock browser suites pass; lint has zero errors/22 existing warnings. Two existing contract assertions still fail on the preserved `autoSave: null` response field; real Redis and sharing-specific suites were not verified. Production deployment `dpl_HbJvEAJxG3pkRbgPaSZqVugi3ynN` is READY at [sangeet-fit.vercel.app](https://sangeet-fit.vercel.app); anonymous home/library return200 and mode is live. No task was generated, no allowance/access setting changed, and no commit/push occurred. Next: approve the exact WhatsApp message to Malhar and T10 Player. Actual friend try-on outcomes remain unverified.
+
+## Home composition and motion — 26 October 2026
+
+Implemented and locally verified: exactly three home sections, gentle hover lift, classier editorial feature index, three animated walkthrough illustrations with pause/reduced motion, and separate session-preserving help/FAQ views. Final build/all11 mock browser suites pass; six-width visual audit has zero page errors or generation requests. Support query/hash regressions are covered. Mock preview remains port3553; changes are uncommitted. See [verification](../testing/HOME_MOTION_2026_10_26.md). No live provider task, publication or deployment occurred.
+
+## Redesign v2 — 26 October 2026
+
+Implemented and locally checked on `codex/redesign-v2`: REA reference study, pill navigation and mobile disclosure, session-preserving tool access, editorial home, feature shortcuts, walkthrough and FAQs. Latest check fixed the viewport scrim, FAQ photo wording and desktop headline wrapping. Final production build/all11 mock browser suites and six-width home/library audit pass; contract/type/lint results and the real-Redis skip are recorded in [the verification report](../testing/REDESIGN_V2_CHECK_2026_10_26.md). Local mock preview: port3553. Latest fixes remain uncommitted alongside preserved premium CSS work; no push, deploy or live provider task was performed by this check. Physical-device and hosted release checks remain separate.
 
 ## Direct generation — later 26 October 2026
 
-User-requested removal of the preview code is implemented across UI and VTO/skin/mode routes. Keep the explicit Generate click, photo preparation/disclosure, JSON/origin validation and unchanged shared budget. Complete current-source verification and restart the loopback live app at port3566 without a code; never spend a provider unit to verify this interaction. Hosted release and allowance changes remain separately gated. [Bounded plan](../plans/2026-10-26-direct-generation.md).
+User-requested removal of the preview code is implemented across UI and VTO/skin/mode routes. Keep the explicit Generate click, photo preparation/disclosure, JSON/origin validation and unchanged shared budget. The rebuilt loopback app is running live at port3566 without a code; actual UI preparation and changed mock flows pass with no paid task. Offline contracts, typecheck/build and canonical lint passed (real Redis skipped). Broader navigation/layout browser failures remain recorded in PROJECT_STATE and were not rewritten as part of this task. No provider unit was spent to verify this interaction. Hosted release and allowance changes remain separately gated. [Bounded plan](../plans/2026-10-26-direct-generation.md).
 
 ## Next checkpoint — local demo package, 26 October 2026
 

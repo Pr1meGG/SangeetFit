@@ -11,22 +11,20 @@ assert.deepEqual(template.plannedCases.map((item) => item.caseId), MEN_VTO_CASE_
 const editorial = readFileSync(new URL("../src/data/editorial.ts", import.meta.url), "utf8");
 const editorialMen = Array.from(editorial.matchAll(/id: "([^"]+)", name: "[^"]+", audience: "men"[\s\S]*?vtoSupported: (true|false)/g))
   .filter((match) => match[2] === "true").map((match) => match[1]);
-const library = JSON.parse(readFileSync(new URL("../src/data/indian-wear.json", import.meta.url), "utf8")) as Array<{ id: string; audience: string; vtoSupported: boolean }>;
-const libraryMen = library.filter((item) => item.audience === "men" && item.vtoSupported).map((item) => item.id);
-assert.deepEqual(new Set(MEN_VTO_CASE_IDS), new Set([...editorialMen, ...libraryMen]));
+assert.deepEqual(new Set(MEN_VTO_CASE_IDS), new Set(editorialMen));
 assert.equal(scoreBenchmarkEvidence(template).planned.gate, true);
 assert.equal(scoreBenchmarkEvidence(template).planned.participants, 1);
-assert.equal(scoreBenchmarkEvidence(template).planned.catalogue, 16);
+assert.equal(scoreBenchmarkEvidence(template).planned.catalogue, 13);
 const pending: BenchmarkEvidence = { plannedCases: template.plannedCases, records: [], budget: { availableUnits: 1000, vtoUnitCost: 2, skinUnitCost: 20 } };
 const passing: BenchmarkEvidence = {
   plannedCases: template.plannedCases,
   records: template.plannedCases.map((item, index) => ({
     ...item,
     mode: "live",
-    status: index === 15 ? "failed" : "success",
-    rendered: index !== 15,
-    identityRating: index === 15 ? null : 4,
-    garmentRating: index === 15 ? null : index >= 13 ? 3 : 4,
+    status: index === 12 ? "failed" : "success",
+    rendered: index !== 12,
+    identityRating: index === 12 ? null : 4,
+    garmentRating: index === 12 ? null : 4,
     durationMs: (index + 1) * 5_000,
     taskSubmissions: 1,
   })),
@@ -38,20 +36,20 @@ assert.equal(empty.metrics.technical.rate, null);
 assert.equal(empty.metrics.identity.gate, null);
 assert.equal(empty.metrics.latency.medianMs, null);
 assert.equal(empty.budget.reserveUnits, 250);
-assert.equal(empty.budget.plannedVtoUnits, 32);
+assert.equal(empty.budget.plannedVtoUnits, 26);
 assert.equal(empty.budget.plannedVtoFits, true);
 assert.equal(empty.budget.approved, false);
-assert.equal(empty.missingCaseIds.length, 16);
+assert.equal(empty.missingCaseIds.length, 13);
 console.log("PASS: empty template is pending, with no fabricated measurements or approval");
 
 const report = scoreBenchmarkEvidence(passing);
 assert.equal(report.status, "pass");
-assert.equal(report.metrics.technical.passed, 15);
-assert.equal(report.metrics.identity.passed, 15);
-assert.equal(report.metrics.garment.passed, 13);
-assert.equal(report.metrics.both.passed, 13);
-assert.equal(report.metrics.latency.medianMs, 40_000);
-assert.deepEqual(report.metrics.latency.rangeMs, [5_000, 75_000]);
+assert.equal(report.metrics.technical.passed, 12);
+assert.equal(report.metrics.identity.passed, 12);
+assert.equal(report.metrics.garment.passed, 12);
+assert.equal(report.metrics.both.passed, 12);
+assert.equal(report.metrics.latency.medianMs, 32_500);
+assert.deepEqual(report.metrics.latency.rangeMs, [5_000, 60_000]);
 assert.equal(report.metrics.duplicates.count, 0);
 assert.equal(report.metrics.taskCoverage.gate, true);
 assert.equal(report.metrics.pilot.gate, true);
@@ -61,8 +59,8 @@ const incomplete = copy();
 incomplete.records.pop();
 const partial = scoreBenchmarkEvidence(incomplete);
 assert.equal(partial.status, "pending");
-assert.equal(partial.metrics.technical.denominator, 16);
-assert.equal(partial.metrics.technical.rate, 15 / 16);
+assert.equal(partial.metrics.technical.denominator, 13);
+assert.equal(partial.metrics.technical.rate, 12 / 13);
 assert.equal(partial.metrics.technical.gate, null);
 const missingRatings = copy();
 missingRatings.records[0].identityRating = null;
@@ -82,7 +80,7 @@ retry.records[0].taskSubmissions = 2;
 assert.equal(scoreBenchmarkEvidence(retry).metrics.duplicates.count, 1);
 assert.equal(scoreBenchmarkEvidence(retry).status, "fail");
 const unsubmitted = copy();
-unsubmitted.records[15].taskSubmissions = 0;
+unsubmitted.records[12].taskSubmissions = 0;
 assert.equal(scoreBenchmarkEvidence(unsubmitted).metrics.taskCoverage.gate, false);
 assert.equal(scoreBenchmarkEvidence(unsubmitted).status, "fail");
 const failedPilot = copy();
@@ -95,20 +93,20 @@ const mockEvidence = copy();
 mockEvidence.records[0] = { ...mockEvidence.records[0], mode: "mock", identityRating: null, garmentRating: null };
 assert.equal(scoreBenchmarkEvidence(mockEvidence).status, "fail");
 assert.equal(scoreBenchmarkEvidence(mockEvidence).metrics.liveMode.gate, false);
-assert.equal(scoreBenchmarkEvidence(mockEvidence).metrics.technical.passed, 14);
+assert.equal(scoreBenchmarkEvidence(mockEvidence).metrics.technical.passed, 11);
 assert.throws(() => parseBenchmarkEvidence({ ...copy(), records: passing.records.map(({ mode, ...item }) => item) }), /explicit live\/mock/);
 console.log("PASS: mock or unspecified modes cannot produce a passing live-quality report");
 
 const secondPerson = copy();
-secondPerson.plannedCases[15].participantId = "p02";
-secondPerson.records[15].participantId = "p02";
+secondPerson.plannedCases[12].participantId = "p02";
+secondPerson.records[12].participantId = "p02";
 assert.equal(scoreBenchmarkEvidence(secondPerson).planned.gate, false);
 const secondPhoto = copy();
-secondPhoto.plannedCases[15].sourceVersion = "photo-v2";
-secondPhoto.records[15].sourceVersion = "photo-v2";
+secondPhoto.plannedCases[12].sourceVersion = "photo-v2";
+secondPhoto.records[12].sourceVersion = "photo-v2";
 assert.equal(scoreBenchmarkEvidence(secondPhoto).planned.gate, false);
 const mismatchedPhoto = copy();
-mismatchedPhoto.records[15].sourceVersion = "photo-v2";
+mismatchedPhoto.records[12].sourceVersion = "photo-v2";
 assert.throws(() => parseBenchmarkEvidence(mismatchedPhoto), /predeclared/);
 const uploadedLook = copy();
 uploadedLook.plannedCases[0].kind = "upload";
@@ -146,7 +144,7 @@ assert.equal(funded.developmentUnits, 750);
 assert.equal(funded.fullCeilingFits, true);
 assert.deepEqual(funded.affordableCaps, { vto: 40, skin: 5 });
 assert.equal(funded.approved, false);
-assert.equal(funded.plannedVtoUnits, 160);
+assert.equal(funded.plannedVtoUnits, 130);
 assert.equal(funded.plannedVtoFits, true);
 const limited = scoreBenchmarkEvidence({ ...budget, budget: { ...budget.budget, availableUnits: 100 } }).budget;
 assert.equal(limited.fullCeilingFits, false);

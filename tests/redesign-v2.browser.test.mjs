@@ -28,7 +28,12 @@ try {
   });
   await page.goto(base);
   await desktop().getByText("Mock Mode", { exact: true }).waitFor();
+  assert.equal(await page.locator(".sf-text-link").filter({ has: page.locator("svg") }).first().evaluate(link => getComputedStyle(link, "::after").content), "none", "icon links must not render decorative underlines");
   assert.equal(await desktop().getByRole("button", { name: "For you", exact: true }).getAttribute("aria-current"), "page");
+  assert.deepEqual(await page.locator("#main-content > section").evaluateAll(sections => sections.map(section => section.id || section.className)), ["sf-editorial-wrap sf-home-enter", "occasions", "sf-final-invite"], "home must contain only hero, occasions and closing invitation");
+  assert.equal(await page.locator("#features, #how-it-works, #faq").count(), 0, "support content must stay out of the home scroll");
+  await page.locator(".sf-occasion").first().hover();
+  await page.waitForFunction(() => new DOMMatrix(getComputedStyle(document.querySelector(".sf-occasion")).transform).m42 < -4);
   await overflow(1440);
   await desktop().getByRole("button", { name: "Plan my week", exact: true }).click();
   await page.locator("#week-board-title").waitFor({ state: "visible" });
@@ -58,6 +63,17 @@ try {
   assert.match(await page.locator("#week-board-sangeet option:checked").innerText(), /Navigation test kurta/, "navbar actions must retain the owned outfit and its event assignment");
   await desktop().getByRole("button", { name: "How it works", exact: true }).click();
   await focusedSection("how-it-works");
+  assert.equal(await desktop().getByRole("button", { name: "How it works", exact: true }).getAttribute("aria-current"), "page");
+  assert.equal(await page.locator(".sf-editorial-hero").count(), 0, "guide must open on its own surface");
+  assert.equal(await page.locator(".sf-feature").count(), 4);
+  assert.equal(await page.locator(".sf-step-illustration").count(), 3);
+  await page.waitForFunction(() => document.querySelector(".sf-step-illustration").getAnimations({ subtree: true }).some(animation => animation.playState === "running" && animation.currentTime > 0));
+  await page.getByRole("button", { name: "Pause animations", exact: true }).click();
+  assert(await page.locator(".sf-illustration-sway").first().evaluate(el => getComputedStyle(el).animationPlayState === "paused"), "pause must stop the illustration loop");
+  await page.getByRole("button", { name: "Play animations", exact: true }).click();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  assert(await page.locator(".sf-illustration-sway").first().evaluate(el => getComputedStyle(el).animationName === "none"), "device reduced-motion preference must disable loops");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await desktop().getByRole("button", { name: "FAQ", exact: true }).click();
   await focusedSection("faq");
   const question = page.locator("#faq summary").first();
@@ -77,6 +93,41 @@ try {
   await desktop().getByRole("link", { name: "Plan my week", exact: true }).click();
   await page.locator("#week-board-title").waitFor({ state: "visible" });
   assert.equal(new URL(page.url()).searchParams.get("view"), "plan", "the library plan link must open the wedding board");
+  for (const section of ["how-it-works", "faq"]) {
+    await page.goto(`${base}/#${section}`);
+    await focusedSection(section);
+    assert.equal(await page.locator(".sf-editorial-hero").count(), 0, "support deep links must open the separate support view");
+    await page.getByRole("button", { name: "Back to celebrations", exact: true }).click();
+    await page.locator(".sf-editorial-hero").waitFor();
+    assert.equal(new URL(page.url()).hash, "", "returning home must clear a support hash");
+  }
+  await page.goto(`${base}/#faq`);
+  await focusedSection("faq");
+  await desktop().getByRole("button", { name: "How it works", exact: true }).click();
+  assert.equal(new URL(page.url()).hash, "#how-it-works", "switching support views must keep the hash in sync");
+  await page.reload();
+  await focusedSection("how-it-works");
+  for (const query of ["step=3&view=plan", "step=3&vto=concept-emerald-kurta"]) {
+    for (const section of ["how-it-works", "faq"]) {
+      await page.goto(`${base}/?${query}#${section}`);
+      await focusedSection(section);
+      await page.reload();
+      await focusedSection(section);
+      await page.getByRole("button", { name: "Back to celebrations", exact: true }).click();
+      await page.locator(".sf-editorial-hero").waitFor();
+      assert.equal(new URL(page.url()).searchParams.get("step"), null, "returning home must clear the entry-only step");
+    }
+    for (const action of ["My wardrobe", "Shortlist", "Plan my week"]) {
+      await page.goto(`${base}/?${query}#faq`);
+      await focusedSection("faq");
+      await desktop().getByRole("button", { name: action, exact: true }).click();
+      assert.equal(new URL(page.url()).searchParams.get("step"), null, "core navigation must consume entry-only parameters");
+      if (action === "My wardrobe") await page.getByRole("form", { name: "Add your own outfit" }).waitFor();
+      else if (action === "Shortlist") await page.getByRole("heading", { name: "Your shortlist.", exact: true }).waitFor();
+      else await focusedSection("wedding-plan");
+      assert.equal(await page.getByRole("dialog").count(), 0, "stale outfit links must not reopen a fitting room during navigation");
+    }
+  }
 
   for (const width of [320, 390, 768]) {
     await page.setViewportSize({ width, height: 900 });
@@ -93,8 +144,14 @@ try {
     assert.equal(await mobile().count(), 0);
     assert(await toggle.evaluate(button => button === document.activeElement), "Escape must restore toggle focus");
     await toggle.click();
-    await page.locator(".sf-menu-scrim").evaluate(el => { for (const type of ["pointerdown", "pointerup", "click"]) el.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 1, clientX: 40, clientY: 90 })); });
+    const menuBounds = await mobile().boundingBox();
+    assert(menuBounds, "open disclosure must have a visible box");
+    const backgroundAction = width <= 640 ? await page.getByRole("navigation", { name: "App navigation", exact: true }).getByRole("button", { name: "My clothes", exact: true }).boundingBox() : null;
+    const outsidePoint = backgroundAction ? { x: backgroundAction.x + backgroundAction.width / 2, y: backgroundAction.y + backgroundAction.height / 2 } : { x: 8, y: menuBounds.y + menuBounds.height + 16 };
+    assert(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.classList.contains("sf-menu-scrim"), outsidePoint), "menu backdrop must cover the content below the disclosure");
+    await page.mouse.click(outsidePoint.x, outsidePoint.y);
     assert.equal(await mobile().count(), 0, "outside click must close the disclosure");
+    assert.equal(await page.getByRole("form", { name: "Add your own outfit" }).count(), 0, "dismissal must not activate the clothes action under the backdrop");
     await toggle.click();
     await mobile().getByRole("button", { name: "How it works", exact: true }).click();
     await focusedSection("how-it-works");

@@ -9,10 +9,11 @@ import { useSearchParams } from "next/navigation";
 import { X, CheckCircle, Shirt, ArrowLeft, ArrowRight, ArrowUpRight, Palette, Heart, Loader2, AlertCircle, Download, Share2, MessageCircle, Camera, Upload, ShieldCheck, Music2, Leaf, Sun, Sparkles, House, Search } from "lucide-react";
 import Navbar, { type NavigationView } from "@/components/Navbar";
 import HomeGuide from "@/components/HomeGuide";
+import SharedResultAction from "@/components/SharedResultAction";
 import { OUTFITS, type Outfit, type Occasion, type Audience, type StyleLevel } from "@/data/outfits";
 import { recommendOutfits, recommendReferenceOutfits, getVerifiedSellerUrl } from "@/lib/styling";
 import { getColorName, getRecommendedColors } from "@/lib/palette";
-import { summarizeWardrobePlan, type SessionOutfit, type GeneratedLook } from "@/lib/session";
+import { summarizeWardrobePlan, type SessionOutfit, type GeneratedLook, type ResultSharing, type ResultAutoSave } from "@/lib/session";
 import WardrobeUpload from "@/components/WardrobeUpload";
 import LookComparison from "@/components/LookComparison";
 import BeforeAfterSlider from "@/components/BeforeAfterSlider";
@@ -58,9 +59,12 @@ interface SkinResult {
 
 interface VTOResult {
   success: boolean;
+  sharing?: Pick<ResultSharing, "id" | "receipt" | "accessToken">;
   resultUrl?: string;
   mode?: string;
   error?: string;
+  autoSave?: { id: string; expiresAt: number } | null;
+  autoSaveError?: string;
 }
 
 // Separate component to use useSearchParams() — wrapped in Suspense for prerendering
@@ -115,20 +119,23 @@ export default function Home() {
   const [vtoLoading, setVtoLoading] = useState(false);
   const [vtoError, setVtoError] = useState<{ outfitId: string; message: string } | null>(null);
   const [rateLimited, setRateLimited] = useState(false);
-  const [vtoModal, setVtoModal] = useState<{ outfit: SessionOutfit; resultUrl: string; mode: string } | null>(null);
+  const [vtoModal, setVtoModal] = useState<{ outfit: SessionOutfit; resultUrl: string; mode: string; sharing?: ResultSharing; saveRequested?: boolean; lookId?: string; autoSave?: ResultAutoSave } | null>(null);
   const [looks, setLooks] = useState<GeneratedLook[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
   const [showShortlist, setShowShortlist] = useState(false);
   const [consentGiven, setConsentGiven] = useState(false);
+  const [autoSaveResults, setAutoSaveResults] = useState(false);
   const [query, setQuery] = useState("");
   const [resultImageError, setResultImageError] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
+  const [guideView, setGuideView] = useState<"how-it-works" | "faq" | null>(null);
   const [navigationTarget, setNavigationTarget] = useState<{ id: string } | null>(null);
   const dialogRef = useRef<HTMLElement>(null);
   const wardrobeAnchor = useRef<HTMLDivElement>(null);
   const referenceSection = useRef<HTMLElement>(null);
   const inFlight = useRef(false);
+  const savingResults = useRef(new Set<string>());
   const photoSelection = useRef(0);
   const skinSelection = useRef(0);
   const sessionEpoch = useRef(0);
@@ -186,21 +193,44 @@ export default function Home() {
     target?.scrollIntoView({ block: "start", behavior: "instant" });
   }, [navigationTarget]);
 
-  const navigateTo = (view: NavigationView) => {
+  const navigateTo = useCallback((view: NavigationView) => {
     setShowFaceCamera(false);
     setShowUpload(view === "clothes");
     setShowShortlist(view === "shortlist");
+    setGuideView(view === "how-it-works" || view === "faq" ? view : null);
     setStep(view === "home" || view === "how-it-works" || view === "faq" ? 1 : 3);
     if (view === "shortlist") { setQuery(""); setAudience("all"); }
+    const hash = view === "how-it-works" || view === "faq" ? `#${view}` : ["#how-it-works", "#faq"].includes(window.location.hash) ? "" : window.location.hash;
+    const search = new URLSearchParams(window.location.search);
+    if (view !== "how-it-works" && view !== "faq") for (const key of ["step", "view", "vto"]) search.delete(key);
+    const destination = window.location.pathname + (search.size ? `?${search}` : "") + hash;
+    if (destination !== window.location.pathname + window.location.search + window.location.hash) {
+      window.history.replaceState(window.history.state, "", destination);
+    }
     setNavigationTarget({ id: view === "plan" ? "wedding-plan" : view === "clothes" ? "my-wardrobe" : view === "how-it-works" || view === "faq" ? view : "main-content" });
+  }, []);
+
+  useEffect(() => {
+    const restoreGuide = () => {
+      const view = window.location.hash.slice(1);
+      if (view === "how-it-works" || view === "faq") navigateTo(view);
+    };
+    restoreGuide();
+    window.addEventListener("hashchange", restoreGuide);
+    return () => window.removeEventListener("hashchange", restoreGuide);
+  }, [navigateTo]);
+
+  const browseLooks = () => {
+    navigateTo("plan");
+    setNavigationTarget({ id: "main-content" });
   };
 
   const clearSession = () => {
-    if (!window.confirm("Clear your photos, outfits, plan and results from this page? A submitted YouCam task may still finish; clearing this page does not delete provider copies.")) return;
+    if (!window.confirm("Clear your photos, outfits, plan and results from this page? A submitted YouCam task may still finish; clearing this page does not delete provider copies or looks you shared with the creator.")) return;
     sessionEpoch.current++; cancelPending();
     inFlight.current = false; skinInFlight.current = false;
     setFullBodyDataUrl(null); setSelfieDataUrl(null); setOwned([]); setLooks([]); setWeekPlan({}); setFavorites(new Set());
-    setVtoModal(null); setShowUpload(false); setShowFaceCamera(false); setConsentGiven(false);
+    setVtoModal(null); setShowUpload(false); setShowFaceCamera(false); setConsentGiven(false); setAutoSaveResults(false);
     setSkinColor(null); setSkinMode(""); setSkinError(null); setFullBodyError(null); setVtoError(null);
     setVtoLoading(false); setSkinLoading(false); setPhotoProcessing(false); setSkinPreparing(false);
     setCopyStatus("idle"); setShowOriginal(false); setResultImageError(false); setPhotoVersion(0);
@@ -237,6 +267,93 @@ export default function Home() {
     return () => { document.body.style.overflow = overflow; document.removeEventListener("keydown", onKeyDown); previous?.focus(); };
   }, [modalId]);
 
+  const updateSharing = useCallback((id: string, changes: Partial<ResultSharing>) => {
+    setLooks(previous => previous.map(look => look.sharing?.id === id ? { ...look, sharing: { ...look.sharing, ...changes } } : look));
+    setVtoModal(previous => previous?.sharing?.id === id ? { ...previous, sharing: { ...previous.sharing, ...changes } } : previous);
+  }, []);
+
+  const privateResultLink = (sharing: ResultSharing) => `${window.location.origin}/view/${encodeURIComponent(sharing.id)}#key=${encodeURIComponent(sharing.accessToken)}`;
+
+  const copyPrivateResult = useCallback(async (sharing: ResultSharing, epoch: number) => {
+    try {
+      await navigator.clipboard.writeText(privateResultLink(sharing));
+      if (epoch === sessionEpoch.current) updateSharing(sharing.id, { copyFailed: false });
+    } catch {
+      if (epoch === sessionEpoch.current) updateSharing(sharing.id, { copyFailed: true });
+    }
+  }, [updateSharing]);
+
+  const saveSharedResult = useCallback(async (sharing: ResultSharing, epoch: number) => {
+    if (savingResults.current.has(sharing.id)) return;
+    savingResults.current.add(sharing.id);
+    updateSharing(sharing.id, { state: "saving" });
+    try {
+      const response = await fetch("/api/shared-results", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ receipt: sharing.receipt, consent: true }), signal: AbortSignal.timeout(30_000),
+      });
+      if (!response.ok) throw new Error();
+      const result = await response.json();
+      if (result.id !== sharing.id || !Number.isFinite(result.expiresAt) || result.expiresAt * 1000 <= Date.now()) throw new Error();
+      if (epoch !== sessionEpoch.current) return;
+      updateSharing(sharing.id, { state: "ready", expiresAt: result.expiresAt });
+      void copyPrivateResult(sharing, epoch);
+    } catch {
+      if (epoch === sessionEpoch.current) updateSharing(sharing.id, { state: "error" });
+    } finally { savingResults.current.delete(sharing.id); }
+  }, [copyPrivateResult, updateSharing]);
+
+  const removeSharedResult = async (sharing: ResultSharing) => {
+    if (savingResults.current.has(sharing.id)) return;
+    const epoch = sessionEpoch.current;
+    savingResults.current.add(sharing.id);
+    try {
+      const response = await fetch(`/api/shared-results/${encodeURIComponent(sharing.id)}`, {
+        method: "DELETE", headers: { Authorization: `Bearer ${sharing.accessToken}` }, signal: AbortSignal.timeout(15_000),
+      });
+      if (!response.ok && response.status !== 404) throw new Error();
+      if (epoch === sessionEpoch.current) updateSharing(sharing.id, { state: "removed", copyFailed: false });
+    } finally { savingResults.current.delete(sharing.id); }
+  };
+
+  const retryAutoSave = async (look: GeneratedLook) => {
+    const receipt = look.autoSave?.receipt;
+    const lock = `auto:${receipt}`;
+    if (!receipt || savingResults.current.has(lock)) return;
+    const epoch = sessionEpoch.current;
+    const update = (changes: Partial<ResultAutoSave>) => {
+      if (epoch !== sessionEpoch.current) return;
+      setLooks(previous => previous.map(item => item.id === look.id && item.autoSave?.receipt === receipt ? { ...item, autoSave: { ...item.autoSave, ...changes } } : item));
+      setVtoModal(previous => previous?.lookId === look.id && previous.autoSave?.receipt === receipt ? { ...previous, autoSave: { ...previous.autoSave, ...changes } } : previous);
+    };
+    savingResults.current.add(lock);
+    update({ state: "saving" });
+    try {
+      const signal = AbortSignal.timeout(30_000);
+      let garmentImageDataUrl = look.outfit.uploadedGarment?.imageDataUrl;
+      if (!garmentImageDataUrl) {
+        const response = await fetch(`/garment_test/${look.outfit.tryOnReference}`, { signal });
+        if (!response.ok) throw new Error();
+        const blob = await response.blob();
+        garmentImageDataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error());
+          reader.onerror = () => reject(new Error());
+          reader.readAsDataURL(blob);
+        });
+      }
+      const response = await fetch("/api/auto-saved", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ receipt, personImageDataUrl: look.sourceDataUrl, garmentImageDataUrl }), signal,
+      });
+      if (!response.ok) throw new Error();
+      const result = await response.json();
+      if (result.id !== look.autoSave?.id || !Number.isFinite(result.expiresAt) || result.expiresAt * 1000 <= Date.now()) throw new Error();
+      update({ state: "ready", expiresAt: result.expiresAt });
+    } catch { update({ state: "error" }); }
+    finally { savingResults.current.delete(lock); }
+  };
+
   const runVTO = useCallback(async (outfit: SessionOutfit) => {
     const src = fullBodyDataUrl;
     if (inFlight.current || skinInFlight.current || photoProcessing || rateLimited) return;
@@ -268,18 +385,28 @@ export default function Home() {
       if (!data.success || !data.resultUrl || (data.mode !== "live" && data.mode !== "mock")) throw new Error(data.error || "Try-on did not complete. Check your photos and try again.");
       const look: GeneratedLook = {
         id: `${outfit.id}:${photoVersion}`, outfit, resultUrl: data.resultUrl, mode: data.mode,
+        sharing: data.mode === "live" && autoSaveResults && data.sharing && typeof data.sharing.id === "string" && typeof data.sharing.receipt === "string" && typeof data.sharing.accessToken === "string" ? { ...data.sharing, state: "saving" } : undefined,
+        saveRequested: data.mode === "live" && autoSaveResults,
+        autoSave: data.mode === "live" && (data.autoSave !== undefined || data.autoSaveError !== undefined) ? {
+          state: data.autoSave && data.autoSave.id === data.sharing?.id ? "ready" : "error",
+          id: data.sharing?.id, receipt: data.sharing?.receipt, accessToken: data.sharing?.accessToken,
+          expiresAt: data.autoSave?.expiresAt,
+        } : undefined,
         sourceDataUrl: src, sourceVersion: photoVersion, durationMs: Math.round(performance.now() - started),
       };
       setLooks(previous => [look, ...previous.filter(item => item.id !== look.id)].slice(0, 2));
       // Photo replacement is locked while pending; reopening this outfit must reuse its completed task.
-      setVtoModal(previous => previous?.outfit.id === outfit.id ? { ...previous, resultUrl: look.resultUrl, mode: look.mode } : previous);
+      setVtoModal(previous => previous?.outfit.id === outfit.id ? { ...previous, resultUrl: look.resultUrl, mode: look.mode, sharing: look.sharing, saveRequested: look.saveRequested, lookId: look.id, autoSave: look.autoSave } : previous);
+      if (look.sharing) void saveSharedResult(look.sharing, epoch);
     } catch (error) {
       if (epoch !== sessionEpoch.current) return;
       setVtoError({ outfitId: outfit.id, message: error instanceof Error ? error.message : "VTO request failed" });
     } finally { if (epoch === sessionEpoch.current) { inFlight.current = false; setVtoLoading(false); } }
-  }, [fullBodyDataUrl, photoProcessing, photoVersion, rateLimited]);
+  }, [fullBodyDataUrl, photoProcessing, photoVersion, rateLimited, autoSaveResults, saveSharedResult]);
 
   const handleRestore = useCallback((params: RestoreParams) => {
+    const guide = window.location.hash.slice(1);
+    if (guide === "how-it-works" || guide === "faq") { navigateTo(guide); return; }
     if (params.occasion) setOccasion(params.occasion);
     if (params.skin) { setSkinColor(params.skin); setSkinMode("link"); }
     if (params.step) setStep(params.step);
@@ -290,7 +417,7 @@ export default function Home() {
       const outfit = OUTFITS.find(item => item.id === params.vto && item.vtoSupported && item.tryOnStatus !== "blocked");
       if (outfit) { setStep(3); setVtoModal({ outfit, resultUrl: "", mode: "" }); }
     }
-  }, []);
+  }, [navigateTo]);
 
   const prepareSelfie = async (file: File) => {
     if (skinInFlight.current) return;
@@ -328,7 +455,7 @@ export default function Home() {
   const openVTO = useCallback((outfit: SessionOutfit) => {
     if (!outfit.vtoSupported || outfit.tryOnStatus === "blocked") return;
     const saved = looks.find(look => look.outfit.id === outfit.id && look.sourceVersion === photoVersion);
-    setVtoModal({ outfit, resultUrl: saved?.resultUrl || "", mode: saved?.mode || "" });
+    setVtoModal({ outfit, resultUrl: saved?.resultUrl || "", mode: saved?.mode || "", sharing: saved?.sharing, saveRequested: saved?.saveRequested, lookId: saved?.id, autoSave: saved?.autoSave });
     setFullBodyError(null); setResultImageError(false); setShowOriginal(false);
     setCopyStatus("idle");
   }, [looks, photoVersion]);
@@ -396,7 +523,7 @@ export default function Home() {
       const dataUrl = await compressImageForUpload(file, 2048, PERSON_UPLOAD_BYTES);
       if (selection !== photoSelection.current) return;
       setFullBodyDataUrl(dataUrl); setPhotoVersion(previous => previous + 1);
-      setVtoModal(previous => previous ? { ...previous, resultUrl: "", mode: "" } : previous);
+      setVtoModal(previous => previous ? { ...previous, resultUrl: "", mode: "", sharing: undefined, saveRequested: false } : previous);
       setVtoError(null); setResultImageError(false);
     } catch (error) { if (selection === photoSelection.current) setFullBodyError(error instanceof Error ? error.message : "Could not process the image"); }
     finally { if (selection === photoSelection.current) setPhotoProcessing(false); }
@@ -410,11 +537,12 @@ export default function Home() {
       if (url.origin === window.location.origin && url.pathname !== window.location.pathname && !window.confirm("Leaving clears this session's clothes, photos and results. Save any result images first. Continue?")) event.preventDefault();
     }}>
       <Suspense fallback={null}><SearchParamHandler onRestore={handleRestore} /></Suspense>
-      <Navbar activeView={step === 1 ? "home" : showShortlist ? "shortlist" : showUpload ? "clothes" : "plan"} onNavigate={navigateTo} shortlistCount={shortlistCount} />
-      {hasSession && <div className="sf-session-strip"><span><ShieldCheck size={16} />On this device, your photos and looks stay in this page session.</span><button className="sf-text-link" onClick={clearSession}>Clear private session</button></div>}
+      <Navbar activeView={step === 1 ? guideView ?? "home" : showShortlist ? "shortlist" : showUpload ? "clothes" : "plan"} onNavigate={navigateTo} shortlistCount={shortlistCount} />
+      {hasSession && <div className="sf-session-strip"><button className="sf-text-link" onClick={clearSession}>Clear private session</button></div>}
       {(apiState === "error" || apiState === "unconfigured") && <div className="sf-session-strip" role="status"><span>{apiState === "error" ? "Could not check generation availability." : "Generation is unavailable on this preview. You can still browse and plan looks."}</span><button className="sf-text-link" onClick={() => { void loadMode(); }}>Check availability again</button></div>}
       <div className="sf-main" id="main-content" tabIndex={-1}>
-        {step === 1 && (
+        {step === 1 && guideView && <HomeGuide view={guideView} onNavigate={navigateTo} onBrowse={browseLooks} />}
+        {step === 1 && !guideView && (
           <>
             <section className="sf-editorial-wrap sf-home-enter">
               <div className="sf-editorial-hero">
@@ -435,7 +563,6 @@ export default function Home() {
                 </div>
               </div>
             </section>
-            <div className="sf-promise-strip" aria-label="Styling tools"><span><Shirt size={16} aria-hidden="true" />Your own wardrobe</span><span><Sparkles size={16} aria-hidden="true" />Personal virtual try-on</span><span><Heart size={16} aria-hidden="true" />A shortlist you love</span><span><Music2 size={16} aria-hidden="true" />Five events, one plan</span></div>
             <section id="occasions" className="sf-editorial-wrap sf-occasion-section" aria-labelledby="occasion-heading">
               <div className="sf-section-heading"><div id="occasion-heading"><h2>What are we dressing for?</h2><p>Pick a function. We’ll bring the outfit ideas.</p></div><span className="sf-small-note">Your plans, your style</span></div>
               <div className="sf-occasions">
@@ -448,7 +575,7 @@ export default function Home() {
                 })}
               </div>
             </section>
-            <HomeGuide onNavigate={navigateTo} onBrowse={() => { setShowShortlist(false); setShowUpload(false); setStep(3); setNavigationTarget({ id: "main-content" }); }} />
+            <HomeGuide view="home" onNavigate={navigateTo} onBrowse={browseLooks} />
           </>
         )}
 
@@ -468,7 +595,7 @@ export default function Home() {
               <button type="button" disabled={skinLoading || skinPreparing} className="sf-button sf-button-primary sf-full" onClick={() => setShowFaceCamera(v => !v)}><Camera size={18} /> {showFaceCamera ? "Hide camera" : "Use camera instead"}</button>
               <div className="sf-or"><span />or upload a photo<span /></div>
               <label className={`sf-upload ${skinLoading || skinPreparing ? "sf-upload-disabled" : ""}`}>
-                <Upload size={26} strokeWidth={1.5} /><strong>Click to upload selfie</strong><span>JPG or PNG · up to 10 MB</span>
+                <Upload size={26} strokeWidth={1.5} /><strong>Click to upload selfie</strong><span>JPG or PNG · up to 100 MB</span>
                 <input id="selfie-file" aria-label="Selfie photo" type="file" accept="image/jpeg,image/png" className="sr-only" disabled={skinLoading || skinPreparing} onChange={e => {
                   const file = e.target.files?.[0]; e.target.value = "";
                   if (!file) return;
@@ -478,7 +605,7 @@ export default function Home() {
               {selfieDataUrl && <img className="sf-selfie-ready" src={selfieDataUrl} alt="Your prepared selfie" />}
               {skinPreparing && <p role="status" className="sf-form-help">Preparing your selfie…</p>}
               {selfieDataUrl && !skinPreparing && <p className="sf-form-help">Selfie ready. Uploading did not start an analysis.</p>}
-              <button className="sf-button sf-button-primary sf-full" disabled={generationUnavailable || !selfieDataUrl || skinPreparing || skinLoading || vtoLoading || rateLimited} onClick={() => { void analyzeSkin(); }}>Analyze selfie</button>
+                                          <button className="sf-button sf-button-primary sf-full" disabled={generationUnavailable || !selfieDataUrl || skinPreparing || skinLoading || vtoLoading || rateLimited} onClick={() => { setConsentGiven(true); void analyzeSkin(); }}>Analyze selfie</button>
               <p className="sf-privacy"><ShieldCheck size={15} /> Analyze sends this selfie to YouCam in live mode. The photo stays in this page session on our side; provider retention is separate.</p>
               {skinError && <p role="alert" className="sf-alert sf-alert-error"><AlertCircle size={17} />{skinError}</p>}
               {skinLoading && <p role="status" className="sf-alert"><Loader2 size={18} className="animate-spin" />Analyzing with YouCam API…</p>}
@@ -556,17 +683,22 @@ export default function Home() {
               {vtoLoading && <div className="sf-generating" role="status"><div className="sf-generating-icon"><Shirt size={34} strokeWidth={1.2} /><Loader2 className="animate-spin" size={20} /></div><h3>Putting your look together.</h3><p>One try-on is processing. You can close this view; the submitted task may still finish. No extra task will start while it is pending.</p></div>}
               {rateLimited && <p role="alert" className="sf-alert sf-alert-error">Rate limit reached. No task will be retried automatically. Wait before reloading to try again.</p>}
               {vtoError?.outfitId === vtoModal.outfit.id && !vtoLoading && <p className="sf-alert sf-alert-error" role="alert">{vtoError.message}</p>}
-              {!vtoLoading && vtoModal.resultUrl && <div className="sf-result"><p className={`sf-result-status ${vtoModal.mode === "live" ? "is-live" : ""}`}>{vtoModal.mode === "live" ? <><CheckCircle size={16} />Generated result — live render from YouCam API</> : <><AlertCircle size={16} />Mock preview — reference outfit, not a personal try-on</>}</p><p className="sf-result-caption">{vtoModal.mode === "live" ? "Check your face and garment details. AI previews don’t establish physical fit or guarantee identity preservation." : "This shows the garment reference only, not a generated image of you."}</p><div className="sf-result-image">{resultImageError ? <div className="sf-empty" role="alert"><AlertCircle size={26} /><p>The result couldn’t load; its link may have expired. Reopen or reload this image before generating another look.</p><a className="sf-button sf-button-secondary" href={vtoModal.resultUrl} target="_blank" rel="noopener noreferrer">Open image</a><button className="sf-text-link" onClick={() => setResultImageError(false)}>Reload image</button></div> : vtoModal.mode === "live" && fullBodyDataUrl && !showOriginal ? <BeforeAfterSlider before={fullBodyDataUrl} after={vtoModal.resultUrl} name={vtoModal.outfit.name} onAfterError={() => setResultImageError(true)} /> : <img src={showOriginal && fullBodyDataUrl ? fullBodyDataUrl : vtoModal.resultUrl} alt={`Try-on result for ${vtoModal.outfit.name}`} onError={() => setResultImageError(true)} />}</div><button className="sf-text-link" aria-pressed={showOriginal} onClick={() => { setShowOriginal(value => !value); setResultImageError(false); }}>{showOriginal ? "Show result" : "Show original"}</button></div>}
+              {!vtoLoading && vtoModal.resultUrl && <div className="sf-result"><p className={`sf-result-status ${vtoModal.mode === "live" ? "is-live" : ""}`}>{vtoModal.mode === "live" ? <><CheckCircle size={16} />Generated result — live render from YouCam API</> : <><AlertCircle size={16} />Mock preview — reference outfit, not a personal try-on</>}</p><p className="sf-result-caption">{vtoModal.mode === "live" ? "Check your face and garment details. AI previews don’t establish physical fit or guarantee identity preservation." : "This shows the garment reference only, not a generated image of you."}</p>
+              <div className="sf-result-image">{resultImageError ? <div className="sf-empty" role="alert"><AlertCircle size={26} /><p>The result couldn’t load; its link may have expired. Reopen or reload this image before generating another look.</p><a className="sf-button sf-button-secondary" href={vtoModal.resultUrl} target="_blank" rel="noopener noreferrer">Open image</a><button className="sf-text-link" onClick={() => setResultImageError(false)}>Reload image</button></div> : vtoModal.mode === "live" && fullBodyDataUrl && !showOriginal ? <BeforeAfterSlider before={fullBodyDataUrl} after={vtoModal.resultUrl} name={vtoModal.outfit.name} onAfterError={() => setResultImageError(true)} /> : <img src={showOriginal && fullBodyDataUrl ? fullBodyDataUrl : vtoModal.resultUrl} alt={`Try-on result for ${vtoModal.outfit.name}`} onError={() => setResultImageError(true)} />}</div><button className="sf-text-link" aria-pressed={showOriginal} onClick={() => { setShowOriginal(value => !value); setResultImageError(false); }}>{showOriginal ? "Show result" : "Show original"}</button></div>}
               {!vtoLoading && !vtoModal.resultUrl && <div className="sf-source"><h3>A photo of you. A whole new look.</h3><p>Start virtual try-on with a photo of yourself.</p>{!consentGiven ? <div className="sf-photo-permission"><ShieldCheck size={26} strokeWidth={1.5} /><p>When you generate in live mode, your person and garment photos are sent to YouCam. They stay in this page session on our side; the provider handles its own retention.</p><button className="sf-button sf-button-primary sf-full" onClick={() => setConsentGiven(true)}>I understand — continue <ArrowRight size={17} /></button></div> : <><label className="sf-upload sf-body-upload">{fullBodyDataUrl ? <img src={fullBodyDataUrl} alt="Your full-body photo" /> : <Upload size={30} />}<strong>{fullBodyDataUrl ? "Replace your photo" : "Upload a full-body photo"}</strong><span>Front-facing · head to toe · clear face</span><span>JPG or PNG under 10 MB</span><span className="sf-button sf-button-secondary">Choose photo</span><input aria-label="Full-body photo" type="file" accept="image/jpeg,image/png" className="sr-only" disabled={photoProcessing || vtoLoading} onChange={handleFullBodyFile} /></label><p className="sf-form-help">{photoProcessing ? "Preparing your photo…" : fullBodyDataUrl ? "Photo ready. Uploading did not start a task." : "Add a photo, review it, then generate explicitly."}</p></>}</div>}
               <input id="fullbody-file" aria-label="Replace full-body photo" type="file" accept="image/jpeg,image/png" className="hidden" disabled={photoProcessing || vtoLoading || !consentGiven} onChange={handleFullBodyFile} />
               {fullBodyError && <p className="sf-alert sf-alert-error" role="alert">{fullBodyError}</p>}
               {vtoModal.outfit.tryOnStatus === "candidate" && vtoModal.outfit.origin !== "upload" && <p className="sf-reference-note">Candidate reference: generated garment quality has not been visually reviewed. This is a testing preview.</p>}
+              {!vtoLoading && vtoModal.resultUrl && vtoModal.mode === "live" && vtoModal.sharing && <SharedResultAction key={vtoModal.sharing.id} sharing={vtoModal.sharing} onRetry={() => { void saveSharedResult(vtoModal.sharing!, sessionEpoch.current); }} onCopy={() => { void copyPrivateResult(vtoModal.sharing!, sessionEpoch.current); }} onRemove={() => removeSharedResult(vtoModal.sharing!)} />}
+              {!vtoLoading && vtoModal.resultUrl && vtoModal.saveRequested && !vtoModal.sharing && <p role="alert" className="sf-alert sf-alert-error">Automatic saving is unavailable. Your try-on is still here; save/open the image to keep it.</p>}
+              {!vtoLoading && vtoModal.resultUrl && vtoModal.autoSave?.state === "saving" && <p role="status">Saving your generated look…</p>}
+              {!vtoLoading && vtoModal.resultUrl && vtoModal.autoSave?.state === "error" && <div className="sf-alert sf-alert-error"><p role="alert">Automatic saving could not finish. Your try-on is still here.</p>{vtoModal.autoSave.receipt ? <button type="button" className="sf-button sf-button-secondary" onClick={() => { const look = looks.find(item => item.id === vtoModal.lookId); if (look) void retryAutoSave(look); }}>Retry saving</button> : <p>Save / open image to keep this result.</p>}</div>}
               <GarmentCredit source={vtoModal.outfit.source} />
             </div>
             <footer className="sf-dialog-actions">
               {!vtoModal.resultUrl && <button className="sf-button sf-button-primary" disabled={generationUnavailable || !fullBodyDataUrl || !consentGiven || photoProcessing || vtoLoading || skinLoading || rateLimited} onClick={retryVTO}>{vtoLoading ? "Processing…" : "Generate try-on"}</button>}
               {consentGiven && fullBodyDataUrl && <button className="sf-button sf-button-secondary" disabled={photoProcessing || vtoLoading} onClick={() => document.getElementById("fullbody-file")?.click()}>Replace photo</button>}
-              {vtoModal.resultUrl && !vtoLoading && <><a className="sf-button sf-button-primary" href={vtoModal.resultUrl} download={`vto-${vtoModal.outfit.id}.png`} target="_blank" rel="noopener noreferrer"><Download size={17} />Save / open image</a>{vtoModal.outfit.origin !== "upload" && <><button className="sf-button sf-button-secondary" onClick={shareWhatsApp}><MessageCircle size={17} />WhatsApp outfit</button><button className="sf-icon-button" onClick={copyShareLink} aria-label="Copy outfit link">{copyStatus === "copied" ? <CheckCircle size={19} /> : <Share2 size={19} />}</button></>}<p role="status">{copyStatus === "copied" ? "Outfit link copied." : copyStatus === "error" ? "Could not copy the link. Please try again." : vtoModal.outfit.origin === "upload" ? "Your clothes and results are session-only. Save/open the image to keep it; no public outfit link is created." : "Share links open this outfit, not your personal photo."}</p></>}
+              {vtoModal.resultUrl && !vtoLoading && <><a className="sf-button sf-button-primary" href={vtoModal.resultUrl} download={`vto-${vtoModal.outfit.id}.png`} target="_blank" rel="noopener noreferrer"><Download size={17} />Save / open image</a>{vtoModal.outfit.origin !== "upload" && <><button className="sf-button sf-button-secondary" onClick={shareWhatsApp}><MessageCircle size={17} />WhatsApp outfit</button><button className="sf-icon-button" onClick={copyShareLink} aria-label="Copy outfit link">{copyStatus === "copied" ? <CheckCircle size={19} /> : <Share2 size={19} />}</button></>}<p role="status">{copyStatus === "copied" ? "Outfit link copied." : copyStatus === "error" ? "Could not copy the link. Please try again." : vtoModal.outfit.origin === "upload" ? "Save/open the image to keep it. Sharing with the creator is optional; no public outfit link is created." : "Share links open this outfit, not your personal photo."}</p></>}
             </footer>
           </section>
         </div>

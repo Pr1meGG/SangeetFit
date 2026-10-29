@@ -3,6 +3,7 @@
   "git": {
     "deploymentEnabled": {
       "codex/ui-revamp": false,
+      "codex/redesign-v2": false,
       "codex/final-week-release": false,
       "experiments": false
     }

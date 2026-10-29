@@ -4,7 +4,7 @@ import { OUTFITS } from "../src/data/outfits.ts";
 import type { Outfit, VerifiedSeller } from "../src/data/outfits.ts";
 import { getVerifiedSellerUrl, isPrimaryEligible, recommendOutfits, recommendReferenceOutfits } from "../src/lib/styling.ts";
 
-const candidate = OUTFITS.find(outfit => outfit.id === "library-navy-gold-lehenga")!;
+const candidate = OUTFITS.find(outfit => outfit.id === "concept-midnight-lehenga")!;
 const pilotIds = new Set(["concept-emerald-kurta", "concept-sapphire-sherwani"]);
 assert(candidate);
 for (const outfit of OUTFITS) {
@@ -44,9 +44,9 @@ const rejectedReferences: Outfit[] = [
   { ...candidate, id: "blocked-reference", tryOnStatus: "blocked" },
   { ...candidate, id: "reviewed-reference", tryOnStatus: "live-reviewed" },
   { ...candidate, id: "uploaded-reference", origin: "upload" },
-  { ...candidate, id: "missing-provenance", source: undefined, generatedConcept: undefined },
-  { ...candidate, id: "unknown-permission", source: { ...candidate.source!, license: "Unknown" } },
-  { ...candidate, id: "invalid-provenance", source: { ...candidate.source!, sha256: "missing" } },
+  { ...candidate, id: "missing-provenance", generatedConcept: undefined },
+  { ...candidate, id: "unknown-tool", generatedConcept: { ...candidate.generatedConcept!, tool: "Unknown tool" as NonNullable<Outfit["generatedConcept"]>["tool"] } },
+  { ...candidate, id: "invalid-provenance", generatedConcept: { ...candidate.generatedConcept!, sha256: "missing" } },
   { ...candidate, id: "unsupported-reference", vtoSupported: false },
   { ...candidate, id: "missing-reference", tryOnReference: null },
   { ...candidate, id: "mismatched-reference", tryOnReference: "another-outfit.jpg" },
@@ -58,13 +58,12 @@ console.log("PASS: catalogue references reject blocked/reviewed states, missing 
 const reviewed: Outfit = { ...candidate, tryOnStatus: "live-reviewed" };
 assert(isPrimaryEligible(reviewed));
 assert.equal(recommendReferenceOutfits([{ ...candidate, origin: "upload" as const }], { occasion: "reception" }).length, 0, "own uploads never enter the catalogue reference group");
-assert(!isPrimaryEligible({ ...reviewed, source: undefined }));
+assert(!isPrimaryEligible({ ...reviewed, generatedConcept: undefined }));
 assert(!isPrimaryEligible({ ...reviewed, tryOnReference: "another-outfit.jpg" }));
 assert(!isPrimaryEligible({ ...reviewed, vtoSupported: false }));
-assert(!isPrimaryEligible({ ...reviewed, source: { ...reviewed.source!, license: "Unknown" } }));
-assert(!isPrimaryEligible({ ...reviewed, source: { ...reviewed.source!, sha256: "missing" } }));
-assert(!isPrimaryEligible({ ...reviewed, source: { ...reviewed.source!, retrievedAt: "2026-02-30" } }));
-assert(!isPrimaryEligible({ ...reviewed, source: { ...reviewed.source!, url: "javascript:alert(1)" } }));
+assert(!isPrimaryEligible({ ...reviewed, generatedConcept: { ...reviewed.generatedConcept!, tool: "Unknown tool" as NonNullable<Outfit["generatedConcept"]>["tool"] } }));
+assert(!isPrimaryEligible({ ...reviewed, generatedConcept: { ...reviewed.generatedConcept!, sha256: "missing" } }));
+assert(!isPrimaryEligible({ ...reviewed, generatedConcept: { ...reviewed.generatedConcept!, createdAt: "2026-02-30" } }));
 console.log("PASS: truthful catalogue states, provenance/reference gates and explicit candidate opt-in");
 
 const fixtures: Outfit[] = [

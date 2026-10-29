@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { parseDataUrl, uploadYouCamFile } from "../src/lib/youcam.ts";
 import { parseVtoInput, parseVtoImage } from "../src/lib/vto-input.ts";
 import { OUTFITS } from "../src/data/outfits.ts";
+import { EDITORIAL_LOOKS } from "../src/data/editorial.ts";
 import { pngDataUrl } from "./fixtures/png.ts";
 
 const validPng = pngDataUrl();
@@ -101,13 +102,11 @@ console.log("PASS: skin task uses src_file_id and task_id");
 
 const vtoSource = readSource("src/app/api/vto/route.ts");
 // Per-outfit reference allowlist with garmentType scoping (no category collapse).
-for (const asset of ["lehenga_ethnic_hd.png", "user_saree.png", "kurta_set_hd.png", "western_dress_hd.png"]) {
-  assert(vtoSource.includes(`"${asset}"`), `reference asset ${asset} must be allowlisted`);
+assert(vtoSource.includes("EDITORIAL_LOOKS.filter(outfit => outfit.vtoSupported)"), "allowlist must be derived from vto-supported editorial looks");
+assert(vtoSource.includes("garmentTypes: [outfit.garmentType]"), "each reference keeps its own garmentType (no category collapse)");
+for (const garmentType of ["lehenga-choli", "saree", "kurta-set", "anarkali", "bandhgala", "sharara", "jacket-set"]) {
+  assert(EDITORIAL_LOOKS.some(outfit => outfit.vtoSupported && outfit.garmentType === garmentType), `${garmentType} must have a vto-supported reference`);
 }
-assert(vtoSource.includes('garmentTypes: ["lehenga-choli"]'));
-assert(vtoSource.includes('garmentTypes: ["saree"]'));
-assert(vtoSource.includes('garmentTypes: ["kurta-set"]'));
-assert(vtoSource.includes('garmentTypes: ["gown"]'));
 assert(!/fullbody_mock/.test(vtoSource.match(/const REFERENCE_ASSETS[\s\S]{0,600}};/)?.[0] ?? ""), "fullbody_mock.png must not be allowlisted as a garment reference");
 // VTO uses the separate full-body input, not the face selfie.
 const supported = OUTFITS.find(outfit => outfit.vtoSupported && outfit.tryOnReference)!;
@@ -161,7 +160,7 @@ void (async () => {
       garmentId: supported.id, referenceAsset: supported.tryOnReference, vtoSupported: true, displayImage: "https://example.test/unrelated.png",
     }) }) as never);
     assert.equal(response.status, 200);
-    assert.deepEqual(await response.json(), { success: true, resultUrl: supported.imageUrl, displayImage: supported.imageUrl, mode: "mock" });
+    assert.deepEqual(await response.json(), { success: true, resultUrl: supported.imageUrl, displayImage: supported.imageUrl, mode: "mock", autoSave: null });
     console.log("PASS: mock placeholder comes from server catalogue, not client displayImage, with zero network calls");
   } finally { globalThis.fetch = originalFetch; }
 })().catch(error => { console.error(error); process.exit(1); });

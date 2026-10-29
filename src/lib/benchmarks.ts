@@ -29,9 +29,6 @@ export const MEN_VTO_CASE_IDS = [
   "concept-plum-brocade-sherwani",
   "concept-antique-gold-sherwani",
   "concept-charcoal-bandhgala",
-  "library-gold-silk-kurta",
-  "library-ivory-nehru-ensemble",
-  "library-ivory-button-kurta",
 ] as const;
 
 function object(value: unknown, allowed: string[], context: string): Record<string, unknown> {

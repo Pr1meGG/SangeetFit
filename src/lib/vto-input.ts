@@ -140,12 +140,14 @@ export function parseVtoImage(value: unknown, label: string): ParsedDataUrl {
 type VtoInput = {
   kind: "upload";
   fullBody: ParsedDataUrl;
+  fullBodyDataUrl: string;
   garmentImage: ParsedDataUrl;
   garmentImageDataUrl: string;
   garmentCategory: "upper_body" | "full_body";
 } | {
   kind: "catalogue";
   fullBody: ParsedDataUrl | null;
+  fullBodyDataUrl: string | null;
   garmentId: string;
   referenceAsset: string;
   vtoSupported: boolean;
@@ -170,6 +172,7 @@ export function parseVtoInput(body: unknown): VtoInput {
     return {
       kind: "upload",
       fullBody: parseVtoImage(body.fullBodyDataUrl, "Full-body photo"),
+      fullBodyDataUrl: body.fullBodyDataUrl as string,
       garmentImage: parseVtoImage(body.garmentImageDataUrl, "Garment photo"),
       garmentImageDataUrl: body.garmentImageDataUrl as string,
       garmentCategory: body.garmentCategory,
@@ -180,6 +183,7 @@ export function parseVtoInput(body: unknown): VtoInput {
   return {
     kind: "catalogue",
     fullBody: body.fullBodyDataUrl === undefined ? null : parseVtoImage(body.fullBodyDataUrl, "Full-body photo"),
+    fullBodyDataUrl: (body.fullBodyDataUrl as string) || "",
     garmentId: body.garmentId,
     referenceAsset: body.referenceAsset,
     vtoSupported: body.vtoSupported === true,

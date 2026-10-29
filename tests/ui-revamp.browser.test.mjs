@@ -60,6 +60,8 @@ try {
   for (const width of [320, 375, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `home overflows at ${width}`);
+    await page.locator(".sf-home-enter").evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)));
+    assert(await page.locator(".sf-editorial-hero").evaluate(el => Math.abs(el.getBoundingClientRect().top) <= 1), `hero must start behind the floating navbar at ${width}px`);
     assert(await page.locator(".sf-editorial-hero h1").evaluate(el => el.getBoundingClientRect().height <= parseFloat(getComputedStyle(el).lineHeight) * 2.1), `headline must fit its two intended lines at ${width}px`);
     // The phone bar is locked: pinned to the viewport bottom at scroll 0 and after deep scroll.
     const navLocked = await page.evaluate(() => {

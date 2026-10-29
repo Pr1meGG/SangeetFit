@@ -32,7 +32,14 @@ try {
   await range.focus();
   await page.keyboard.press("ArrowRight");
   assert.equal(await range.inputValue(), "51");
-  assert.equal(await range.locator("..").locator("img").last().evaluate(image => image.style.clipPath), "inset(0px 0px 0px 49%)");
+  assert.equal(await range.locator("..").locator("img").last().evaluate(image => image.style.clipPath), "inset(0px 0px 0px 51%)");
+  assert.equal(await range.getAttribute("aria-valuetext"), "49% of generated result visible");
+  await page.keyboard.press("Home");
+  assert.equal(await range.locator("..").locator("img").last().evaluate(image => image.style.clipPath), "inset(0px 0px 0px 0%)");
+  assert.equal(await range.getAttribute("aria-valuetext"), "100% of generated result visible");
+  await page.keyboard.press("End");
+  assert.equal(await range.locator("..").locator("img").last().evaluate(image => image.style.clipPath), "inset(0px 0px 0px 100%)");
+  assert.equal(await range.getAttribute("aria-valuetext"), "0% of generated result visible");
   await dialog.getByRole("button", { name: "Show original" }).click();
   assert.equal(await range.count(), 0);
   await dialog.getByRole("button", { name: "Show result" }).click();

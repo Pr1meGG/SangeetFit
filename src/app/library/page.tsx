@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, House, Search, Shirt, Heart } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import GarmentCredit from "@/components/GarmentCredit";
-import { INDIAN_WEAR_LIBRARY } from "@/data/indian-wear";
 import { EDITORIAL_LOOKS } from "@/data/editorial";
 
 const TRY_ON_LABELS: Record<string, string> = {
@@ -19,7 +17,6 @@ export default function GarmentLibrary() {
   const [audience, setAudience] = useState("all");
   const [occasion, setOccasion] = useState("all");
   const [referencesOnly, setReferencesOnly] = useState(true);
-  const [showArchive, setShowArchive] = useState(false);
   const [generationMode, setGenerationMode] = useState<"checking" | "mock" | "live" | "unconfigured" | "error">("checking");
   useEffect(() => {
     const controller = new AbortController();
@@ -35,7 +32,7 @@ export default function GarmentLibrary() {
     })();
     return () => controller.abort();
   }, []);
-  const visibleCollection = showArchive || query.trim() ? [...EDITORIAL_LOOKS, ...INDIAN_WEAR_LIBRARY] : EDITORIAL_LOOKS;
+  const visibleCollection = EDITORIAL_LOOKS;
   const outfits = visibleCollection.filter(outfit =>
     (audience === "all" || outfit.audience === audience) &&
     (occasion === "all" || outfit.occasionTags.includes(occasion as typeof outfit.occasion)) &&
@@ -59,7 +56,7 @@ export default function GarmentLibrary() {
               : generationMode === "error"
                 ? "Browse without a photo. Try-on availability could not be checked. You can still explore outfit ideas."
                 : "Browse without a photo. Virtual try-on is unavailable on this preview, but you can still explore the collection."}</p>
-          <p className="sf-editorial-subhead sf-library-note">{EDITORIAL_LOOKS.length} original outfit concepts. Two passed a live pilot on one photo; the rest remain unreviewed. Older sourced references are in filters.</p>
+          <p className="sf-editorial-subhead sf-library-note">{EDITORIAL_LOOKS.length} original AI outfit concepts. Two passed a live pilot on one photo; the rest remain unreviewed.</p>
         </header>
 
         <div className="sf-library-toolbar flex flex-wrap gap-6">
@@ -91,9 +88,6 @@ export default function GarmentLibrary() {
             <label className="flex items-center gap-3 text-sm text-[var(--sf-muted)] min-h-11 cursor-pointer">
               <input type="checkbox" checked={referencesOnly} onChange={event => setReferencesOnly(event.target.checked)} className="w-5 h-5 accent-[var(--sf-burgundy)]" /> Try-on references only
             </label>
-            <label className="flex items-center gap-3 text-sm text-[var(--sf-muted)] min-h-11 cursor-pointer">
-              <input type="checkbox" checked={showArchive} onChange={event => setShowArchive(event.target.checked)} className="w-5 h-5 accent-[var(--sf-burgundy)]" /> Include 14 sourced reference photos
-            </label>
           </div>
         </details>
 
@@ -102,14 +96,14 @@ export default function GarmentLibrary() {
           <div className="sf-library-empty">
             <p>No garments match these filters.</p>
             <p>Try a different occasion, audience, or search term.</p>
-            <button type="button" onClick={() => { setQuery(""); setAudience("all"); setOccasion("all"); setReferencesOnly(true); setShowArchive(false); }} className="sf-button sf-button-secondary">Clear filters</button>
+            <button type="button" onClick={() => { setQuery(""); setAudience("all"); setOccasion("all"); setReferencesOnly(true); }} className="sf-button sf-button-secondary">Clear filters</button>
           </div>
         ) : (
           <div className="sf-library-grid">
             {outfits.map((outfit, index) => (
               <article key={outfit.id} className="sf-library-card">
                 <div className="sf-library-image relative aspect-[3/4]">
-                  <img src={outfit.imageUrl} alt={outfit.name} width={outfit.source?.width ?? 1086} height={outfit.source?.height ?? 1448} loading={index === 0 ? "eager" : "lazy"} className="absolute inset-0 w-full h-full object-contain" />
+                  <img src={outfit.imageUrl} alt={outfit.name} loading={index === 0 ? "eager" : "lazy"} className="absolute inset-0 w-full h-full object-contain" />
                   {outfit.generatedConcept && <span className="absolute left-3 top-3 rounded-full bg-[var(--sf-paper)] px-3 py-1.5 text-xs font-medium">AI outfit concept</span>}
                 </div>
                 <div className="sf-library-info">
@@ -117,12 +111,7 @@ export default function GarmentLibrary() {
                   <h2>{outfit.name}</h2>
                   <p>{outfit.description}</p>
                   <p className="sf-library-status">{TRY_ON_LABELS[outfit.tryOnStatus] ?? "Browse only"}</p>
-                  {outfit.generatedConcept ? <p className="text-xs text-[var(--sf-muted)]">Original concept · no retail listing</p> : (
-                    <>
-                      <p className="text-xs text-[var(--sf-muted)]">{outfit.referenceNotes}</p>
-                      <GarmentCredit source={outfit.source} />
-                    </>
-                  )}
+                  <p className="text-xs text-[var(--sf-muted)]">Original concept · no retail listing</p>
                   {outfit.vtoSupported && outfit.tryOnStatus !== "blocked" && (
                     <Link href={`/?step=3&occasion=${occasion === "all" ? outfit.occasion : occasion}&vto=${outfit.id}`} className="sf-button sf-button-primary mt-auto">Try with your photo</Link>
                   )}

@@ -1,9 +1,7 @@
 // Run against the local mock server; reuse an installed Playwright via PLAYWRIGHT_MODULE_PATH.
 import { strict as assert } from "node:assert";
-import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-const sourcedOutfits = JSON.parse(readFileSync(new URL("../src/data/indian-wear.json", import.meta.url), "utf8"));
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE_PATH || "playwright");
 const browser = await chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || "chromium", headless: true });
 const page = await browser.newPage({ viewport: { width: 375, height: 812 } });
@@ -51,9 +49,8 @@ try {
   }
   assert.equal(await page.locator("summary").filter({ hasText: /Search and filter/ }).count(), 1, "the library must have one search and filter disclosure");
   assert.equal(await page.getByRole("searchbox", { includeHidden: true }).count(), 1, "the library must have one garment searchbox");
-  for (const label of ["Include 14 sourced reference photos", "Try-on references only"]) {
-    assert.equal(await page.getByRole("checkbox", { name: label, exact: true, includeHidden: true }).count(), 1, `${label} must have exactly one checkbox`);
-  }
+  assert.equal(await page.getByRole("checkbox", { name: "Try-on references only", exact: true, includeHidden: true }).count(), 1, "reference filtering must have exactly one checkbox");
+  assert.equal(await page.getByRole("checkbox", { name: /sourced reference photos/, includeHidden: true }).count(), 0, "the removed sourced-photo archive must not be offered");
   assert(await occasions.getByRole("button", { name: "Sangeet" }).isVisible(), "occasion choices must be visible on a narrow phone");
   assert(await collections.getByRole("button", { name: "Women’s wear" }).isVisible(), "audience choices must be visible on a narrow phone");
   const receptionBounds = await occasions.getByRole("button", { name: "Reception" }).boundingBox();
@@ -88,39 +85,40 @@ try {
   await page.getByRole("group", { name: "Choose collection" }).getByRole("button", { name: "Everyone" }).click();
   await page.getByText("Search and filter outfits").click();
   await page.getByRole("searchbox").fill("saree");
-  assert((await page.getByRole("article").count()) > 0, "search must find matching sourced references even when the archive is hidden");
+  assert((await page.getByRole("article").count()) > 0, "search must find matching AI saree concepts");
+  for (const heading of await page.getByRole("article").getByRole("heading").allTextContents()) assert.match(heading, /saree/i);
   await page.getByRole("searchbox").fill("");
-  await page.getByLabel("Include 14 sourced reference photos").check();
-  assert.equal(await page.getByRole("checkbox", { name: "Try-on references only", exact: true }).count(), 1, "opening the archive must retain one reference checkbox");
-  assert.equal(await page.getByRole("article").count(), 34);
+  assert.equal(await page.getByRole("article").count(), 26);
   await page.getByLabel("Try-on references only").uncheck();
-  assert.equal(await page.getByRole("article").count(), 40);
+  assert.equal(await page.getByRole("article").count(), 26, "all current AI concepts have try-on references");
   for (const article of await page.getByRole("article").all()) {
     const image = article.getByRole("img");
     await image.scrollIntoViewIfNeeded();
     await image.evaluate(img => img.decode());
     assert(await image.evaluate(img => img.naturalWidth >= 320));
     assert.equal(await image.evaluate(img => getComputedStyle(img).objectFit), "contain", "outfit images must show the whole garment");
-    assert.equal(await article.getByRole("link").filter({ hasText: /CC0|CC BY-SA|Public domain/ }).count(), await article.getByText("AI outfit concept", { exact: true }).count() ? 0 : 1);
-    const imageUrl = await image.getAttribute("src");
-    const sourcedOutfit = sourcedOutfits.find(outfit => outfit.imageUrl === imageUrl);
-    if (sourcedOutfit) assert(await article.getByText(sourcedOutfit.referenceNotes, { exact: true }).isVisible(), "sourced photos must retain their reference limitations");
+    assert.equal(await article.getByText("AI outfit concept", { exact: true }).count(), 1);
+    assert.equal(await article.getByText("Original concept · no retail listing", { exact: true }).count(), 1);
+    assert.equal(await article.getByRole("link").filter({ hasText: /CC0|CC BY-SA|Public domain/ }).count(), 0, "AI concepts must not invent sourced-photo licences");
   }
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-  console.log("PASS: 26 concepts and 14 sourced photos decode, retain honest labels/credits and fit mobile layout");
+  console.log("PASS: all 26 concepts decode, retain AI/no-retail labels and fit mobile layout");
 
   await page.getByRole("group", { name: "Choose collection" }).getByRole("button", { name: "Men’s wear", exact: true }).click();
-  assert.equal(await page.getByRole("article").count(), 19);
+  const mensLooks = await page.getByRole("article").count();
+  assert(mensLooks > 0 && mensLooks < 26, "audience filter must select a subset");
+  for (const article of await page.getByRole("article").all()) assert.match(await article.innerText(), /Men’s wear/);
   await page.getByRole("group", { name: "Choose occasion" }).getByRole("button", { name: "Sangeet" }).click();
-  assert.equal(await page.getByRole("article").count(), 9);
+  const mensSangeetLooks = await page.getByRole("article").count();
+  assert(mensSangeetLooks >= 5 && mensSangeetLooks < mensLooks, "occasion filter must narrow the audience selection");
+  for (const article of await page.getByRole("article").all()) assert.match(await article.innerText(), /sangeet/);
   await page.getByLabel("Try-on references only").check();
-  assert.equal(await page.getByRole("article").count(), 8);
+  assert.equal(await page.getByRole("article").count(), mensSangeetLooks, "all selected AI concepts have try-on references");
   await page.getByRole("searchbox").fill("nonexistent-garment");
   await page.getByText("No garments match these filters.").waitFor();
   assert.equal(await page.getByText("Try a different occasion, audience, or search term.", { exact: true }).count(), 1, "empty-state guidance must appear once");
   await page.getByRole("button", { name: "Clear filters" }).click();
   assert.equal(await page.getByRole("article").count(), 26);
-  await page.getByLabel("Include 14 sourced reference photos").check();
   await page.getByRole("searchbox").fill("Midnight");
   assert.equal(await page.getByRole("article").count(), 1);
   console.log("PASS: collection, occasion, reference and text filters combine; empty state resets");

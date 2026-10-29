@@ -7,7 +7,8 @@ import { isRecord, uploadYouCamFile, YouCamHttpError } from "@/lib/youcam";
 import { parseVtoInput, VtoInputError } from "@/lib/vto-input";
 import { privateJson, readPhotoJson } from "@/lib/request";
 import { LiveBudgetError, reserveLiveBudget } from "@/lib/live-budget";
-import { INDIAN_WEAR_LIBRARY } from "@/data/indian-wear";
+import { issueSharingReceipt } from "@/lib/shared-results";
+import { autoSaveVtoResult } from "@/lib/shared-results";
 import { EDITORIAL_LOOKS } from "@/data/editorial";
 
 // Whole request has a 180s deadline; allow 300s per official Vercel limits
@@ -29,11 +30,7 @@ const MOCK_MODE = process.env.MOCK_MODE === "true";
  * Garment reference photos may show a model wearing the catalog outfit.
  */
 const REFERENCE_ASSETS: Record<string, { contentType: string; garmentTypes: string[] }> = {
-  "lehenga_ethnic_hd.png": { contentType: "image/png", garmentTypes: ["lehenga-choli"] },
-  "user_saree.png": { contentType: "image/png", garmentTypes: ["saree"] },
-  "kurta_set_hd.png": { contentType: "image/png", garmentTypes: ["kurta-set"] },
-  "western_dress_hd.png": { contentType: "image/png", garmentTypes: ["gown"] },
-  ...Object.fromEntries([...INDIAN_WEAR_LIBRARY, ...EDITORIAL_LOOKS].filter(outfit => outfit.vtoSupported).map(outfit => [
+  ...Object.fromEntries(EDITORIAL_LOOKS.filter(outfit => outfit.vtoSupported).map(outfit => [
     outfit.tryOnReference!,
     { contentType: outfit.tryOnReference!.endsWith(".png") ? "image/png" : "image/jpeg", garmentTypes: [outfit.garmentType] },
   ])),
@@ -133,7 +130,8 @@ async function runTryOn(req: NextRequest, signal: AbortSignal) {
 
     if (MOCK_MODE) {
       if (input.kind === "upload") {
-        return privateJson({ success: true, resultUrl: input.garmentImageDataUrl, mode: "mock" });
+        const resultUrl = input.garmentImageDataUrl;
+        return privateJson({ success: true, resultUrl, mode: "mock", autoSave: null });
       }
       if (!outfit) throw new VtoInputError("Unknown outfit");
       // Mock mode: results are placeholders — show the SAME display thumbnail the
@@ -144,6 +142,7 @@ async function runTryOn(req: NextRequest, signal: AbortSignal) {
         resultUrl: mockUrl,
         displayImage: outfit.imageUrl,
         mode: "mock",
+        autoSave: null,
       });
     }
 
@@ -185,8 +184,20 @@ async function runTryOn(req: NextRequest, signal: AbortSignal) {
     });
     const taskId = await submitTask(YOUCAM_API_KEY, srcFileId, refFileId, category, signal);
     const resultUrl = await pollTask(YOUCAM_API_KEY, taskId, signal);
-
-    return privateJson({ success: true, resultUrl, mode: "live" });
+    const images = {
+      personImageDataUrl: input.fullBodyDataUrl || "",
+      garmentImageDataUrl: input.kind === "upload" ? input.garmentImageDataUrl : `data:${contentType};base64,${garmentBuffer.toString("base64")}`,
+    };
+    const sharing = issueSharingReceipt(resultUrl, outfit?.name ?? "Your garment", images);
+    let autoSave: { id: string; expiresAt: number } | null = null;
+    let autoSaveError: string | undefined;
+    try {
+      if (!sharing) throw new VtoInputError("Automatic saving is unavailable. Save the image on your device.", 503);
+      autoSave = await autoSaveVtoResult({ ...images, receipt: sharing.receipt }, AbortSignal.any([signal, AbortSignal.timeout(20_000)]));
+    } catch (error) {
+      autoSaveError = error instanceof VtoInputError ? error.message : "Automatic saving could not finish. Your try-on is still available.";
+    }
+    return privateJson({ success: true, resultUrl, mode: "live", autoSave, ...(autoSaveError ? { autoSaveError } : {}), ...(sharing ? { sharing } : {}) });
   } catch (err: unknown) {
     if (signal.aborted) return timedOutResponse();
     const status = err instanceof VtoInputError || err instanceof LiveBudgetError ? err.status : err instanceof YouCamHttpError && err.status === 429 ? 429 : 502;

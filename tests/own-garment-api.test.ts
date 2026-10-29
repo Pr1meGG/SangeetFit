@@ -3,18 +3,19 @@ import { strict as assert } from "node:assert";
 import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { INDIAN_WEAR_LIBRARY } from "../src/data/indian-wear.ts";
+import { EDITORIAL_LOOKS } from "../src/data/editorial.ts";
 import { pngDataUrl } from "./fixtures/png.ts";
 import { configureOfflineBudget, offlineBudgetResponse } from "./fixtures/budget.ts";
 
 const png = pngDataUrl();
-const jpegOutfit = INDIAN_WEAR_LIBRARY.find(item => item.vtoSupported && item.tryOnReference?.endsWith(".jpg"))!;
+const jpegOutfit = EDITORIAL_LOOKS.find(item => item.vtoSupported && item.tryOnReference?.endsWith(".jpg"))!;
 const jpeg = `data:image/jpeg;base64,${readFileSync(`public/garment_test/${jpegOutfit.tryOnReference}`).toString("base64")}`;
 const mock = process.argv.includes("--mock");
 
 void (async () => {
   process.env.MOCK_MODE = String(mock);
   configureOfflineBudget();
+  process.env.RESULTS_ADMIN_SECRET = "";
   process.env.YOUCAM_API_KEY = "offline-test-key";
   process.env.YOUCAM_BASE_URL = "https://example.test/s2s/v2.0";
   let calls: string[] = [];
@@ -24,10 +25,11 @@ void (async () => {
   let timeoutAt = "";
   let deadlineController: AbortController | null = null;
   let requestSignal: AbortSignal | undefined;
+  let budgetReservations = 0;
   const realFetch = globalThis.fetch;
   globalThis.fetch = (async (input, init) => {
     const budget = offlineBudgetResponse(input, init);
-    if (budget) return budget;
+    if (budget) { budgetReservations++; return budget; }
     const url = String(input);
     calls.push(url);
     if (timeoutAt) {
@@ -78,7 +80,15 @@ void (async () => {
     }
     assert.equal(tasks.length, 1);
     assert.equal(tasks[0].garment_category, "upper_body");
-    assert.equal(calls.length, 6);
+    assert.deepEqual(calls, [
+      "https://example.test/s2s/v2.0/file", "https://example.test/upload/1",
+      "https://example.test/s2s/v2.0/file", "https://example.test/upload/2",
+      "https://example.test/s2s/v2.0/task/cloth-v4", "https://example.test/s2s/v2.0/task/cloth-v4/offline-task",
+    ], "unconfigured saving must make only the six provider operations, without downloading the result");
+    assert.equal(budgetReservations, 1, "only the live budget reservation may contact Redis when saving is unconfigured");
+    assert.equal(result.autoSave, null);
+    assert.match(result.autoSaveError, /saving is unavailable/i);
+    assert.equal(Object.hasOwn(result, "sharing"), false, "unconfigured saving must not issue a retry receipt");
     for (const body of [
       { ...upload, fullBodyDataUrl: jpeg, garmentCategory: "full_body" },
       { ...upload, garmentImageDataUrl: jpeg },

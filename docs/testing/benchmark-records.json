@@ -1,25 +1,116 @@
 {
   "plannedCases": [
-    {"caseId": "concept-emerald-kurta", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "concept-sapphire-sherwani", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "concept-oxblood-bandhgala", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "concept-mint-kurta", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "concept-saffron-kurta", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "concept-marigold-jacket-set", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "concept-sage-embroidered-kurta", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "concept-ivory-gold-kurta", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "concept-cream-embroidered-bandhgala", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "concept-navy-velvet-bandhgala", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "concept-plum-brocade-sherwani", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "concept-antique-gold-sherwani", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "concept-charcoal-bandhgala", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "library-gold-silk-kurta", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "library-ivory-nehru-ensemble", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"},
-    {"caseId": "library-ivory-button-kurta", "participantId": "p01", "kind": "catalogue", "sourceVersion": "photo-v1"}
+    {
+      "caseId": "concept-emerald-kurta",
+      "participantId": "p01",
+      "kind": "catalogue",
+      "sourceVersion": "photo-v1"
+    },
+    {
+      "caseId": "concept-sapphire-sherwani",
+      "participantId": "p01",
+      "kind": "catalogue",
+      "sourceVersion": "photo-v1"
+    },
+    {
+      "caseId": "concept-oxblood-bandhgala",
+      "participantId": "p01",
+      "kind": "catalogue",
+      "sourceVersion": "photo-v1"
+    },
+    {
+      "caseId": "concept-mint-kurta",
+      "participantId": "p01",
+      "kind": "catalogue",
+      "sourceVersion": "photo-v1"
+    },
+    {
+      "caseId": "concept-saffron-kurta",
+      "participantId": "p01",
+      "kind": "catalogue",
+      "sourceVersion": "photo-v1"
+    },
+    {
+      "caseId": "concept-marigold-jacket-set",
+      "participantId": "p01",
+      "kind": "catalogue",
+      "sourceVersion": "photo-v1"
+    },
+    {
+      "caseId": "concept-sage-embroidered-kurta",
+      "participantId": "p01",
+      "kind": "catalogue",
+      "sourceVersion": "photo-v1"
+    },
+    {
+      "caseId": "concept-ivory-gold-kurta",
+      "participantId": "p01",
+      "kind": "catalogue",
+      "sourceVersion": "photo-v1"
+    },
+    {
+      "caseId": "concept-cream-embroidered-bandhgala",
+      "participantId": "p01",
+      "kind": "catalogue",
+      "sourceVersion": "photo-v1"
+    },
+    {
+      "caseId": "concept-navy-velvet-bandhgala",
+      "participantId": "p01",
+      "kind": "catalogue",
+      "sourceVersion": "photo-v1"
+    },
+    {
+      "caseId": "concept-plum-brocade-sherwani",
+      "participantId": "p01",
+      "kind": "catalogue",
+      "sourceVersion": "photo-v1"
+    },
+    {
+      "caseId": "concept-antique-gold-sherwani",
+      "participantId": "p01",
+      "kind": "catalogue",
+      "sourceVersion": "photo-v1"
+    },
+    {
+      "caseId": "concept-charcoal-bandhgala",
+      "participantId": "p01",
+      "kind": "catalogue",
+      "sourceVersion": "photo-v1"
+    }
   ],
   "records": [
-    {"caseId": "concept-emerald-kurta", "participantId": "p01", "sourceVersion": "photo-v1", "kind": "catalogue", "mode": "live", "status": "success", "rendered": true, "identityRating": 5, "garmentRating": 5, "durationMs": null, "taskSubmissions": 1},
-    {"caseId": "concept-sapphire-sherwani", "participantId": "p01", "sourceVersion": "photo-v1", "kind": "catalogue", "mode": "live", "status": "success", "rendered": true, "identityRating": 5, "garmentRating": 5, "durationMs": null, "taskSubmissions": 1}
+    {
+      "caseId": "concept-emerald-kurta",
+      "participantId": "p01",
+      "sourceVersion": "photo-v1",
+      "kind": "catalogue",
+      "mode": "live",
+      "status": "success",
+      "rendered": true,
+      "identityRating": 5,
+      "garmentRating": 5,
+      "durationMs": null,
+      "taskSubmissions": 1
+    },
+    {
+      "caseId": "concept-sapphire-sherwani",
+      "participantId": "p01",
+      "sourceVersion": "photo-v1",
+      "kind": "catalogue",
+      "mode": "live",
+      "status": "success",
+      "rendered": true,
+      "identityRating": 5,
+      "garmentRating": 5,
+      "durationMs": null,
+      "taskSubmissions": 1
+    }
   ],
-  "budget": {"availableUnits": 910, "vtoUnitCost": 2, "skinUnitCost": 20, "approved": false}
+  "budget": {
+    "availableUnits": 910,
+    "vtoUnitCost": 2,
+    "skinUnitCost": 20,
+    "approved": false
+  }
 }

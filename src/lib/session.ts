@@ -5,6 +5,23 @@ export type SessionOutfit = Outfit & {
   uploadedGarment?: { imageDataUrl: string; category: GarmentCategory };
 };
 
+export interface ResultSharing {
+  id: string;
+  receipt: string;
+  accessToken: string;
+  state: "saving" | "ready" | "error" | "removed";
+  expiresAt?: number;
+  copyFailed?: boolean;
+}
+
+export interface ResultAutoSave {
+  state: "saving" | "ready" | "error";
+  id?: string;
+  expiresAt?: number;
+  receipt?: string;
+  accessToken?: string;
+}
+
 export interface GeneratedLook {
   id: string;
   outfit: SessionOutfit;
@@ -13,6 +30,9 @@ export interface GeneratedLook {
   sourceDataUrl: string;
   sourceVersion: number;
   durationMs: number;
+  sharing?: ResultSharing;
+  saveRequested?: boolean;
+  autoSave?: ResultAutoSave;
 }
 
 /** Scalar plan data only: safe to pass to the text-only print view. */
