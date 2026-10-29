@@ -116,7 +116,7 @@ try {
   assert.equal(skinRequests, 0);
   await noNewTasks(0, "browse and optional-analysis skip submit nothing");
   assert(await page.locator(".sf-reference-card").count() > 0, "an occasion without a reviewed recommendation still shows available references");
-  assert.equal(await page.locator(".sf-reference-card .sf-outfit-badge").first().textContent(), "Unreviewed reference");
+  assert.equal(await page.locator(".sf-reference-card .sf-outfit-badge").first().textContent(), "Inspiration");
 
   await page.getByRole("button", { name: "Sangeet", exact: true }).click();
   await page.getByRole("button", { name: "Women's wear", exact: true }).click();
@@ -125,8 +125,8 @@ try {
   const womenReferences = page.locator(".sf-reference-card");
   assert(await womenReferences.count() >= 5, "women's default gallery must surface available reference candidates");
   assert.equal(await womenReferences.locator(".sf-outfit-badge").count(), await womenReferences.count(), "every surfaced reference keeps a label");
-  assert((await womenReferences.locator(".sf-outfit-badge").allTextContents()).every(label => label === "Unreviewed reference"));
-  assert(await page.getByRole("heading", { name: "Reference outfits for Sangeet", exact: true }).isVisible());
+  assert((await womenReferences.locator(".sf-outfit-badge").allTextContents()).every(label => label === "Inspiration"));
+  assert(await page.getByRole("heading", { name: "Inspiration for Sangeet", exact: true }).isVisible());
   const exploreReferences = page.getByRole("button", { name: "Explore reference outfits", exact: true });
   assert.equal(await exploreReferences.isDisabled(), false);
   await exploreReferences.focus();
@@ -136,10 +136,10 @@ try {
     const header = document.querySelector(".sf-navbar")?.getBoundingClientRect();
     return section && header && section.top >= header.bottom && section.top < innerHeight;
   });
-  const referenceHeading = await page.getByRole("heading", { name: "Reference outfits for Sangeet", exact: true }).boundingBox();
+  const referenceHeading = await page.getByRole("heading", { name: "Inspiration for Sangeet", exact: true }).boundingBox();
   const stickyHeader = await page.locator(".sf-navbar").boundingBox();
   assert(referenceHeading && stickyHeader && referenceHeading.y >= stickyHeader.y + stickyHeader.height, "keyboard reference jump must land below the sticky navbar");
-  const referenceRegion = page.getByRole("region", { name: "Reference outfits for Sangeet", exact: true });
+  const referenceRegion = page.getByRole("region", { name: "Inspiration for Sangeet", exact: true });
   assert(await referenceRegion.evaluate(el => el === document.activeElement), "reference jump must move keyboard focus to the destination");
   await page.keyboard.press("Tab");
   assert(await womenReferences.first().getByRole("button", { name: /^Try on / }).evaluate(el => el === document.activeElement), "Tab after a reference jump must enter its first card");
@@ -158,14 +158,14 @@ try {
   const savedCandidate = page.locator(".sf-outfit-card");
   assert.equal(await savedCandidate.count(), 1, "only the saved candidate belongs in the shortlist");
   assert.equal(await savedCandidate.getByRole("heading").innerText(), savedCandidateName);
-  assert.equal(await savedCandidate.locator(".sf-outfit-badge").innerText(), "Unreviewed reference", "saving must never promote a candidate's review status");
+  assert.equal(await savedCandidate.locator(".sf-outfit-badge").innerText(), "Inspiration", "saving must never promote a candidate's review status");
   await savedCandidate.getByRole("button", { name: `Try on ${savedCandidateName}`, exact: true }).focus();
   await page.keyboard.press("Enter");
   await page.getByRole("dialog", { name: "Make this look yours." }).waitFor();
   await page.keyboard.press("Escape");
   await noNewTasks(0, "saving, shortlisting and opening a candidate with the keyboard must not generate");
   await savedCandidate.getByRole("button", { name: `Remove ${savedCandidateName} from shortlist`, exact: true }).click();
-  await page.getByRole("button", { name: "Browse reference candidates", exact: true }).focus();
+  await page.getByRole("button", { name: "Browse inspiration looks", exact: true }).focus();
   await page.keyboard.press("Enter");
   await page.waitForFunction(() => document.activeElement?.classList.contains("sf-reference-section"));
   assert(await referenceRegion.evaluate(el => el === document.activeElement), "empty-shortlist recovery must focus the newly mounted references");
@@ -182,10 +182,10 @@ try {
   await page.getByRole("button", { name: "Men's wear", exact: true }).click();
   await page.waitForTimeout(150);
   const reviewedLabels = await page.locator(".sf-outfit-card .sf-outfit-badge").allTextContents();
-  assert(reviewedLabels.length >= 2 && reviewedLabels.every(label => label === "Live-reviewed reference"), "reviewed cards keep their distinct label");
+  assert(reviewedLabels.length >= 2 && reviewedLabels.every(label => label === "Tested on a real photo"), "reviewed cards keep their distinct label");
   const menReferences = page.locator(".sf-reference-card");
   assert(await menReferences.count() >= 1);
-  assert((await menReferences.locator(".sf-outfit-badge").allTextContents()).every(label => label === "Unreviewed reference"));
+  assert((await menReferences.locator(".sf-outfit-badge").allTextContents()).every(label => label === "Inspiration"));
   await page.getByRole("button", { name: "Reception", exact: true }).click();
   await page.getByRole("button", { name: "All styles", exact: true }).click();
   await page.waitForTimeout(150);
@@ -196,9 +196,9 @@ try {
   }
   await page.setViewportSize({ width: 375, height: 812 });
   await board.getByLabel("Outfit for Sangeet").selectOption({ index: 1 });
-  await board.getByText("AI inspiration · try-on unreviewed").waitFor();
+  await board.getByText("AI inspiration · not yet tried on").waitFor();
   await board.locator("article").first().getByRole("button", { name: "Try on this look" }).click();
-  await page.getByRole("dialog", { name: "Make this look yours." }).getByText(/Candidate reference: generated garment quality/).waitFor();
+  await page.getByRole("dialog", { name: "Make this look yours." }).getByText(/Inspiration look: we haven’t tried this AI concept/).waitFor();
   await noNewTasks(0, "planning and opening candidate inspiration must not generate");
   await page.getByRole("button", { name: "Close try-on" }).click();
   await page.getByRole("button", { name: "Reception", exact: true }).click();

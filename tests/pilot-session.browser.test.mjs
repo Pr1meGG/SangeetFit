@@ -50,7 +50,7 @@ try {
   assert.match(await board.getByLabel("Outfit for Haldi").locator("option:checked").textContent(), /Sapphire Embroidered Sherwani/);
   assert.match(await board.getByRole("status", { name: "Wardrobe plan summary" }).innerText(), /0 owned outfits used/);
   await page.getByRole("searchbox", { name: "Search outfit ideas" }).fill("no-such-outfit");
-  await page.getByRole("button", { name: "Browse reference candidates" }).click();
+  await page.getByRole("button", { name: "Browse inspiration looks" }).click();
   assert.equal(await page.getByRole("searchbox", { name: "Search outfit ideas" }).inputValue(), "");
   assert(await page.locator(".sf-reference-card").count() > 0, "empty-state recovery must show candidates in their labelled group");
   assert.equal(requests.length, 2, "browsing after comparison must not generate");

@@ -50,7 +50,7 @@ export function summarizeWardrobePlan(
       outfitId: outfit?.id ?? null,
       garmentName: outfit?.name ?? "Not planned",
       sourceLabel: !outfit ? "No outfit selected" : owned ? "Your clothes" :
-        `${outfit.generatedConcept ? "AI inspiration" : "Reference outfit"} · ${outfit.tryOnStatus === "live-reviewed" ? "live-reviewed" : "try-on unreviewed"}`,
+        `${outfit.generatedConcept ? "AI inspiration" : "Reference outfit"} · ${outfit.tryOnStatus === "live-reviewed" ? "tested on a real photo" : "not yet tried on"}`,
       owned,
     };
   });

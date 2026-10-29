@@ -7,8 +7,8 @@ import Navbar from "@/components/Navbar";
 import { EDITORIAL_LOOKS } from "@/data/editorial";
 
 const TRY_ON_LABELS: Record<string, string> = {
-  "live-reviewed": "Pilot-reviewed · one source photo",
-  "candidate": "Try-on reference · unreviewed quality",
+  "live-reviewed": "Tested on a real photo",
+  "candidate": "Inspiration · not yet tried on",
   "blocked": "Browse only",
 };
 
@@ -56,7 +56,7 @@ export default function GarmentLibrary() {
               : generationMode === "error"
                 ? "Browse without a photo. Try-on availability could not be checked. You can still explore outfit ideas."
                 : "Browse without a photo. Virtual try-on is unavailable on this preview, but you can still explore the collection."}</p>
-          <p className="sf-editorial-subhead sf-library-note">{EDITORIAL_LOOKS.length} original AI outfit concepts. Two passed a live pilot on one photo; the rest remain unreviewed.</p>
+          <p className="sf-editorial-subhead sf-library-note">{EDITORIAL_LOOKS.length} original AI outfit concepts. Two have been tried on a real photo; the rest are inspiration.</p>
         </header>
 
         <div className="sf-library-toolbar flex flex-wrap gap-6">

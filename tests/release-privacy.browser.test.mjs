@@ -59,6 +59,7 @@ try {
   // Reproduce the cosmetic filter observed hiding the photo permission notice in Brave.
   await page.addStyleTag({ content: ".sf-consent { display: none !important; }" });
   assert(await dialog.getByRole("button", { name: "I understand — continue" }).isVisible(), "photo permission must survive cookie-banner cosmetic filters");
+  assert(await dialog.getByText(/privately for 24 hours/).isVisible(), "the notice must disclose automatic server retention");
   await dialog.getByRole("button", { name: "I understand — continue" }).click();
   assert(await dialog.getByRole("button", { name: "Generate try-on", exact: true }).isDisabled());
   await dialog.getByLabel("Full-body photo", { exact: true }).setInputFiles({ name: "invalid.txt", mimeType: "text/plain", buffer: Buffer.from("not an image") });
@@ -84,8 +85,10 @@ try {
   assert.equal(vtoRequests, 1);
   await page.getByRole("button", { name: "Try on Emerald Silk Kurta", exact: true }).click();
   await dialog.getByRole("button", { name: "I understand — continue" }).click();
-  await dialog.getByLabel("Full-body photo", { exact: true }).setInputFiles(file);
+  // The sample model goes through the same preparation path and still needs an explicit Generate.
+  await dialog.getByRole("button", { name: /Use our sample model/ }).click();
   await dialog.getByText("Photo ready. Uploading did not start a task.").waitFor();
+  assert.equal(vtoRequests, 1, "loading the sample must not submit");
   await dialog.getByRole("button", { name: "Generate try-on", exact: true }).click();
   await dialog.getByRole("slider").waitFor();
   await dialog.getByRole("button", { name: "Close try-on" }).click();

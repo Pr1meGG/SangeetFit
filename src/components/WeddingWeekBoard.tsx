@@ -43,14 +43,14 @@ export default function WeddingWeekBoard({ occasions, outfits, plan, onChoose, o
             <select id={`week-board-${event.id}`} value={selected?.id || ""} onChange={e => onChoose(event.id, e.target.value)}>
               <option value="">Choose an outfit</option>
               {owned.length > 0 && <optgroup label="Your clothes">{owned.map(outfit => <option key={outfit.id} value={outfit.id}>{outfit.name}</option>)}</optgroup>}
-              {selectedReferenceOutsideOptions && <optgroup label="Your selected reference"><option value={selected.id}>{selected.name}{selected.tryOnStatus === "live-reviewed" ? " · reviewed" : " · unreviewed"}</option></optgroup>}
-              <optgroup label="AI outfit ideas">{concepts.map(outfit => <option key={outfit.id} value={outfit.id}>{outfit.name}{outfit.tryOnStatus === "live-reviewed" ? " · reviewed" : " · unreviewed"}</option>)}</optgroup>
+              {selectedReferenceOutsideOptions && <optgroup label="Your selected reference"><option value={selected.id}>{selected.name}{selected.tryOnStatus === "live-reviewed" ? " · tested" : ""}</option></optgroup>}
+              <optgroup label="AI outfit ideas">{concepts.map(outfit => <option key={outfit.id} value={outfit.id}>{outfit.name}{outfit.tryOnStatus === "live-reviewed" ? " · tested" : ""}</option>)}</optgroup>
             </select>
             {selected ? <button className="sf-week-board-action" onClick={() => onTryOn(event.id, selected)}>Try on this look <ArrowUpRight size={16} /></button> : <button className="sf-week-board-action" onClick={() => onAddOwn(event.id)}>Add my clothes <ArrowUpRight size={16} /></button>}
           </div>
         </article>;
       })}
     </div>
-    <p className="sf-week-board-note">This plan stays in this page session. Print or save the text-only plan to keep it; photos and try-on results are excluded. Candidate inspiration results have not been quality-reviewed.</p>
+    <p className="sf-week-board-note">This plan stays in this page session. Print or save the text-only plan to keep it; photos and try-on results are excluded. Inspiration looks haven’t been tried on a real photo yet.</p>
   </section>;
 }

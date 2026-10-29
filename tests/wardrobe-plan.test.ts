@@ -21,7 +21,7 @@ const summary = session.summarizeWardrobePlan(occasions, outfits, {
 assert.equal(summary.plannedCount, 4);
 assert.equal(summary.ownedOutfitCount, 2);
 assert.equal(summary.plannedRewears, 1);
-assert.equal(summary.entries[3].sourceLabel, "AI inspiration · try-on unreviewed");
+assert.equal(summary.entries[3].sourceLabel, "AI inspiration · not yet tried on");
 assert.equal(summary.entries[4].garmentName, "Not planned");
 assert.equal(summary.entries[4].outfitId, null);
 assert(!JSON.stringify(summary).includes("private.invalid"), "print data must exclude image URLs");
