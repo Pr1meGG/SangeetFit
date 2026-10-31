@@ -44,7 +44,7 @@ export default function GarmentLibrary() {
   return (
     <main className="sf-app sf-library">
       <Navbar activeView="collection" />
-      <div id="main-content" tabIndex={-1} className="sf-library-content max-w-7xl mx-auto px-4 py-6 sm:px-8 sm:py-10 space-y-7">
+      <div id="main-content" tabIndex={-1} className="sf-library-content py-6 sm:py-10 space-y-7">
         <Link href="/" className="sf-text-link inline-flex gap-2 items-center min-h-11 py-2"><ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to your looks</Link>
         <header className="sf-library-header">
           <p className="sf-editorial-eyebrow">SangeetFit collection</p>

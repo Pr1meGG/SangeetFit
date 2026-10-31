@@ -2,6 +2,14 @@
 
 Durable, verified facts about SangeetFit. Prior-generation results not rechecked in the current working tree are explicitly labeled **[prior report]**. Update this file when durable facts, verified outcomes, major decisions, or blockers change — not as a running log.
 
+## Wedding Look Studio — shelved, 31 October 2026
+
+User decision (31 Oct): not shipped. In mock mode every look slot shows the catalogue image, so the workspace read as a showcase rather than a working try-on decision tool. Work is preserved as local-only commit `59c5ae5` on `codex/wedding-look-studio` (not pushed); its mock-only verification is in that commit's `docs/testing/WEDDING_LOOK_STUDIO_2026_10_31.md`. The checkout is back on `codex/redesign-v2` at `6f5396a`, which matches production; that is the submission candidate.
+
+## Production deployment of tested CI SHA — 31 October 2026, 07:28 IST
+
+With user approval, a clean detached worktree of `6f5396a28dc2d8a21e38cb434aad07acb9f754ac` was deployed with the Vercel CLI: production `dpl_Hj3Ymk4Q79LR1A2YpufGJ1QkU5rf` READY, aliased to https://sangeet-fit.vercel.app; Vercel metadata `gitCommitSha` matches. That SHA passed remote CI run 40848988972 (17 offline suites with required real Redis, 13 mock browser suites). Home/library/results/mode HTTP200; mode live. Prior production and rollback target: `dpl_S3XTf3qgBTHXJRieDwxYbEBf9HNu` (`1f2dd37`). No generation, save or allowance check was performed; hosted phone/judge acceptance (stage4) remains open.
+
 ## Submission audit — 29 October 2026
 
 **Later stages 1–3 execution:** user excluded retention-notice wording and assigned it to Claude; existing notice remained byte-identical. Autosave authentication/index/deletion/summary/failure/retry repairs and current catalogue/slider/sharing regressions are implemented. Final isolated `npm run verify` exited0: all17 offline suites including actual disposable Redis, all13 mock browser suites, typecheck/build and lint0errors/22warnings. All135 checked files matched the checkout; independent code/security/TypeScript/React reviews have no outstanding findings after receipt-race and summary-read corrections. Local current-branch deployment guard added; no push/deployment/live task occurred. Stage3 remote CI/deployment remains pending exact checkpoint/history approval. [Verification receipt](../testing/STAGES_1_3_VERIFICATION_2026_10_29.md), [release candidate](../submission/RELEASE_CANDIDATE_2026_10_29.md).

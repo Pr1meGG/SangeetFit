@@ -1,6 +1,16 @@
 # TASK_BOARD.md
 
+## Layout alignment — 31 October 2026
+
+One `--sf-gutter` token (40px desktop, 32px ≤1000px, 20px ≤640px) now sets the page margin for main views, Collection, full-bleed bands (hero, week board, how-it-works, closing invite) and the navbar. Measured on home, try-on step, Collection, How it works and FAQ at 1440/800/390px: one left edge per width (140/32/20px), no horizontal overflow. `TEST_PORT=3571 npm run verify` exit 0: 17 offline suites (real Redis skipped), typecheck, lint 0 errors/22 warnings, build, 13 mock browser suites. Uncommitted on `codex/redesign-v2`; not deployed.
+
+## Wedding Look Studio — 31 October 2026
+
+**Shelved by user; not in the submission.** Preserved locally on `codex/wedding-look-studio` at `59c5ae5` (unpushed). Submission candidate is `6f5396a` (production).
+
 ## Submission gates — 29 October 2026
+
+**31 October deployment:** stage3 complete — tested CI SHA `6f5396a` deployed to production `dpl_Hj3Ymk4Q79LR1A2YpufGJ1QkU5rf` (rollback `dpl_S3XTf3qgBTHXJRieDwxYbEBf9HNu`). Hosted phone generation/save/reopen and judge access (stage4) **on hold at user request (31 Oct)**; next work is submission assets.
 
 **Later execution:** stages1–2 local implementation and integrated checks complete:17offline suites (actual Redis included),13browser suites, typecheck/build/lint and independent reviews pass. Retention notice intentionally excluded per user and unchanged. Stage3 release candidate/manifest/branch deploy guard prepared; exact checkpoint/history approval, remote CI and matching deployment remain open. [Current verification](../testing/STAGES_1_3_VERIFICATION_2026_10_29.md).
 
