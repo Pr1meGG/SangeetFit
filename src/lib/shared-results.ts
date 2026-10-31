@@ -73,6 +73,13 @@ async function readAutoSaved(id: string, signal: AbortSignal): Promise<AutoSaved
 }
 const imageHash = (data: string) => createHash("sha256").update(data).digest("hex");
 
+const AUTO_SAVE_MAX_MS = 20_000, AUTO_SAVE_MIN_MS = 3_000, RESPONSE_MARGIN_MS = 5_000;
+// Saving must never push a paid, finished try-on past its request deadline; 0 means skip the save.
+export function autoSaveTimeoutMs(deadline: number, current = Date.now()): number {
+  const available = Math.min(AUTO_SAVE_MAX_MS, deadline - current - RESPONSE_MARGIN_MS);
+  return available >= AUTO_SAVE_MIN_MS ? available : 0;
+}
+
 export async function autoSaveVtoResult(params: {
   receipt: string;
   personImageDataUrl: string;

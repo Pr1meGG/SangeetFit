@@ -8,7 +8,7 @@ import { parseVtoInput, VtoInputError } from "@/lib/vto-input";
 import { privateJson, readPhotoJson } from "@/lib/request";
 import { LiveBudgetError, reserveLiveBudget } from "@/lib/live-budget";
 import { issueSharingReceipt } from "@/lib/shared-results";
-import { autoSaveVtoResult } from "@/lib/shared-results";
+import { autoSaveTimeoutMs, autoSaveVtoResult } from "@/lib/shared-results";
 import { EDITORIAL_LOOKS } from "@/data/editorial";
 
 // Whole request has a 180s deadline; allow 300s per official Vercel limits
@@ -109,7 +109,9 @@ async function pollTask(apiKey: string, taskId: string, signal: AbortSignal, tim
   throw new Error("Timeout waiting for VTO result");
 }
 
-async function runTryOn(req: NextRequest, signal: AbortSignal) {
+const REQUEST_DEADLINE_MS = 180_000;
+
+async function runTryOn(req: NextRequest, signal: AbortSignal, deadline: number) {
   try {
     signal.throwIfAborted();
     const body = await readPhotoJson(req, signal);
@@ -193,7 +195,9 @@ async function runTryOn(req: NextRequest, signal: AbortSignal) {
     let autoSaveError: string | undefined;
     try {
       if (!sharing) throw new VtoInputError("Automatic saving is unavailable. Save the image on your device.", 503);
-      autoSave = await autoSaveVtoResult({ ...images, receipt: sharing.receipt }, AbortSignal.any([signal, AbortSignal.timeout(20_000)]));
+      const saveMs = autoSaveTimeoutMs(deadline);
+      if (!saveMs) throw new VtoInputError("This try-on took too long to save automatically. Save the image on your device.", 503);
+      autoSave = await autoSaveVtoResult({ ...images, receipt: sharing.receipt }, AbortSignal.any([signal, AbortSignal.timeout(saveMs)]));
     } catch (error) {
       autoSaveError = error instanceof VtoInputError ? error.message : "Automatic saving could not finish. Your try-on is still available.";
     }
@@ -211,13 +215,14 @@ function timedOutResponse() {
 }
 
 export async function POST(req: NextRequest) {
-  const signal = AbortSignal.any([req.signal, AbortSignal.timeout(180_000)]);
+  const deadline = Date.now() + REQUEST_DEADLINE_MS;
+  const signal = AbortSignal.any([req.signal, AbortSignal.timeout(REQUEST_DEADLINE_MS)]);
   let onAbort = () => {};
   const cancelled = new Promise<NextResponse>(resolve => {
     onAbort = () => resolve(timedOutResponse());
     if (signal.aborted) onAbort();
     else signal.addEventListener("abort", onAbort, { once: true });
   });
-  try { return await Promise.race([runTryOn(req, signal), cancelled]); }
+  try { return await Promise.race([runTryOn(req, signal, deadline), cancelled]); }
   finally { signal.removeEventListener("abort", onAbort); }
 }
