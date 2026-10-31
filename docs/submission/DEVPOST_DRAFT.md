@@ -28,7 +28,7 @@ An Indian wedding is rarely one event. Sangeet, Mehendi, Haldi, the wedding and 
 
 Most virtual try-on puts a button next to a product you might buy. SangeetFit uses Cloth V4 as a **decision tool for clothes you already own**: the planner does the organising, and a try-on is spent only on the look you can't decide about.
 
-Under the hood, the browser shrinks the photos, our server validates them, uploads the person and garment through the YouCam File API, submits a `cloth-v4` task, and polls with back-off until the render is ready. In our two recorded live runs, Generate-to-render took about 16 seconds. See the [architecture note]([CONFIRM: repository URL]/blob/main/docs/submission/ARCHITECTURE.md).
+Under the hood, the browser shrinks the photos, our server validates them, uploads the person and garment through the YouCam File API, submits a `cloth-v4` task, and polls with back-off until the render is ready. In our three recorded live runs, Generate-to-render took 16 to 26 seconds. See the [architecture note](https://github.com/Pr1meGG/SangeetFit/blob/codex/redesign-v2/docs/submission/ARCHITECTURE.md).
 
 ### How we built it
 
@@ -73,9 +73,9 @@ Virtual try-on is most valuable at the moment of indecision, not at the moment o
 
 ### Try it
 
-- **App:** https://sangeet-fit.vercel.app (no account needed). [CONFIRM: live or mock mode during judging, and the judging try-on allowance]
+- **App:** https://sangeet-fit.vercel.app (no account needed). Live mode: Generate runs a real Cloth V4 try-on from a small shared allowance. If it runs out, the app says so plainly; planning, browsing and PDF export keep working.
 - **Video:** [CONFIRM: video link]
-- **Code:** [CONFIRM: repository access route the organisers require]
+- **Code:** https://github.com/Pr1meGG/SangeetFit (private; shared with contact_event@PerfectCorp.com as the rules require). Run it without keys: `npm ci && MOCK_MODE=true npm run dev`.
 
 ### AI disclosure
 
@@ -86,7 +86,7 @@ Virtual try-on is most valuable at the moment of indecision, not at the moment o
 ## Internal notes — do not paste
 
 - Tagline and persona must match [DEMO_SCRIPT.md](DEMO_SCRIPT.md) and [README.md](../../README.md) word for word.
-- "About 16 seconds" comes from the two 26 October live runs (15.7 s and 16.0 s) on AI-created demo sources ([pilot record](../testing/CATALOGUE_AI_PILOT_2026_10_26.md)). Owned-garment live quality is **not** verified; don't claim it.
+- "16 to 26 seconds" comes from three live runs on AI-created demo sources: 15.7 s and 16.0 s on 26 October, and 26.0 s on production on 31 October (the video take) ([pilot record](../testing/CATALOGUE_AI_PILOT_2026_10_26.md)). Owned-garment live quality is **not** verified; don't claim it.
 - No problem statistics, savings, time-saved or demand numbers anywhere.
 - Video upload, Devpost publishing and submission each need the user's approval of the exact text.
 - Older evidence notes from this file's previous version live in [PROJECT_STATE.md](../agent-workflow/PROJECT_STATE.md) and the dated testing records.

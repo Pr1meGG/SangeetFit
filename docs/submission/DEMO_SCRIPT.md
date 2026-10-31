@@ -4,6 +4,8 @@ Updated 31 October 2026. **English recording plan only; final video and public l
 
 **Current direction, 26 October:** the user reports creating the demo-person image with AI and has cleared its use. Record the exact image/version and available creation provenance; independent licence verification or real-participant consent is not claimed. **Garment selection and the two-case live pilot are on hold at the user's request.** Do not start live calls or recording until garment work resumes and the specific release/task approvals exist. The source-use clearance need not be requested again.
 
+**Recordable cut for the current build:** [VIDEO_PLAN_V3.md](VIDEO_PLAN_V3.md) (2:00 shot list, 31 October).
+
 **Persona:** a guest at a five-event Indian wedding who doesn't want to buy five new outfits.
 
 **Promise:** “Plan five celebrations with clothes you already own, preview uncertain looks, and choose what to wear.”
