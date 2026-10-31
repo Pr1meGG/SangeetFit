@@ -1,6 +1,14 @@
 # SangeetFit
 
-Plan what to wear across five wedding celebrations using clothes you already own. Rewear a favourite, try uncertain looks on your photo, compare two results and save your choice. Browse model-led concepts without a photo for optional inspiration. Built for the YouCam API hackathon with Next.js 16.4.1, React 19.3.1, TypeScript and Tailwind CSS.
+**Plan five celebrations with clothes you already own, preview uncertain looks, and choose what to wear.**
+
+For a guest at a five-event Indian wedding who doesn't want to buy five new outfits. Built with the YouCam AI Clothes Virtual Try-On API (Cloth V4) for the YouCam API hackathon.
+
+- **Try it:** [sangeet-fit.vercel.app](https://sangeet-fit.vercel.app) — no account needed.
+- **How it works:** [one-page architecture note](docs/submission/ARCHITECTURE.md).
+- **Run it without any keys:** `npm ci && MOCK_MODE=true npm run dev`, then open [localhost:3000](http://localhost:3000).
+
+Stack: Next.js 16.4.1, React 19.3.1, TypeScript and Tailwind CSS.
 
 ## Current experience
 
@@ -82,21 +90,7 @@ git diff --check
 
 ## Release and submission
 
-[Milestones](docs/plans/2026-10-20-personal-stylist-milestones.md), [project state](docs/agent-workflow/PROJECT_STATE.md), [user validation](docs/testing/REAL_USER_VALIDATION.md), [release procedure](docs/testing/RELEASE.md), [Android checklist](docs/testing/ANDROID_CHECK.md), [demo script](docs/submission/DEMO_SCRIPT.md) and [submission checklist](docs/submission/PITCH_CHECKLIST.md) track implementation separately from live/release evidence.
-
-Current execution: [29 October audit](docs/testing/SUBMISSION_AUDIT_2026_10_29.md), [stages 1–3 plan](docs/plans/2026-10-29-submission-stages-1-3.md) and [release candidate checklist](docs/submission/RELEASE_CANDIDATE_2026_10_29.md), preserving the [accepted final-week scope](docs/plans/2026-10-24-final-week-release.md). The audit identified autosave access/index defects and three browser regressions; a successful build alone does not clear these gates. Final integrated verification, current-source CI and a matching deployment remain pending. The [two-owned-garment demo-source pilot](docs/testing/OWN_GARMENT_PILOT.md) and [judge-access preflight](docs/testing/JUDGING_ACCESS_PREFLIGHT.md) distinguish earlier evidence from current release acceptance. The historical guest-study protocol is deferred.
-
-Latest catalogue proof: two AI-source cases rendered and were saved through the local live app on 26 October (Emerald15.7s; Midnight16.0s), exactly two tasks/four units. [Pilot record](docs/testing/CATALOGUE_AI_PILOT_2026_10_26.md). User quality ratings remain pending; uploaded-owned-garment testing stays on hold. The [local release package](docs/submission/RELEASE_PACKAGE_2026-10-26.md) separates available demo assets from current-source CI, hosting access and publication gates.
-
-Historical provider balance/pricing evidence is recorded in [benchmarks](docs/testing/BENCHMARKS.md). The latest documented shared allowance on 27 October was 50 total units, 40 reserved and 10 remaining, enough for five VTO reservations at the recorded two-unit cost then. This is not a current balance, and the shared allowance is separate from provider credits. Recheck allowance, pricing and judging capacity before any new approved live task; `/api/mode` reports configuration, not available credits.
-
-The separately approved two-look live pilot rendered Emerald Silk Kurta and Sapphire Embroidered Sherwani on one private full-body source. Both images remain outside the repository; the participant rated face and garment fidelity 5/5 for each, so the two-look pilot gate passed for this one source. Another observer rated the overall AI appearance 4/5. The other 14 distinct men's references remain deferred and require separate authorization. This is one-person catalogue evidence, not independent usability or own-garment proof. The [24 October Android record](docs/testing/ANDROID_CHECK.md) covers a physical-phone mock journey and native image/PDF saving on an older release build; current cloud/live saving and iPhone remain unverified. Keep private photos/results out of GitHub and the public demo. Final permitted screenshots/video, judge access and submission remain pending. The shared Redis guard exists in source and passed older-release CI; deployed runtime enforcement is still unverified.
-
-Working target: complete release acceptance on **30–31 October** and submit by **1 November**, leaving deadline day for recovery; official deadline **2 November 2026, 22:15 IST**. Preserve judging availability through 20 November. Dates and requirements were rechecked against the [official rules](https://youcam-api-skin-ai-ecommerce.devpost.com/rules) in the 29 October audit.
-
-Working source: `codex/redesign-v2` is the current local integration candidate, with committed base `4c4ed65` plus substantial staged, modified and untracked work. The full candidate has no release commit yet. The latest listed passing GitHub CI covers older source `e2eb6cd` on `codex/final-week-release`, not this candidate. Production was anonymously reachable and reported live mode on 29 October; generation, saving and source identity were not certified by that reachability check.
-
-Local `vercel.json` disables Git auto-deployment for `experiments`, `codex/final-week-release` and `codex/ui-revamp`, but does not explicitly disable `codex/redesign-v2`. Verify effective hosting settings or prepare an approved deployment guard before a push. Review the complete candidate and exact checkpoint text/destination before publication; require matching-source CI before release. Machine-local settings, traces, scratch screenshots, draft branding and private photos/results are excluded. Deployment remains a separate approval.
+Submission materials: [Devpost draft](docs/submission/DEVPOST_DRAFT.md), [demo script](docs/submission/DEMO_SCRIPT.md) and [checklist](docs/submission/PITCH_CHECKLIST.md). Dated release, deployment and live-test evidence is tracked in [project state](docs/agent-workflow/PROJECT_STATE.md) and `docs/testing/`.
 
 ## License
 

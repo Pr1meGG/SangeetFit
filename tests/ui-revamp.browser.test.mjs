@@ -63,22 +63,7 @@ try {
     await page.locator(".sf-home-enter").evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)));
     assert(await page.locator(".sf-editorial-hero").evaluate(el => Math.abs(el.getBoundingClientRect().top) <= 1), `hero must start behind the floating navbar at ${width}px`);
     assert(await page.locator(".sf-editorial-hero h1").evaluate(el => el.getBoundingClientRect().height <= parseFloat(getComputedStyle(el).lineHeight) * 2.1), `headline must fit its two intended lines at ${width}px`);
-    // The phone bar is locked: pinned to the viewport bottom at scroll 0 and after deep scroll.
-    const navLocked = await page.evaluate(() => {
-      const nav = document.querySelector(".sf-bottom-nav");
-      if (!nav || getComputedStyle(nav).display === "none") return null;
-      const rect = nav.getBoundingClientRect();
-      return Math.round(rect.bottom) === Math.round(innerHeight) && getComputedStyle(nav).position === "fixed";
-    });
-    if (width === 768 || width === 1440) assert.equal(navLocked, null, "desktop widths must not show the phone bar");
-    else {
-      assert(navLocked !== null && navLocked, `phone bar must sit pinned at viewport bottom at ${width}px`);
-      await page.mouse.wheel(0, 1200);
-      await page.waitForTimeout(150);
-      assert(await page.evaluate(() => { const r = document.querySelector(".sf-bottom-nav").getBoundingClientRect(); return Math.round(r.bottom) === Math.round(innerHeight); }), `phone bar must stay locked after scroll at ${width}px`);
-      await page.mouse.wheel(0, -1200);
-      await page.waitForTimeout(150);
-    }
+    assert.equal(await page.locator(".sf-bottom-nav").count(), 0, `no bottom bar at ${width}px; the top navbar is the only navigation`);
     if (width === 1440) {
       assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector(".sf-season")).fontSize), "11px", "eyebrow scale must settle at the shared 11px token");
       const copy = await page.locator(".sf-welcome-copy").boundingBox();
@@ -95,8 +80,9 @@ try {
   const navbar = await page.locator(".sf-navbar").boundingBox();
   assert(stepHeading && navbar && stepHeading.y >= navbar.height, "step heading must be visible below the sticky navbar");
   await page.getByRole("button", { name: "Use camera instead" }).click();
-  assert(await page.getByRole("navigation", { name: "App navigation" }).isVisible(), "phone navigation must remain available during selfie capture");
-  await page.getByRole("navigation", { name: "App navigation" }).getByRole("button", { name: "For you" }).click();
+  assert(await page.getByRole("button", { name: "Open menu" }).isVisible(), "phone navigation must remain available during selfie capture");
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("button", { name: "For you" }).click();
   await page.getByRole("button", { name: "Reception An evening to remember", exact: true }).click();
   await page.getByRole("heading", { name: "A little more you." }).waitFor();
   assert(await page.getByRole("button", { name: "Use camera instead" }).isVisible(), "returning to the selfie step must require a fresh camera action");
@@ -223,13 +209,15 @@ try {
   await noNewTasks(0, "adding a garment only saves session metadata");
   assert.match(await page.locator(".sf-recommendation-reason").innerText(), /reception/i);
   await page.getByRole("button", { name: "Add My burgundy kurta to shortlist", exact: true }).click();
-  await page.getByRole("navigation", { name: "App navigation" }).getByRole("button", { name: /Shortlist/ }).click();
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("button", { name: /Shortlist/ }).click();
   assert.equal(await page.locator(".sf-outfit-card").count(), 1);
   await page.getByRole("button", { name: "Remove My burgundy kurta from shortlist", exact: true }).click();
   await page.getByRole("heading", { name: "Keep a look you love." }).waitFor();
   await page.getByRole("button", { name: "Shortlist (0)", exact: true }).click();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await page.getByRole("navigation", { name: "App navigation" }).getByRole("button", { name: "My clothes" }).click();
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("button", { name: "My wardrobe" }).click();
   await page.waitForTimeout(300);
   const wardrobeForm = page.getByRole("form", { name: "Add your own outfit" });
   const wardrobeBox = await wardrobeForm.boundingBox();

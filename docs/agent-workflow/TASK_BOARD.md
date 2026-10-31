@@ -1,5 +1,9 @@
 # TASK_BOARD.md
 
+## Submission readiness — 31 October 2026 (evening)
+
+Phone bottom navigation removed at the user's request; the top navbar (menu on phones) is the only navigation. On phones the plan board now shows each event's name, outfit picker and action beside a thumbnail instead of a screen-tall empty box, and the "N of 5 planned" counter is readable on the dark board. Bottom-bar browser assertions were moved to the top-navbar menu. **Physical-phone check (vivo I2126, Android Chrome, via adb):** production home/plan load; local mock build home → plan → pick outfit → try-on → sample photo → mock Generate (labelled mock) → menu → My wardrobe → Collection all work, with no bottom bar. No live provider task. New: [ARCHITECTURE.md](../submission/ARCHITECTURE.md), final-draft [DEVPOST_DRAFT.md](../submission/DEVPOST_DRAFT.md) with [CONFIRM] placeholders, judge-facing README top. Uncommitted; production still serves `6f5396a`. Remaining: commit/push approval, deployment approval, video, Devpost submission.
+
 ## Layout alignment — 31 October 2026
 
 One `--sf-gutter` token (40px desktop, 32px ≤1000px, 20px ≤640px) now sets the page margin for main views, Collection, full-bleed bands (hero, week board, how-it-works, closing invite) and the navbar. Measured on home, try-on step, Collection, How it works and FAQ at 1440/800/390px: one left edge per width (140/32/20px), no horizontal overflow. `TEST_PORT=3571 npm run verify` exit 0: 17 offline suites (real Redis skipped), typecheck, lint 0 errors/22 warnings, build, 13 mock browser suites. Uncommitted on `codex/redesign-v2`; not deployed.

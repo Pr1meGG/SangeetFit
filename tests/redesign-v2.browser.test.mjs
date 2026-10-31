@@ -146,8 +146,7 @@ try {
     await toggle.click();
     const menuBounds = await mobile().boundingBox();
     assert(menuBounds, "open disclosure must have a visible box");
-    const backgroundAction = width <= 640 ? await page.getByRole("navigation", { name: "App navigation", exact: true }).getByRole("button", { name: "My clothes", exact: true }).boundingBox() : null;
-    const outsidePoint = backgroundAction ? { x: backgroundAction.x + backgroundAction.width / 2, y: backgroundAction.y + backgroundAction.height / 2 } : { x: 8, y: menuBounds.y + menuBounds.height + 16 };
+    const outsidePoint = { x: 8, y: menuBounds.y + menuBounds.height + 16 };
     assert(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.classList.contains("sf-menu-scrim"), outsidePoint), "menu backdrop must cover the content below the disclosure");
     await page.mouse.click(outsidePoint.x, outsidePoint.y);
     assert.equal(await mobile().count(), 0, "outside click must close the disclosure");

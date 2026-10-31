@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 import { useState, useCallback, useMemo, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { X, CheckCircle, Shirt, ArrowLeft, ArrowRight, ArrowUpRight, Palette, Heart, Loader2, AlertCircle, Download, Share2, MessageCircle, Camera, Upload, ShieldCheck, Music2, Leaf, Sun, Sparkles, House, Search, CalendarHeart } from "lucide-react";
+import { X, CheckCircle, Shirt, ArrowLeft, ArrowRight, ArrowUpRight, Palette, Heart, Loader2, AlertCircle, Download, Share2, MessageCircle, Camera, Upload, ShieldCheck, Music2, Leaf, Sun, Sparkles, Search } from "lucide-react";
 import Navbar, { type NavigationView } from "@/components/Navbar";
 import HomeGuide from "@/components/HomeGuide";
 import SharedResultAction from "@/components/SharedResultAction";
@@ -181,7 +181,7 @@ export default function Home() {
   }, [step]);
 
   // The wardrobe form opens inline above the catalogue. Bring it into view so
-  // the bottom-nav action never appears to do nothing from deep in the grid.
+  // the wardrobe action never appears to do nothing from deep in the grid.
   useEffect(() => {
     if (showUpload) wardrobeAnchor.current?.scrollIntoView({ block: "start", behavior: "instant" });
   }, [showUpload]);
@@ -682,13 +682,6 @@ export default function Home() {
           </section>
         )}
       </div>
-      <nav className="sf-bottom-nav" aria-label="App navigation">
-        <button aria-current={step === 1 ? "page" : undefined} onClick={() => navigateTo("home")}><House size={20} />For you</button>
-        <Link href="/library"><Search size={20} />Explore</Link>
-        <button aria-current={step === 3 && !showUpload && !showShortlist ? "page" : undefined} onClick={() => navigateTo("plan")}><CalendarHeart size={20} />Plan</button>
-        <button aria-current={step === 3 && showUpload && !showShortlist ? "page" : undefined} onClick={() => navigateTo("clothes")}><Shirt size={20} />My clothes</button>
-        <button aria-current={step === 3 && showShortlist ? "page" : undefined} onClick={() => navigateTo("shortlist")}><Heart size={20} />Shortlist{shortlistCount > 0 && <span>{shortlistCount}</span>}</button>
-      </nav>
       {step === 3 && vtoModal && (
         <div className="sf-modal-backdrop" onClick={closeVTO}>
           <section className="sf-tryon-dialog" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="tryon-title" tabIndex={-1} onClick={event => event.stopPropagation()}>

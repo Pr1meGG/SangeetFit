@@ -76,8 +76,10 @@ try {
   await page.getByRole("button", { name: "Plan for Sangeet", exact: true }).click();
   assert.equal(await page.getByRole("region", { name: "Compare session looks" }).locator("article").count(), 1);
   page.once("dialog", prompt => prompt.dismiss());
-  await page.getByRole("link", { name: "Explore", exact: true }).click({ force: true });
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("link", { name: "Collection", exact: true }).click({ force: true });
   assert.equal(new URL(page.url()).pathname, "/", "cancelling leave must retain the session");
+  await page.getByRole("button", { name: "Close menu" }).click();
   page.once("dialog", prompt => prompt.accept());
   await page.getByRole("button", { name: "Clear private session" }).click();
   assert.equal(await page.getByRole("region", { name: "Compare session looks" }).count(), 0);

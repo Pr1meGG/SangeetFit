@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, House, Search, Shirt, Heart } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { EDITORIAL_LOOKS } from "@/data/editorial";
 
@@ -121,12 +121,6 @@ export default function GarmentLibrary() {
           </div>
         )}
       </div>
-      <nav className="sf-bottom-nav sf-bottom-nav-library" aria-label="App navigation">
-        <Link href="/"><House size={20} />For you</Link>
-        <Link href="/library" aria-current="page"><Search size={20} />Explore</Link>
-        <Link href="/?step=3&view=clothes"><Shirt size={20} />My clothes</Link>
-        <Link href="/?step=3&view=shortlist"><Heart size={20} />Shortlist</Link>
-      </nav>
     </main>
   );
 }

@@ -342,7 +342,6 @@ a, button { touch-action: manipulation; }
 .sf-reference-section .sf-context { margin-bottom: 8px; }
 /* ── Locked phone bottom bar ──
    Fixed, always visible under 640px; blurs over content. */
-.sf-bottom-nav { display: none; }
 
 .sf-modal-backdrop { position: fixed; inset: 0; z-index: 100; background: #27182080; backdrop-filter: blur(7px); display: flex; align-items: center; justify-content: center; padding: 24px; }
 .sf-tryon-dialog { background: #fffdf8; width: 100%; max-width: 520px; max-height: calc(100dvh - 48px); border-radius: 24px; box-shadow: 0 24px 100px #27182033; display: flex; flex-direction: column; outline: none; overflow: hidden; }
@@ -404,7 +403,7 @@ a, button { touch-action: manipulation; }
 @media (max-width: 1000px) { .sf-week-board-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }
 @media (max-width: 640px) {
   :root { --sf-gutter: 20px; }
-  .sf-main { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+  .sf-main { padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
 
   .sf-season { font-size: 10px; margin-bottom: 16px; gap: 6px; }
   .sf-season > span { font-size: 20px; }
@@ -420,10 +419,6 @@ a, button { touch-action: manipulation; }
   .sf-home-footer { flex-direction: column; align-items: flex-start; padding-block: 24px; margin-top: 26px; gap: 8px; }
   .sf-home-footer > .sf-text-link { margin-left: 32px; }
   .sf-photo-attribution { flex-direction: column; gap: 0; }
-  .sf-bottom-nav { position: fixed; z-index: 40; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; padding: 8px 12px max(8px,env(safe-area-inset-bottom)); background: #fffdf9f0; backdrop-filter: blur(18px) saturate(1.2); border-top: 1px solid var(--sf-line); box-shadow: 0 -6px 24px #2718200a; }
-  .sf-bottom-nav > a, .sf-bottom-nav > button { display: flex; flex: 1; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 4px; position: relative; min-height: 50px; color: #78665e; font-size: 11px; font-weight: 500; text-decoration: none; border-radius: 10px; transition: color .15s; }
-  .sf-bottom-nav [aria-current="page"] { color: var(--sf-burgundy); background: #f6e8e4; }
-  .sf-bottom-nav button > span { position: absolute; top: 2px; right: 15px; border-radius: 50%; min-width: 16px; height: 16px; display: grid; place-items: center; color: #fff; background: var(--sf-burgundy); font-size: 9px; }
   .sf-personalize { grid-template-columns: 1fr; margin-top: 24px; gap: 28px; }
   .sf-back { margin-bottom: 16px; }
   .sf-personalize-copy h1 { font-size: 38px; margin-bottom: 16px; }
@@ -588,7 +583,7 @@ a, button { touch-action: manipulation; }
 #week-board-title { font-family: var(--sf-display-serif); letter-spacing: -.03em; font-weight: 400; }
 @media (max-width: 640px) {
   .sf-week-board { padding-block: 40px; }
-  .sf-week-board-card { display: block; }
+  .sf-week-board-card { display: grid; grid-template-columns: 104px minmax(0,1fr); }
   .sf-week-board-card strong, .sf-week-board-source { min-height: 0; }
 }
 @media print {
@@ -753,7 +748,7 @@ a, button { touch-action: manipulation; }
   .sf-occasion-caption > span:last-child { font-size: var(--sf-text-eyebrow); }
   .sf-editorial-grid, .sf-library-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 12px; }
   .sf-library-header { padding-block: 0 12px; }
-  .sf-library-content { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+  .sf-library-content { padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
   .sf-library-toolbar { gap: 24px; }
   .sf-library-info h2 { font-size: 14px; }
   .sf-library-info > a { padding-inline: 8px; font-size: 11px; }
@@ -964,7 +959,8 @@ a, button { touch-action: manipulation; }
 .sf-combo-hint { font-size: 11px; color: #52714a; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
 
 .sf-week-board-summary { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 18px 0; font-size: 13px; color: var(--sf-muted); }
-.sf-week-board-summary > span:first-child { color: var(--sf-burgundy); font-weight: 600; }
+.sf-week-board-summary { color: #b6a7b4; }
+.sf-week-board-summary > span:first-child { color: var(--sf-gold); font-weight: 600; }
 .sf-plan-print { display: none; }
 
 /* Only the scalar plan sibling is printable, even with private dialogs open. */

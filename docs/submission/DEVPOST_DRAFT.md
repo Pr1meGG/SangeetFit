@@ -1,52 +1,92 @@
 # SangeetFit — Devpost description draft
 
-Updated 26 October 2026. **Not published or submitted.** The release narrative below reflects locally implemented comparison-to-plan assignment, counters and text-only PDF. See [local wardrobe verification](../testing/WARDROBE_DECISION_CHECK_2026-10-23.md) for dated mock/browser/PDF evidence and its limits; review the actual released build before using this publicly. Two AI-source catalogue cases rendered live on 26 October; user quality ratings, physical-phone release checks, final video and judge access remain pending. No independent guest study is planned for this release.
+Updated 31 October 2026. **Draft — not published or submitted.** Paste the section under "Devpost text" only after the final build, video and every [CONFIRM] item are settled and the exact text is approved.
 
-## Inspiration
+---
 
-A wedding can mean Sangeet, Mehendi, Haldi, Wedding and Reception — five occasions, with choices that are easy to lose across photos and conversations. SangeetFit starts with a different question: what can I wear from the clothes I already own? Our goal is to help wedding guests plan, rewear a favourite, preview an uncertain choice and leave with a usable wardrobe plan.
+## Devpost text
 
-## What it does — locally verified software, live gates pending
+**Tagline:** Plan five celebrations with clothes you already own, preview uncertain looks, and choose what to wear.
 
-Users add photos of their own upper-body garments or complete outfits and confirm each item's name, colour, style and occasion tags. The five-event board records an outfit for each celebration. Recommendations explain the metadata they match rather than pretending to infer a person's style, size or physical fit from an image. Optional colour suggestions are inspiration, not an undertone analysis or a personal suitability guarantee.
+**For:** a guest at a five-event Indian wedding who doesn't want to buy five new outfits.
 
-When someone wants a personal preview, they provide a separate suitable full-body source photo, consent to live photo processing and explicitly press **Generate try-on**. They can compare two existing results, inspect the original and choose **Plan for Sangeet**, or the currently selected occasion. The board records the outfit decision and the comparison shows **Planned for Sangeet**. Two photo versions of the same outfit still represent one garment; planning, comparing and reopening an existing result do not request another generation.
+**Built with:** the YouCam AI Clothes Virtual Try-On API (Cloth V4).
 
-The board counts events planned, distinct owned outfits assigned and planned rewears. Planned rewears are owned event assignments minus distinct assigned owned garments: a plan-level count, not a claim that purchases or waste were reduced. **Print / Save as PDF** creates a text-only five-event plan with event names, garment names, owned/reference labels and undecided slots. Photos, generated images, access codes and provider links stay out of that export.
+### Inspiration
 
-Users can also browse a photo-free collection of labelled outfit concepts and sourced references for inspiration. These are not personal try-on results or verified seller products. The current wardrobe, person photos, generated results and decisions belong to the page session; they are not a permanent saved wardrobe. Live generation additionally sends the declared person and garment photos to YouCam for processing.
+An Indian wedding is rarely one event. Sangeet, Mehendi, Haldi, the wedding and the reception can fall in a single week, and each one asks "what am I wearing?" The usual answer is a group chat full of photos and a shopping trip. We started from a different question: *what can I wear from the clothes I already own?*
 
-## How we built it
+### What it does
 
-SangeetFit uses Next.js, TypeScript and YouCam AI Clothes Virtual Try-On V4. After explicit Generate, its server validates the person/reference inputs, uploads them through the YouCam File API, submits the clothing task and polls for the result. Uploaded references declare `upper_body` or `full_body`; catalogue references use server-owned mappings. Live access and the shared generation allowance are separate server controls.
+1. **Plan five events on one board.** Assign an outfit to Sangeet, Mehendi, Haldi, Wedding and Reception. Reuse a favourite across events, and the board counts it as a planned rewear.
+2. **Add the clothes you own.** Photograph a garment and confirm its name, type, colour, style and occasions. Adding clothes never starts an AI task.
+3. **Preview only the looks you're unsure about.** Add a full-body photo, accept the photo notice and press **Generate try-on**. YouCam Cloth V4 renders the garment on you, with an original/result slider.
+4. **Decide and take the plan with you.** The board shows events planned, owned outfits used and planned rewears. **Print / Save as PDF** gives a text-only plan with no photos or links.
+5. **Browse for inspiration without a photo.** A collection of 26 original AI-generated outfit concepts, each labelled as inspiration or as tested on a real photo.
 
-The event-to-outfit plan connects comparison to a concrete choice without a new generation endpoint. The export uses the browser's print/save workflow with a dedicated text view. An optional YouCam skin-tone flow uses a separate face selfie; it is not required for the core clothing journey or evidence of clothing suitability. Mock mode displays labelled reference placeholders rather than generated images of the user.
+### How we use the YouCam API
 
-## Evidence and limits — refresh before publication
+Most virtual try-on puts a button next to a product you might buy. SangeetFit uses Cloth V4 as a **decision tool for clothes you already own**: the planner does the organising, and a try-on is spent only on the look you can't decide about.
 
-The [recorded catalogue pilot](../testing/REAL_USER_VALIDATION.md) produced two live looks on one consenting person's private full-body source. That participant rated identity and garment fidelity 5/5 for each; another observer rated overall AI appearance 4/5. These are limited subjective results for two catalogue references on one source, **not proof of uploaded-own-garment quality, broad identity retention or independent usability**. The 16-reference engineering sweep has two outcomes and 14 pending cases; it is an internal target, not an official submission requirement.
+Under the hood, the browser shrinks the photos, our server validates them, uploads the person and garment through the YouCam File API, submits a `cloth-v4` task, and polls with back-off until the render is ready. In our two recorded live runs, Generate-to-render took about 16 seconds. See the [architecture note]([CONFIRM: repository URL]/blob/main/docs/submission/ARCHITECTURE.md).
 
-On 26 October, two catalogue try-ons rendered through the local app using separate AI-created male and female source images: Emerald Silk Kurta in 15.7 seconds and Midnight & Gold Lehenga in 16.0 seconds. Each used one explicit generation; both output images were saved. These are two technical cases, with visual quality ratings still pending.
+### How we built it
 
-Owned-garment live validation has **not been run**. These catalogue outcomes do not establish uploaded-clothing quality or broad identity preservation.
+Next.js 16, React 19 and TypeScript on Vercel, with a small Redis store for the shared try-on allowance and private result saving. The server reserves allowance *before* any photo is uploaded, a 429 stops without automatic retries, and a missing API key fails closed instead of showing a fake result.
 
-Independent usability, completion rates, demand and savings have not been measured.
+### Challenges
 
-Historical software checks are recorded in the [cloud checkpoint](../testing/CLOUD_CHECKPOINT.md) and [23 October UI playtest](../testing/UI_V2_PLAYTEST_2026-10-23.md). The [24 October Android record](../testing/ANDROID_CHECK.md) covers the core portrait mock journey on release source `e2eb6cd`, including comparison, five-event planning, native mock-image saving and actual PDF save/reopen. These are single-device mock results; they do not verify the latest experimental UI, cloud access, live output quality/saving or iPhone Safari. The earlier synthetic slider test remains labelled **SYNTHETIC UI TEST — NO YOUCAM RESULT**.
+- **Keeping the AI honest.** A mock image must never look like a personal result, so every result carries a visible live-or-mock label, and live mode never falls back to mock.
+- **Async rendering inside serverless limits.** Uploads, task submission and polling share one request deadline, with polling that starts fast and backs off.
+- **Privacy by default.** Photos are sent only after an explicit notice and a Generate click, and saved results expire after 24 hours.
 
-AI previews can change facial or garment details. They provide visual guidance and do not establish fit, sizing or broad identity reliability.
+### Accomplishments
 
-## Internal release notes — do not paste into Devpost
+- A complete own-clothes → preview → five-event plan → PDF journey that works on a phone.
+- A planner that's useful with zero AI calls, with AI used only where it changes a decision.
 
-- **Current direction, 26 October:** the user reports creating the demo-person image with AI and has cleared its use. Exact source/version and creation-provenance receipts remain to be recorded; this is user-reported clearance, not independent licence verification or real-participant consent. Do not request the granted source-use clearance again. Existing private catalogue participant photos/results remain excluded from public footage and GitHub.
-- The [owned-garment validation](../testing/OWN_GARMENT_PILOT.md) remains **on hold, not run**. After garment work resumes and scoped release/task approvals exist, use exactly two Cloth V4 attempts total: the user's upper-body garment and complete outfit on the same user-created AI demo-person image. Both must visibly render and receive the user's separate source-likeness and garment-fidelity scores ≥4/5 for two-case signoff. These are single-evaluator technical ratings, not participant satisfaction. Preserve every attempt, failure and timing; a failed case narrows the claim, and two failed cases prevent owned-clothes live signoff without a separately approved retest. The hold is neither a failed attempt nor spending authorization.
-- No independent guest study is planned; the [historical guest protocol](../testing/WARDROBE_GUEST_PLAYTEST.md) is deferred research. Use the recorded catalogue live evidence only for the two demonstrated cases; label the separate planner walkthrough as local software with no generation. Family collaboration, separate top/bottom generation, permanent wardrobes, accounts, checkout, a chatbot and another redesign remain outside this release; optional skin analysis stays outside the pilot and headline demo.
-- [Local wardrobe verification](../testing/WARDROBE_DECISION_CHECK_2026-10-23.md) records mock verification, review, responsive/keyboard checks and actual PDF inspection; the [24 October Android record](../testing/ANDROID_CHECK.md) adds dated physical-phone mock save/open evidence. Use the [26 October audit](../testing/READINESS_AUDIT_2026_10_26.md) and [current execution plan](../plans/feature_spec_release_readiness_2026-10-26.md) for the candidate and remaining gates. Final recording/release SHA, current released live phone checks, live-output quality and deployed access remain pending.
-- The 24–30 October sprint targets submission on **30 October**, with **31 October–1 November** reserved for recovery. The official deadline is **2 November 2026, 22:15 IST**, with judging through **20 November**. Recheck [official rules](https://youcam-api-skin-ai-ecommerce.devpost.com/rules) and the final form before publication.
-- Current catalogue evidence: [26 October pilot](../testing/CATALOGUE_AI_PILOT_2026_10_26.md), two cases/requests, four units deducted, provider906 and shared allowance6 remaining at completion. These are dated values, not a new spending authorization. The normal mock default remains on.
-- [Historical budget initialization](../testing/BUDGET_INITIALIZATION_CHECK.json) records a 10-unit/five-VTO starter allowance, not a current balance. **20 judging VTO attempts** is proposed planning capacity, separate from the two validation attempts; fresh authorized pricing/balance inspection and approval of the exact unit cap/reserve remain pending. No automatic refill or top-up.
-- [Judge preflight](../testing/JUDGING_ACCESS_PREFLIGHT.md) requires a clean browser without developer login, code-free explicit generation, the same two approved validation previews, actual-phone live saving/PDF opening, function-duration/Fluid Compute verification and access through **20 November**. A protected mock Preview or live-mode badge cannot pass those gates. No extra release-smoke batch is planned.
-- Garment selection and the two-case pilot are **on hold at the user's request**, not cancelled or failed. After resumption and specific release/task approvals, capture raw full-journey footage, actual result save/open and PDF save/open during the same two-attempt session; temporary results and page-session state cannot be assumed available for later recording. Edit that footage into a **2:30 English video** and refresh five final screenshots.
-- Keep the repository **private** and verify the organizer's specified private-sharing route, recipient and access. Public screenshots, video, judge instructions, source/setup access and application-code licence need final verification; this draft supplies no final video or newly verified judge URL.
-- The user has **4–6 hours daily**, owns phone checks and single-evaluator ratings, and owns manual judging-period access/allowance checks through **20 November**. No monitoring automation or guest recruitment is planned.
-- Live tasks, deployments, video publication, credential sharing and Devpost submission retain their specific approval boundaries. This documentation update performs none of them.
+### What we learned
+
+Virtual try-on is most valuable at the moment of indecision, not at the moment of purchase. Trust comes from labelling clearly what is generated and what isn't.
+
+### Built vs next
+
+| Built and shown | Next |
+|---|---|
+| Five-event board with rewear counts | Family and friends planning together |
+| Add your own clothes | Separate top and bottom combinations |
+| Cloth V4 try-on with original/result slider | A permanent saved wardrobe |
+| Text-only PDF plan | Optional checkout for a missing piece |
+| Private 24-hour result saving | |
+
+### FAQ
+
+**Who is it for?** A guest at a multi-event Indian wedding who would rather rewear what they own than buy a new outfit for every event.
+
+**Why YouCam Cloth V4?** It takes a person photo plus a single garment or full-outfit reference, so it works with a photo of clothes you own, not only catalogue items.
+
+**What happens to my photos?** Nothing is sent anywhere until you accept the photo notice and press Generate. In live mode, your photo and the garment go to YouCam to create the look. We keep your photo, the garment and the result privately for 24 hours so the look stays saved, then delete them automatically. Only you and the SangeetFit team can view them, and you can remove them sooner. YouCam handles its own retention.
+
+**Does it preserve my face and the fit?** It's visual guidance, not a fit guarantee. AI previews can change facial or garment details and can't tell you how something fits physically.
+
+**How is this different from a shop's try-on widget?** Shop widgets help you buy one product. SangeetFit plans a whole week of events around clothes you already own and uses try-on only for the uncertain looks.
+
+### Try it
+
+- **App:** https://sangeet-fit.vercel.app (no account needed). [CONFIRM: live or mock mode during judging, and the judging try-on allowance]
+- **Video:** [CONFIRM: video link]
+- **Code:** [CONFIRM: repository access route the organisers require]
+
+### AI disclosure
+
+[CONFIRM exact wording and tools] We built SangeetFit with AI coding assistants. The outfit concepts in the collection and the demo person image were generated with AI and are labelled in the app.
+
+---
+
+## Internal notes — do not paste
+
+- Tagline and persona must match [DEMO_SCRIPT.md](DEMO_SCRIPT.md) and [README.md](../../README.md) word for word.
+- "About 16 seconds" comes from the two 26 October live runs (15.7 s and 16.0 s) on AI-created demo sources ([pilot record](../testing/CATALOGUE_AI_PILOT_2026_10_26.md)). Owned-garment live quality is **not** verified; don't claim it.
+- No problem statistics, savings, time-saved or demand numbers anywhere.
+- Video upload, Devpost publishing and submission each need the user's approval of the exact text.
+- Older evidence notes from this file's previous version live in [PROJECT_STATE.md](../agent-workflow/PROJECT_STATE.md) and the dated testing records.
