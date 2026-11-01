@@ -71,7 +71,7 @@ void (async () => {
     const ttl = Number(await redis("TTL", visitor(5)));
     assert(ttl > 86_000 && ttl <= 86_400, "the visitor counter expires after a day");
     await reserveLiveBudget("vto", signal, visitor(6));
-    await seed("200"); await redis("DEL", visitor(7));
+    await seed("100"); await redis("DEL", visitor(7));
     await assert.rejects(reserveLiveBudget("vto", signal, visitor(7)), /exhausted/);
     assert.equal(await redis("EXISTS", visitor(7)), 0, "an exhausted allowance does not count against the visitor");
     await clearVisitors();
