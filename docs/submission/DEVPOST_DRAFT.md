@@ -75,7 +75,7 @@ Virtual try-on is most valuable at the moment of indecision, not at the moment o
 
 - **App:** https://sangeet-fit.vercel.app (no account needed). Live mode: Generate runs a real Cloth V4 try-on from a small shared allowance. If it runs out, the app says so plainly; planning, browsing and PDF export keep working.
 - **Video:** [CONFIRM: video link]
-- **Code:** https://github.com/Pr1meGG/SangeetFit (private; shared with contact_event@PerfectCorp.com as the rules require). Run it without keys: `npm ci && MOCK_MODE=true npm run dev`.
+- **Code:** https://github.com/Pr1meGG/SangeetFit (private; shared with contact_event@PerfectCorp.com as the rules require [CONFIRM: invite sent — not sent as of 1 Nov]). Run it without keys (Node 22): `npm ci && MOCK_MODE=true npm run dev`.
 
 ### AI disclosure
 

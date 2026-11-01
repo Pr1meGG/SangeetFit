@@ -1,0 +1,64 @@
+{
+  "base": "http://localhost:3301",
+  "mode": "mock",
+  "blockedGenerationRequests": 0,
+  "shots": [
+    {
+      "file": "01-home-desktop.png",
+      "shows": "Home: five celebrations, one wardrobe"
+    },
+    {
+      "file": "02-board-empty-desktop.png",
+      "shows": "Five-event plan board before any choice"
+    },
+    {
+      "file": "05-add-own-outfit-desktop.png",
+      "shows": "Add a garment you own and confirm its details; no AI task runs"
+    },
+    {
+      "file": "03-board-planned-desktop.png",
+      "shows": "All five events planned: one owned outfit worn twice (counters read from the app)"
+    },
+    {
+      "file": "04-pdf-plan-desktop.png",
+      "shows": "Print / Save as PDF view: text-only plan, no photos or links"
+    },
+    {
+      "file": "06-fitting-room-desktop.png",
+      "shows": "Fitting room after consent, photo ready, stopped before Generate (AI-created demo person)"
+    },
+    {
+      "file": "07-collection-desktop.png",
+      "shows": "Collection of 26 labelled AI outfit concepts"
+    },
+    {
+      "file": "01-home-phone.png",
+      "shows": "Home: five celebrations, one wardrobe"
+    },
+    {
+      "file": "02-board-empty-phone.png",
+      "shows": "Five-event plan board before any choice"
+    },
+    {
+      "file": "05-add-own-outfit-phone.png",
+      "shows": "Add a garment you own and confirm its details; no AI task runs"
+    },
+    {
+      "file": "03-board-planned-phone.png",
+      "shows": "All five events planned: one owned outfit worn twice (counters read from the app)"
+    },
+    {
+      "file": "04-pdf-plan-phone.png",
+      "shows": "Print / Save as PDF view: text-only plan, no photos or links"
+    },
+    {
+      "file": "06-fitting-room-phone.png",
+      "shows": "Fitting room after consent, photo ready, stopped before Generate (AI-created demo person)"
+    },
+    {
+      "file": "07-collection-phone.png",
+      "shows": "Collection of 26 labelled AI outfit concepts"
+    }
+  ],
+  "at": "2026-11-01T14:03:52.486Z"
+}
