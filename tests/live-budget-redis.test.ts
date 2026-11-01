@@ -2,7 +2,7 @@
 import { strict as assert } from "node:assert";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { LIVE_BUDGET_KEY, INITIALIZE_BUDGET_SCRIPT, reserveLiveBudget } from "../src/lib/live-budget.ts";
+import { LIVE_BUDGET_KEY, INITIALIZE_BUDGET_SCRIPT, reserveLiveBudget, VISITOR_KEY_PREFIX, visitorKey } from "../src/lib/live-budget.ts";
 import { pngDataUrl } from "./fixtures/png.ts";
 
 const execute = promisify(execFile);
@@ -47,34 +47,51 @@ void (async () => {
     assert.equal(await redis("EVAL", INITIALIZE_BUDGET_SCRIPT, "1", LIVE_BUDGET_KEY, "999999", "1", "1"), 0);
     assert.equal(await redis("HGET", LIVE_BUDGET_KEY, "limit"), "1000", "initialization cannot overwrite an allowance");
     const secondWorker = await import(new URL("../src/lib/live-budget.ts?worker=2", import.meta.url).href);
-    const results = await Promise.allSettled(Array.from({ length: 20 }, (_, index) => (index % 2 ? secondWorker.reserveLiveBudget : reserveLiveBudget)("vto", signal)));
+    const visitor = (n: number) => `${VISITOR_KEY_PREFIX}${String(n).padStart(32, "0")}`;
+    const clearVisitors = async () => { for (let n = 0; n < 20; n++) await redis("DEL", visitor(n)); };
+    await clearVisitors();
+    const results = await Promise.allSettled(Array.from({ length: 20 }, (_, index) => (index % 2 ? secondWorker.reserveLiveBudget : reserveLiveBudget)("vto", signal, visitor(index))));
     assert.equal(results.filter(result => result.status === "fulfilled").length, 5);
     assert.equal(await redis("HGET", LIVE_BUDGET_KEY, "used"), "1000");
-    await assert.rejects(reserveLiveBudget("skin", signal), /exhausted/);
+    await assert.rejects(reserveLiveBudget("skin", signal, visitor(19)), /exhausted/);
     console.log("PASS: 20 concurrent reservations across workers admit exactly five within a ten-unit allowance");
 
-    await seed();
-    await Promise.all([reserveLiveBudget("skin", signal), secondWorker.reserveLiveBudget("vto", signal), reserveLiveBudget("skin", signal), secondWorker.reserveLiveBudget("vto", signal)]);
+    await seed(); await clearVisitors();
+    await Promise.all([reserveLiveBudget("skin", signal, visitor(0)), secondWorker.reserveLiveBudget("vto", signal, visitor(1)), reserveLiveBudget("skin", signal, visitor(2)), secondWorker.reserveLiveBudget("vto", signal, visitor(3))]);
     assert.equal(await redis("HGET", LIVE_BUDGET_KEY, "used"), "1000", "both APIs share the same counter at their own costs");
-    await assert.rejects(secondWorker.reserveLiveBudget("vto", signal), /exhausted/);
+    await assert.rejects(secondWorker.reserveLiveBudget("vto", signal, visitor(4)), /exhausted/);
     assert.equal(await redis("TTL", LIVE_BUDGET_KEY), -1);
     console.log("PASS: mixed task prices and reloaded workers retain the same persistent allowance");
+
+    await seed("100000"); await clearVisitors();
+    const capped = await Promise.allSettled(Array.from({ length: 6 }, () => reserveLiveBudget("vto", signal, visitor(5))));
+    assert.equal(capped.filter(result => result.status === "fulfilled").length, 3, "one visitor gets exactly three concurrent reservations");
+    assert(capped.every(result => result.status === "fulfilled" || /3 live try-ons/.test(String(result.reason))));
+    assert.equal(await redis("HGET", LIVE_BUDGET_KEY, "used"), "600", "a capped request reserves nothing from the shared allowance");
+    const ttl = Number(await redis("TTL", visitor(5)));
+    assert(ttl > 86_000 && ttl <= 86_400, "the visitor counter expires after a day");
+    await reserveLiveBudget("vto", signal, visitor(6));
+    await seed("200"); await redis("DEL", visitor(7));
+    await assert.rejects(reserveLiveBudget("vto", signal, visitor(7)), /exhausted/);
+    assert.equal(await redis("EXISTS", visitor(7)), 0, "an exhausted allowance does not count against the visitor");
+    await clearVisitors();
+    console.log("PASS: per-visitor daily cap admits three, spends nothing when capped, expires in a day and ignores exhausted attempts");
 
     for (const [field, value] of [["limit", "-1"], ["used", "0.5"], ["used", "1000000001"], ["vto", "0"], ["skin", "NaN"]]) {
       await seed();
       await redis("HSET", LIVE_BUDGET_KEY, field, value);
-      await assert.rejects(reserveLiveBudget("vto", signal), /unavailable/);
+      await assert.rejects(reserveLiveBudget("vto", signal, visitor(8)), /unavailable/);
     }
     await seed(); await redis("EXPIRE", LIVE_BUDGET_KEY, "60");
-    await assert.rejects(reserveLiveBudget("vto", signal), /unavailable/);
+    await assert.rejects(reserveLiveBudget("vto", signal, visitor(8)), /unavailable/);
     await redis("DEL", LIVE_BUDGET_KEY);
-    await assert.rejects(reserveLiveBudget("vto", signal), /unavailable/);
+    await assert.rejects(reserveLiveBudget("vto", signal, visitor(8)), /unavailable/);
     assert.equal(await redis("EXISTS", LIVE_BUDGET_KEY), 0, "missing state never auto-initializes");
     await redis("SET", LIVE_BUDGET_KEY, "wrong-type");
-    await assert.rejects(reserveLiveBudget("skin", signal));
+    await assert.rejects(reserveLiveBudget("skin", signal, visitor(8)));
     console.log("PASS: deleted, corrupt, wrong-type and expiring state blocks reservations without a reset");
 
-    await seed();
+    await seed(); await redis("DEL", visitorKey(new Headers()));
     const { POST } = await import("../src/app/api/skin/route.ts");
     const response = await POST(new Request("http://localhost/api/skin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ imageDataUrl: pngDataUrl() }) }) as never);
     assert.equal(response.status, 502);
@@ -83,6 +100,6 @@ void (async () => {
     console.log("PASS: provider failure does not refund an ambiguous reservation or retry work");
   } finally {
     globalThis.fetch = realFetch;
-    await redis("DEL", LIVE_BUDGET_KEY);
+    await redis("DEL", LIVE_BUDGET_KEY, visitorKey(new Headers()));
   }
 })().catch(error => { console.error(error); process.exit(1); });

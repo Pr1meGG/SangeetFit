@@ -3,7 +3,7 @@ import { setTimeout as wait } from "node:timers/promises";
 import { isRecord, uploadYouCamFile, YouCamHttpError } from "@/lib/youcam";
 import { parseVtoImage, VtoInputError } from "@/lib/vto-input";
 import { privateJson, readPhotoJson } from "@/lib/request";
-import { LiveBudgetError, reserveLiveBudget } from "@/lib/live-budget";
+import { LiveBudgetError, reserveLiveBudget, visitorKey } from "@/lib/live-budget";
 
 // Whole request has a 180s deadline; verify Fluid Compute before enabling live
 // processing because legacy non-Fluid Hobby functions are limited to 60s.
@@ -74,7 +74,7 @@ async function runAnalysis(req: NextRequest, signal: AbortSignal) {
       // Live mode explicitly requested but not configured — never substitute a mock value.
       return privateJson({ success: false, error: "Live skin analysis is unavailable: YOUCAM_API_KEY is not configured on this deployment", mode: "live" }, 503);
     }
-    await reserveLiveBudget("skin", signal);
+    await reserveLiveBudget("skin", signal, visitorKey(req.headers));
     const fileId = await uploadYouCamFile({
       apiKey: YOUCAM_API_KEY,
       baseUrl: YOUCAM_BASE,

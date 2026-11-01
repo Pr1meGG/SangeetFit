@@ -6,7 +6,7 @@ For a guest at a five-event Indian wedding who doesn't want to buy five new outf
 
 - **Try it:** [sangeet-fit.vercel.app](https://sangeet-fit.vercel.app) — no account needed.
 - **How it works:** [one-page architecture note](docs/submission/ARCHITECTURE.md).
-- **Run it without any keys:** `npm ci && MOCK_MODE=true npm run dev`, then open [localhost:3000](http://localhost:3000).
+- **Run it without any keys (Node 22):** `npm ci && MOCK_MODE=true npm run dev`, then open [localhost:3000](http://localhost:3000).
 
 Stack: Next.js 16.4.1, React 19.3.1, TypeScript and Tailwind CSS.
 
@@ -64,7 +64,7 @@ MOCK_MODE=true
 
 `MOCK_MODE=true` explicitly disables provider work. With any other value the routes use live mode; missing configuration is **unconfigured**, not mock. `/api/mode` reports configuration, without querying or exposing budget values. No preview access code is required. After the photo disclosure and successful local photo preparation, the user explicitly clicks Generate (or Analyze for the optional selfie). Selecting a photo alone sends no provider request. Never put secrets in a `NEXT_PUBLIC_` variable, URL, repository, screenshot or public submission.
 
-Both live routes also reserve units from one persistent Redis budget **before uploading photos**. Every app instance sharing that store uses the same allowance. Missing/exhausted/corrupt state or a storage error blocks generation. Reservations do not expire or refund automatically, including failed attempts. Anyone who can reach a live instance can use its finite shared allowance. The ledger does not control other applications or old deployments using the same YouCam key. Setup, operator commands and deployment boundaries are in the [release procedure](docs/testing/RELEASE.md). Live tasks still need verified prices, a 25% reserve and separate bounded approval. Stop on 429. A timed-out/cancelled request may already have submitted a provider task; cancellation cannot undo it.
+Both live routes also reserve units from one persistent Redis budget **before uploading photos**. Every app instance sharing that store uses the same allowance. Missing/exhausted/corrupt state or a storage error blocks generation. Reservations do not expire or refund automatically, including failed attempts. Anyone who can reach a live instance can use its finite shared allowance, up to **3 live tasks per visitor per rolling day** (keyed by a SHA-256 hash of the client address, never the raw IP); the over-limit response is 429 and spends nothing. The ledger does not control other applications or old deployments using the same YouCam key. Setup, operator commands and deployment boundaries are in the [release procedure](docs/testing/RELEASE.md). Live tasks still need verified prices, a 25% reserve and separate bounded approval. Stop on 429. A timed-out/cancelled request may already have submitted a provider task; cancellation cannot undo it.
 
 ## Verification
 

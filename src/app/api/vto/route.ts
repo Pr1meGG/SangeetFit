@@ -6,7 +6,7 @@ import { setTimeout as wait } from "node:timers/promises";
 import { isRecord, uploadYouCamFile, YouCamHttpError } from "@/lib/youcam";
 import { parseVtoInput, VtoInputError } from "@/lib/vto-input";
 import { privateJson, readPhotoJson } from "@/lib/request";
-import { LiveBudgetError, reserveLiveBudget } from "@/lib/live-budget";
+import { LiveBudgetError, reserveLiveBudget, visitorKey } from "@/lib/live-budget";
 import { issueSharingReceipt } from "@/lib/shared-results";
 import { autoSaveTimeoutMs, autoSaveVtoResult } from "@/lib/shared-results";
 import { EDITORIAL_LOOKS } from "@/data/editorial";
@@ -167,7 +167,7 @@ async function runTryOn(req: NextRequest, signal: AbortSignal, deadline: number)
       : await fs.readFile(path.join(process.cwd(), "public", "garment_test", input.referenceAsset), { signal });
     const contentType = input.kind === "upload" ? input.garmentImage.contentType : reference!.contentType;
     const category = input.kind === "upload" ? input.garmentCategory : outfit!.youcamCategory;
-    await reserveLiveBudget("vto", signal);
+    await reserveLiveBudget("vto", signal, visitorKey(req.headers));
     const srcFileId = await uploadYouCamFile({
       apiKey: YOUCAM_API_KEY,
       baseUrl: YOUCAM_BASE,
