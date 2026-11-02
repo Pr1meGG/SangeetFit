@@ -1,173 +1,63 @@
-// Browser regression: fake camera + MediaPipe contract, no real photos or API tasks.
-// Run against MOCK_MODE=true npm run dev -- --port 3100.
-// PLAYWRIGHT_MODULE_PATH may point to an existing Playwright installation.
+// Mock-only retirement regression: old selfie URLs reach try-on without camera access.
 import { strict as assert } from "node:assert";
 import { createRequire } from "node:module";
 
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE_PATH || "playwright");
 const browser = await chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || "chromium", headless: true });
 const page = await browser.newPage({ viewport: { width: 375, height: 812 } });
+const base = process.env.TEST_ORIGIN || process.env.TEST_BASE_URL || "http://localhost:3500";
 const errors = [];
+let skinRequests = 0;
+let modelRequests = 0;
+let vtoRequests = 0;
 page.on("pageerror", error => errors.push(error.message));
-
-await page.addInitScript(() => {
-  window.cameraTest = { active: 0, stopped: 0, closed: 0, created: 0, frames: 0, delay: 0, modelDelay: 0, denied: false, dark: false, detectionError: false,
-    box: { originX: 420, originY: 260, width: 120, height: 160 } };
-  Object.defineProperty(navigator.mediaDevices, "getUserMedia", { value: async () => {
-    if (window.cameraTest.denied) throw new DOMException("Denied", "NotAllowedError");
-    const canvas = document.createElement("canvas");
-    canvas.width = 960;
-    canvas.height = 720;
-    const draw = () => {
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = window.cameraTest.dark ? "#111" : "#ddd";
-      ctx.fillRect(0, 0, 960, 720);
-    };
-    draw();
-    const timer = setInterval(draw, 50);
-    const stream = canvas.captureStream(10);
-    window.cameraTest.active++;
-    const track = stream.getTracks()[0];
-    const stop = track.stop.bind(track);
-    track.stop = () => {
-      if (track.readyState === "ended") return;
-      clearInterval(timer); window.cameraTest.stopped++; window.cameraTest.active--; stop();
-    };
-    await new Promise(resolve => setTimeout(resolve, window.cameraTest.delay));
-    return stream;
-  } });
-});
-
-let blockModel = false;
-await page.route("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@*/vision_bundle.mjs", route => blockModel ? route.abort() : route.fulfill({
-  contentType: "text/javascript",
-  headers: { "access-control-allow-origin": "*" },
-  body: `
-    export const FilesetResolver = { forVisionTasks: async () => ({ wasmLoaderPath: "fake" }) };
-    export const FaceDetector = { createFromOptions: async (fileset, options) => {
-      if (fileset.wasmLoaderPath !== "fake" || options.runningMode !== "VIDEO") throw Error("Invalid detector setup");
-      window.cameraTest.created++;
-      await new Promise(resolve => setTimeout(resolve, window.cameraTest.modelDelay));
-      let lastTimestamp = -1;
-      return {
-        detectForVideo(video, timestamp) {
-          if (window.cameraTest.detectionError) throw Error("Inference unavailable");
-          if (!video.videoWidth || !(timestamp > lastTimestamp)) throw Error("Invalid video frame/timestamp");
-          lastTimestamp = timestamp;
-          window.cameraTest.frames++;
-          return { detections: window.cameraTest.box ? [{ boundingBox: window.cameraTest.box }] : [] };
-        },
-        close() { window.cameraTest.closed++; }
-      };
-    } };
-  `,
-}));
-
 try {
-  const baseUrl = process.env.TEST_ORIGIN || process.env.TEST_BASE_URL || "http://localhost:3100";
-  await page.goto(baseUrl);
-  assert.deepEqual(await page.request.get(`${baseUrl}/api/mode`).then(r => r.json()), { mode: "mock" });
-  await page.getByRole("button", { name: "Sangeet Dance-floor moments", exact: true }).click();
-  await page.getByRole("button", { name: "Use camera instead" }).click();
-  await page.getByText("Move a little closer", { exact: true }).waitFor({ timeout: 10000 });
-  assert.equal(await page.evaluate(() => window.cameraTest.created), 1);
-  console.log("PASS: real MediaPipe factory, video method and bounding-box contract drive hints");
-
-  for (const [box, text] of [
-    [null, "Bring your face into the oval"],
-    [{ originX: 280, originY: 150, width: 400, height: 400 }, "Move back a bit"],
-    [{ originX: 500, originY: 180, width: 250, height: 250 }, "Center your face in the oval"],
-    [{ originX: 355, originY: 177, width: 250, height: 250 }, "Perfect — hold still ✨"],
-  ]) {
-    await page.evaluate(box => { window.cameraTest.box = box; }, box);
-    await page.getByText(text, { exact: true }).waitFor();
-  }
-  await page.evaluate(() => { window.cameraTest.dark = true; });
-  await page.getByText("Find brighter light in front of you", { exact: true }).waitFor();
-  await page.evaluate(() => { window.cameraTest.dark = false; });
-  await page.getByText("Perfect — hold still ✨", { exact: true }).waitFor();
-  console.log("PASS: portrait-crop framing, missing face and poor-light hints");
-
-  let skinRequests = 0;
-  let vtoRequests = 0;
-  await page.route("**/api/skin", async route => {
-    skinRequests++;
-    const body = route.request().postDataJSON();
-    assert.deepEqual(Object.keys(body), ["imageDataUrl"]);
-    assert(body.imageDataUrl.startsWith("data:image/jpeg;base64,"));
-    await route.fulfill({ json: { success: true, skin_color: "#b9947c", mode: "mock" } });
+  assert.deepEqual(await page.request.get(`${base}/api/mode`).then(response => response.json()), { mode: "mock" });
+  await page.addInitScript(() => {
+    window.__cameraCalls = 0;
+    if (navigator.mediaDevices) Object.defineProperty(navigator.mediaDevices, "getUserMedia", { value: async () => {
+      window.__cameraCalls++;
+      throw new DOMException("Camera must remain unused", "NotAllowedError");
+    } });
   });
+  await page.route("**/api/skin", async route => { skinRequests++; await route.abort(); });
   await page.route("**/api/vto", async route => { vtoRequests++; await route.abort(); });
-  await page.getByRole("button", { name: "Capture selfie", exact: true }).click();
-  await page.getByRole("button", { name: "Use this photo" }).waitFor();
-  const preview = await page.getByAltText("Captured selfie preview").evaluate(image => ({
-    width: image.naturalWidth, height: image.naturalHeight,
-  }));
-  assert.equal(preview.width, 540);
-  assert.equal(preview.height, 720);
-  assert.equal(skinRequests, 0, "capture must wait for photo confirmation");
-  const counts = await page.evaluate(() => ({ ...window.cameraTest }));
-  assert.equal(counts.active, 0);
-  assert.equal(counts.closed, 1);
-  await page.waitForTimeout(500);
-  assert.equal(await page.evaluate(() => window.cameraTest.frames), counts.frames, "inference must stop after capture");
-  await page.getByRole("button", { name: "Retake", exact: true }).click();
-  await page.getByText("Perfect — hold still ✨", { exact: true }).waitFor();
-  assert.equal(await page.evaluate(() => window.cameraTest.created), 2);
-  await page.getByRole("button", { name: "Capture selfie", exact: true }).click();
-  await page.getByRole("button", { name: "Use this photo" }).click();
-  await page.getByText("Selfie ready. Uploading did not start an analysis.").waitFor();
-  assert.equal(skinRequests, 0, "confirmation prepares the photo without analysis");
-  await page.getByRole("button", { name: "Analyze selfie", exact: true }).click();
-  await page.getByText("Sample skin-tone reference", { exact: true }).waitFor();
-  assert.equal(skinRequests, 1);
-  assert.equal(vtoRequests, 0);
-  console.log("PASS: cropped JPEG capture, cleanup, retake and confirmed selfie-only submission");
-
-  await page.evaluate(() => { window.cameraTest.delay = 700; });
-  await page.getByRole("button", { name: "Use camera instead" }).click();
-  await page.getByText("Starting camera…", { exact: true }).waitFor();
-  await page.waitForFunction(() => window.cameraTest.active > 0);
-  await page.getByRole("button", { name: "Cancel", exact: true }).click();
-  await page.waitForFunction(() => window.cameraTest.active === 0);
-  assert.equal(await page.evaluate(() => window.cameraTest.created), 2);
-  console.log("PASS: late camera permission response is stopped after cancellation");
-
-  await page.evaluate(() => { window.cameraTest.delay = 0; window.cameraTest.denied = true; });
-  await page.getByRole("button", { name: "Use camera instead" }).click();
-  await page.getByRole("alert").filter({ hasText: "Camera permission denied" }).waitFor();
-  assert.equal(await page.getByRole("button", { name: "Capture selfie", exact: true }).isDisabled(), true);
-  await page.evaluate(() => { window.cameraTest.denied = false; });
-  await page.getByRole("button", { name: "Retry", exact: true }).click();
-  await page.getByText("Perfect — hold still ✨", { exact: true }).waitFor();
-  await page.evaluate(() => { window.cameraTest.detectionError = true; });
-  await page.getByText("Live face tracking unavailable — center your face in the oval", { exact: true }).waitFor();
-  await page.getByRole("button", { name: "Capture anyway", exact: true }).click();
-  await page.getByRole("button", { name: "Use this photo" }).waitFor();
-  await page.getByRole("button", { name: "Cancel", exact: true }).click();
-  console.log("PASS: denied permission can recover; inference failure keeps manual capture available");
-
-  await page.evaluate(() => { window.cameraTest.detectionError = false; window.cameraTest.modelDelay = 1000; });
-  await page.getByRole("button", { name: "Use camera instead" }).click();
-  await page.getByText("Center your face while tracking loads — you can capture now", { exact: true }).waitFor();
-  await page.waitForFunction(() => window.cameraTest.created === 4);
-  await page.getByRole("button", { name: "Cancel", exact: true }).click();
-  await page.waitForFunction(() => window.cameraTest.closed === 4);
-  console.log("PASS: a detector that finishes loading after cancellation is released");
-
-  blockModel = true;
-  await page.reload();
-  await page.getByRole("button", { name: "Sangeet Dance-floor moments", exact: true }).click();
-  await page.getByRole("button", { name: "Use camera instead" }).click();
-  await page.getByText("Live face tracking unavailable — center your face in the oval", { exact: true }).waitFor();
-  assert.equal(await page.getByRole("button", { name: "Capture anyway", exact: true }).isEnabled(), true);
-  await page.evaluate(() => { window.cameraTest.dark = true; });
-  await page.getByText("Find brighter light in front of you", { exact: true }).waitFor();
-  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
-  await page.getByRole("button", { name: "Cancel", exact: true }).click();
-  assert.equal(await page.evaluate(() => window.cameraTest.active), 0);
-  console.log("PASS: blocked CDN retains manual capture and brightness hints; mobile layout fits");
+  await page.route("https://cdn.jsdelivr.net/npm/@mediapipe/**", async route => { modelRequests++; await route.abort(); });
+  const noSelfie = async () => {
+    assert.equal(await page.locator("#selfie-file, .cap-stage, .sf-palette-row").count(), 0);
+    assert.equal(await page.getByRole("button", { name: /^(Use camera instead|Analyze selfie|Optional skin-tone analysis)$/ }).count(), 0);
+    assert.equal(await page.getByLabel("Selfie photo", { exact: true }).count(), 0);
+    assert.equal(await page.evaluate(() => window.__cameraCalls), 0, "retired selfie entry must never request the camera");
+  };
+  await page.goto(base);
+  await page.getByRole("button", { name: "Reception An evening to remember", exact: true }).click();
+  await page.getByRole("heading", { name: "Your clothes. Your kind of look.", exact: true }).waitFor();
+  assert.equal(await page.getByRole("group", { name: "Choose occasion", exact: true }).getByRole("button", { name: "Reception", exact: true }).getAttribute("aria-pressed"), "true");
+  await noSelfie();
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(`${base}/?step=2&occasion=sangeet&skin=%23b9947c`);
+    await page.getByRole("heading", { name: "Your clothes. Your kind of look.", exact: true }).waitFor();
+    const colour = page.getByRole("combobox", { name: "Preferred colour", exact: true });
+    assert.equal(await colour.inputValue(), "", "old skin parameters must not set a colour preference");
+    await colour.selectOption("#6b1e3a");
+    assert.equal(await colour.inputValue(), "#6b1e3a", "manual colour filtering stays available");
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    await noSelfie();
+  }
+  await page.goto(`${base}/?step=2&vto=concept-emerald-kurta`);
+  const dialog = page.getByRole("dialog", { name: "Make this look yours." });
+  await dialog.waitFor();
+  await dialog.getByRole("button", { name: "I understand — continue" }).click();
+  await dialog.getByRole("button", { name: /Use our sample model/ }).click();
+  await dialog.getByText("Photo ready. Uploading did not start a task.").waitFor();
+  assert(await dialog.getByRole("button", { name: "Generate try-on", exact: true }).isEnabled());
+  await noSelfie();
+  assert.equal(skinRequests, 0);
+  assert.equal(modelRequests, 0, "no face-tracking model should be loaded");
+  assert.equal(vtoRequests, 0, "photo preparation still requires an explicit Generate");
   assert.deepEqual(errors, []);
+  console.log("PASS: selfie/camera UI archived, legacy step2 links reach try-on, manual colours remain and no camera/model/API task is requested");
 } finally {
   await browser.close();
 }

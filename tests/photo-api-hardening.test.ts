@@ -1,3 +1,4 @@
+// Skin handler assertions in this suite exercise the archived implementation only.
 // Offline trust-boundary checks. Every provider request is replaced with a stub.
 import { strict as assert } from "node:assert";
 import { spawnSync } from "node:child_process";
@@ -13,7 +14,7 @@ void (async () => {
   configureOfflineBudget();
   process.env.YOUCAM_API_KEY = "offline-test-key";
   process.env.YOUCAM_BASE_URL = "https://example.test/s2s/v2.0";
-  const { POST: skin } = await import("../src/app/api/skin/route.ts");
+  const { POST: skin } = await import("../docs/archive/skin-tone/route.ts");
   const { POST: vto } = await import("../src/app/api/vto/route.ts");
   const { GET: mode } = await import("../src/app/api/mode/route.ts");
   const realFetch = globalThis.fetch;
@@ -101,7 +102,7 @@ void (async () => {
       assert.equal(response.headers.get("cache-control"), "no-store");
     }
     assert.equal(calls.length, 0);
-    console.log("PASS: live routes accept requests without a code while invalid images stop before provider work");
+    console.log("PASS: active VTO and archived skin accept requests without a code while invalid images stop before provider work");
 
     for (const endpoint of [skin, vto]) {
       let chunk = 0;
@@ -138,7 +139,7 @@ void (async () => {
       assert(!text.includes("token=secret") && !text.includes("javascript:"));
       assert(tasks <= 1);
     }
-    console.log("PASS: skin contracts validate task/result shapes and sanitize provider failures without another task");
+    console.log("PASS: archived skin contracts validate task/result shapes and sanitize provider failures without another task");
     failure = "task-error"; stage = "poll"; calls = []; tasks = 0; sharedSignal = null;
     response = await vto(request({ fullBodyDataUrl: png, garmentImageDataUrl: png, garmentCategory: "upper_body" }) as never);
     assert.equal(response.status, 502);

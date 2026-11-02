@@ -1,3 +1,4 @@
+// Skin handler assertions in this suite exercise the archived implementation only.
 // Runs the production Lua on disposable Redis, never the cloud or YouCam.
 import { strict as assert } from "node:assert";
 import { execFile } from "node:child_process";
@@ -92,7 +93,7 @@ void (async () => {
     console.log("PASS: deleted, corrupt, wrong-type and expiring state blocks reservations without a reset");
 
     await seed(); await redis("DEL", visitorKey(new Headers()));
-    const { POST } = await import("../src/app/api/skin/route.ts");
+    const { POST } = await import("../docs/archive/skin-tone/route.ts");
     const response = await POST(new Request("http://localhost/api/skin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ imageDataUrl: pngDataUrl() }) }) as never);
     assert.equal(response.status, 502);
     assert.equal(providerCalls, 1);

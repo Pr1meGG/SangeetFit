@@ -35,8 +35,8 @@ try {
   await page.locator(".sf-occasion").first().hover();
   await page.waitForFunction(() => new DOMMatrix(getComputedStyle(document.querySelector(".sf-occasion")).transform).m42 < -4);
   await overflow(1440);
-  await desktop().getByRole("button", { name: "Plan my week", exact: true }).click();
-  await page.locator("#week-board-title").waitFor({ state: "visible" });
+  await desktop().getByRole("button", { name: "Try on a look", exact: true }).click();
+  await page.getByRole("heading", { name: "Your clothes. Your kind of look.", exact: true }).waitFor();
   await page.locator('.sf-heart[aria-pressed="false"]').first().click();
   await desktop().getByRole("button", { name: "For you", exact: true }).click();
   await page.getByRole("heading", { name: "Five moments. One wardrobe.", exact: true }).waitFor();
@@ -59,13 +59,13 @@ try {
   await form.getByRole("button", { name: "Add to my clothes", exact: true }).click();
   await page.getByRole("heading", { name: "Navigation test kurta", exact: true }).waitFor();
   await desktop().getByRole("button", { name: "For you", exact: true }).click();
-  await desktop().getByRole("button", { name: "Plan my week", exact: true }).click();
-  assert.match(await page.locator("#week-board-sangeet option:checked").innerText(), /Navigation test kurta/, "navbar actions must retain the owned outfit and its event assignment");
+  await desktop().getByRole("button", { name: "Try on a look", exact: true }).click();
+  await page.getByRole("heading", { name: "Navigation test kurta", exact: true }).waitFor();
   await desktop().getByRole("button", { name: "How it works", exact: true }).click();
   await focusedSection("how-it-works");
   assert.equal(await desktop().getByRole("button", { name: "How it works", exact: true }).getAttribute("aria-current"), "page");
   assert.equal(await page.locator(".sf-editorial-hero").count(), 0, "guide must open on its own surface");
-  assert.equal(await page.locator(".sf-feature").count(), 4);
+  assert.equal(await page.locator(".sf-feature").count(), 3);
   assert.equal(await page.locator(".sf-step-illustration").count(), 3);
   await page.waitForFunction(() => document.querySelector(".sf-step-illustration").getAnimations({ subtree: true }).some(animation => animation.playState === "running" && animation.currentTime > 0));
   await page.getByRole("button", { name: "Pause animations", exact: true }).click();
@@ -90,9 +90,9 @@ try {
   assert.equal(await desktop().getByRole("link", { name: "Collection", exact: true }).getAttribute("aria-current"), "page");
   assert.equal(await desktop().getByRole("link", { name: "My wardrobe", exact: true }).getAttribute("href"), "/?step=3&view=clothes");
   assert.equal(await desktop().getByRole("link", { name: "Shortlist", exact: true }).getAttribute("href"), "/?step=3&view=shortlist");
-  await desktop().getByRole("link", { name: "Plan my week", exact: true }).click();
-  await page.locator("#week-board-title").waitFor({ state: "visible" });
-  assert.equal(new URL(page.url()).searchParams.get("view"), "plan", "the library plan link must open the wedding board");
+  await desktop().getByRole("link", { name: "Try on a look", exact: true }).click();
+  await page.getByRole("heading", { name: "Your clothes. Your kind of look.", exact: true }).waitFor();
+  assert.equal(new URL(page.url()).searchParams.get("view"), "try-on", "the library action must open the try-on gallery");
   for (const section of ["how-it-works", "faq"]) {
     await page.goto(`${base}/#${section}`);
     await focusedSection(section);
@@ -117,14 +117,14 @@ try {
       await page.locator(".sf-editorial-hero").waitFor();
       assert.equal(new URL(page.url()).searchParams.get("step"), null, "returning home must clear the entry-only step");
     }
-    for (const action of ["My wardrobe", "Shortlist", "Plan my week"]) {
+    for (const action of ["My wardrobe", "Shortlist", "Try on a look"]) {
       await page.goto(`${base}/?${query}#faq`);
       await focusedSection("faq");
       await desktop().getByRole("button", { name: action, exact: true }).click();
       assert.equal(new URL(page.url()).searchParams.get("step"), null, "core navigation must consume entry-only parameters");
       if (action === "My wardrobe") await page.getByRole("form", { name: "Add your own outfit" }).waitFor();
       else if (action === "Shortlist") await page.getByRole("heading", { name: "Your shortlist.", exact: true }).waitFor();
-      else await focusedSection("wedding-plan");
+      else await focusedSection("main-content");
       assert.equal(await page.getByRole("dialog").count(), 0, "stale outfit links must not reopen a fitting room during navigation");
     }
   }
@@ -162,7 +162,7 @@ try {
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.waitForFunction(() => !document.querySelector("#sf-mobile-menu"));
   }
-  assert.equal(tasks, 0, "browsing, uploading, planning and all navbar actions must submit zero skin/VTO requests");
+  assert.equal(tasks, 0, "browsing, uploading and all navbar actions must submit zero skin/VTO requests");
   assert.deepEqual(errors, []);
   console.log("PASS: redesign v2 navigation, session retention, FAQ, deep links and mobile keyboard behavior; zero AI tasks");
 } finally {

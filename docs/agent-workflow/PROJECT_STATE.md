@@ -1,6 +1,48 @@
 # PROJECT_STATE.md
 
-Durable, verified facts about SangeetFit. Prior-generation results not rechecked in the current working tree are explicitly labeled **[prior report]**. Update this file when durable facts, verified outcomes, major decisions, or blockers change — not as a running log.
+## Skin-tone analysis archived — 2 November 2026
+
+User approved removing skin analysis after the planning/PDF archive. Active app
+now goes directly from occasion selection to outfits, without selfie/camera,
+skin analysis or skin-derived palette UI. Manual colour/style filters remain.
+Legacy step2 links open the gallery and skin query values are ignored. Retired
+`POST /api/skin` returns private/no-store HTTP410 without reading the body,
+reserving budget or calling a provider. Original handler/page/camera test and
+camera/palette source are preserved; see `docs/archive/skin-tone/README.md`.
+
+Verified: 19 offline suites enumerated (2 real-Redis suites skipped locally),
+typecheck, lint 0 errors/21 warnings and production build passed. Initial browser
+run exposed a test-selector error; fixed to the accessible combobox role/name.
+Primary focused rerun passed, then `TEST_PORT=3597 npm run test:browser` exited0
+with all13 mock browser suites passing. `git diff --check` clean. Independent
+React, TS and feature/API reviews had no actionable findings; local Brave check
+confirms legacy selfie entry opens the simplified gallery. No provider task,
+budget mutation, commit, push or deployment. Local preview refreshed on3598.
+Full record: `docs/testing/SKIN_ARCHIVE_2026_11_02.md`.
+
+## Planning and PDF archived — 2 November 2026
+
+At the user's request, removed the active board, event assignments/rewear counters,
+PDF export, planning CTAs and comparison assignment controls. The app now directs
+users to **Try on a look**; legacy `view=plan` and `#wedding-plan` links safely open
+the gallery. Board/print components, summary helper/unit test and styles remain
+preserved and unmounted; no persistent plan data existed to migrate or delete.
+Own-clothes upload, shortlist, explicit generation, comparison and saving retain
+mock regression coverage. Updated active README/Devpost/demo/checklist drafts;
+older board/PDF scripts and test are preserved under `docs/archive/planning/`.
+Older videos are superseded and must be recut before submission.
+
+Verification on `codex/redesign-v2` working changes over `54e7b58`:
+`TEST_PORT=3597 npm run verify` exit 0: 18 offline suites enumerated (2 real-Redis
+suites skipped locally), typecheck, lint 0 errors/22 existing image warnings,
+production build, all 13 mock browser suites. `git diff --check` clean. Independent
+React, TypeScript/test and project feature reviews: no actionable findings. Brave
+local mock check confirms the legacy plan link opens the gallery. No live
+provider task, budget mutation, commit, push or deployment. Local preview:3598.
+
+## Original moving demo — 1 November 2026
+
+User rejected the earlier slide-like cut. Replacement: `work/video-codex/out/SangeetFit-walkthrough.mp4`, 86.77 seconds, 1920×1080, no audio track. Fresh full-screen browser recording shows pointer movement, typing, scrolls and actual outfit selection; no still-image sequence or frozen-frame padding. Original successful 31 October live YouCam recording supplies the photo/Generate/wait/result-slider section, clearly labelled; wait excerpt is 4×. Mock planner and AI sample garment/person are labelled. New capture asserts 5 of 5 planned and 1 planned rewear, with zero generation attempts. Full decode and final duration/chapter-order checks passed; script/capture reviews completed. Separate timed narration: [DEMO_VOICEOVER_CODEX.md](../submission/DEMO_VOICEOVER_CODEX.md). User voiceover and combined playback remain; nothing uploaded or submitted. Earlier video drafts remain local, superseded for this task.
 
 ## Wedding Look Studio — shelved, 31 October 2026
 

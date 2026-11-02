@@ -33,7 +33,7 @@ try {
     assert.equal(await page.locator(".sf-bottom-nav").count(), 0, "phones use the top navbar only");
     await page.getByRole("button", { name: "Open menu" }).click();
     const nav = page.getByRole("navigation", { name: "Mobile navigation" });
-    assert.deepEqual(await nav.locator("a").allTextContents().then(items => items.map(item => item.trim())), ["For you", "Collection", "My wardrobe", "Shortlist", "How it works", "FAQ", "Plan my week"]);
+    assert.deepEqual(await nav.locator("a").allTextContents().then(items => items.map(item => item.trim())), ["For you", "Collection", "My wardrobe", "Shortlist", "How it works", "FAQ", "Try on a look"]);
     assert.equal(await nav.getByRole("link", { name: "Collection" }).getAttribute("aria-current"), "page");
     assert.equal(await nav.getByRole("link", { name: "My wardrobe" }).getAttribute("href"), "/?step=3&view=clothes");
     assert.equal(await nav.getByRole("link", { name: "Shortlist" }).getAttribute("href"), "/?step=3&view=shortlist");

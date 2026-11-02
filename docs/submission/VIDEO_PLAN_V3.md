@@ -1,5 +1,7 @@
 # Video v3 — shot list
 
+> Planning and PDF export were archived on 2 November 2026. Any planning storyboard below is historical. Use [the current demo direction](DEMO_SCRIPT.md).
+
 Written 31 October 2026. Plan only; nothing recorded or published. Story and rules come from [DEMO_SCRIPT.md](DEMO_SCRIPT.md) and the [lock-in](../research/hackathon-videos/07-lock-in.md). This file turns them into a recordable cut for the **current production build `a697fdf`**.
 
 **Target: 2:00** (rules allow 1–3 min). Phone portrait (390×844) framed in a 1920×1080 canvas, captions burned in.

@@ -9,18 +9,10 @@ const page = await browser.newPage({ viewport: { width: 375, height: 812 } });
 let modeFails = true;
 let skinRequests = 0;
 let vtoRequests = 0;
-let finishSkin;
-let onSkinStarted;
-const skinStarted = new Promise(resolve => { onSkinStarted = resolve; });
 try {
   assert.deepEqual(await page.request.get(`${base}/api/mode`).then(response => response.json()), { mode: "mock" });
   await page.route("**/api/mode", route => modeFails ? route.abort() : route.fulfill({ json: { mode: "live" } }));
-  await page.route("**/api/skin", async route => {
-    skinRequests++;
-    assert.equal(route.request().headers()["x-sangeetfit-access-code"], undefined);
-    await new Promise(resolve => { finishSkin = resolve; onSkinStarted(); });
-    await route.fulfill({ json: { success: true, mode: "live", skin_color: "#b9947c" } }).catch(() => {});
-  });
+  await page.route("**/api/skin", async route => { skinRequests++; await route.abort(); });
   await page.route("**/api/vto", async route => {
     vtoRequests++;
     assert.equal(route.request().headers()["x-sangeetfit-access-code"], undefined);
@@ -38,21 +30,9 @@ try {
     return canvas.toDataURL("image/jpeg");
   });
   const file = { name: "synthetic.jpg", mimeType: "image/jpeg", buffer: Buffer.from(person.split(",")[1], "base64") };
-  await page.getByLabel("Selfie photo", { exact: true }).setInputFiles(file);
-  await page.getByText("Selfie ready. Uploading did not start an analysis.").waitFor();
+  assert.equal(await page.getByLabel("Selfie photo", { exact: true }).count(), 0);
+  assert.equal(await page.getByRole("button", { name: "Analyze selfie", exact: true }).count(), 0);
   assert.equal(skinRequests, 0);
-  assert(await page.getByRole("button", { name: "Analyze selfie", exact: true }).isEnabled());
-  await page.getByRole("button", { name: "Analyze selfie", exact: true }).click();
-  await page.getByText("Analyzing with YouCam API…").waitFor();
-  await skinStarted;
-  page.once("dialog", dialog => dialog.accept());
-  await page.getByRole("button", { name: "Clear private session" }).click();
-  finishSkin();
-  await page.getByRole("button", { name: "Analyze selfie", exact: true }).waitFor();
-  assert.equal(await page.getByAltText("Your prepared selfie").count(), 0);
-  assert.equal(await page.getByText("Detected skin tone", { exact: true }).count(), 0);
-  assert.equal(await page.getByLabel("Preview access code", { exact: false }).count(), 0);
-  assert.equal(skinRequests, 1);
   await page.goto(`${base}/?step=3&occasion=sangeet&vto=concept-emerald-kurta`);
   const dialog = page.getByRole("dialog", { name: "Make this look yours." });
   await dialog.waitFor();
@@ -73,7 +53,6 @@ try {
   await dialog.getByRole("button", { name: "Generate try-on", exact: true }).click();
   await dialog.getByRole("slider").waitFor();
   await dialog.getByRole("button", { name: "Close try-on" }).click();
-  await page.getByRole("button", { name: "Plan for Sangeet", exact: true }).click();
   assert.equal(await page.getByRole("region", { name: "Compare session looks" }).locator("article").count(), 1);
   page.once("dialog", prompt => prompt.dismiss());
   await page.getByRole("button", { name: "Open menu" }).click();
@@ -94,23 +73,21 @@ try {
   await dialog.getByRole("button", { name: "Generate try-on", exact: true }).click();
   await dialog.getByRole("slider").waitFor();
   await dialog.getByRole("button", { name: "Close try-on" }).click();
-  assert.equal(await page.getByRole("button", { name: "Planned for Sangeet", exact: true }).count(), 0, "a fresh session cannot inherit the previous assignment");
-  assert.equal(await page.getByRole("button", { name: "Plan for Sangeet", exact: true }).getAttribute("aria-pressed"), "false");
+  assert.equal(await page.getByRole("region", { name: "Compare session looks" }).locator("article").count(), 1, "a fresh session cannot inherit the previous result");
   assert.equal(vtoRequests, 2, "only the two explicit actions submit");
-  await page.getByRole("button", { name: "Plan for Sangeet", exact: true }).click();
   await page.getByRole("button", { name: "Remove result for Emerald Silk Kurta", exact: true }).click();
   await page.getByRole("button", { name: "Try on Emerald Silk Kurta", exact: true }).click();
   await dialog.getByRole("button", { name: "Generate try-on", exact: true }).click();
   await dialog.getByRole("slider").waitFor();
   await dialog.getByRole("button", { name: "Close try-on" }).click();
-  assert.equal(await page.getByRole("button", { name: "Planned for Sangeet", exact: true }).getAttribute("aria-pressed"), "true", "removing a render must preserve the planned outfit");
+  assert.equal(await page.getByRole("region", { name: "Compare session looks" }).locator("article").count(), 1, "regeneration after removal keeps only the new result");
   assert.equal(vtoRequests, 3);
+  assert.equal(skinRequests, 0, "the entire try-on flow must leave the archived endpoint unused");
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   const missing = await page.request.get(`${base}/missing-page`);
   assert.equal(missing.status(), 404);
   assert.equal(missing.headers()["x-content-type-options"], "nosniff");
   console.log("PASS: availability recovery, explicit code-free generation, stale-result/session clearing, safe leave and404 recovery");
 } finally {
-  finishSkin?.();
   await browser.close();
 }

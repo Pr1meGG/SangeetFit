@@ -1,4 +1,5 @@
-// Missing budget must block both live photo routes before any provider upload.
+// Skin handler assertions in this suite exercise the archived implementation only.
+// Missing budget must block active VTO and archived skin before any provider upload.
 import { strict as assert } from "node:assert";
 import { pngDataUrl } from "./fixtures/png.ts";
 import { spawnSync } from "node:child_process";
@@ -15,7 +16,7 @@ void (async () => {
   const realFetch = globalThis.fetch;
   globalThis.fetch = (async () => { calls++; throw new Error("provider must not be reached"); }) as typeof fetch;
   try {
-    const { POST: skin } = await import("../src/app/api/skin/route.ts");
+    const { POST: skin } = await import("../docs/archive/skin-tone/route.ts");
     const { POST: vto } = await import("../src/app/api/vto/route.ts");
     const { GET: mode } = await import("../src/app/api/mode/route.ts");
     const png = pngDataUrl();
@@ -26,7 +27,7 @@ void (async () => {
     }
     assert.equal(calls, 0);
     assert.deepEqual(await mode().then(r => r.json()), { mode: "unconfigured" });
-    console.log("PASS: missing shared budget blocks both live routes before provider work");
+    console.log("PASS: missing shared budget blocks active VTO and archived skin before provider work");
 
     const { liveBudgetConfigured, reserveLiveBudget } = await import("../src/lib/live-budget.ts");
     const TEST_VISITOR = `sangeetfit:visitor:v1:${"0".repeat(32)}`;

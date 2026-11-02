@@ -1,21 +1,4 @@
-/**
- * Image-input routing regression tests.
- *
- * Enforces the distinction introduced after the 2026-10-19 live Skin Analysis
- * failure (YouCam: "input image is smaller than the minimum size (320x320px)"
- * when a full-body shot was sent to /api/skin):
- *
- *   1. /api/skin  consumes ONLY the face selfie (imageDataUrl) — step 2 input.
- *   2. /api/vto   consumes ONLY the full-body photo (fullBodyDataUrl) — VTO modal
- *      input; the face selfie must never be reused as the VTO source.
- *   3. The full-body preview is retained on failure (upload errors never clear
- *      fullBodyDataUrl).
- *   4. A dedicated face-selfie test asset exists at >=320x320 native pixels
- *      (no upscaling of a tiny face).
- *
- * No external test framework — plain Node assert (stdlib), no network calls,
- * no YouCam API usage.
- */
+/** Active VTO uses only the full-body source; archived skin contracts stay isolated. */
 
 import { strict as assert } from "node:assert";
 import * as fs from "node:fs";
@@ -31,15 +14,15 @@ function readSource(relativePath: string): string {
   return fs.readFileSync(path.join(projectRoot, relativePath), "utf8");
 }
 
-// ── 1. /api/skin is face-selfie-only ─────────────────────────────────────────
+// ── 1. Archived skin handler is face-selfie-only ─────────────────────────────────────────
 
-const skinSource = readSource("src/app/api/skin/route.ts");
+const skinSource = readSource("docs/archive/skin-tone/route.ts");
 assert(skinSource.includes("imageDataUrl"), "skin route must read imageDataUrl (face selfie)");
 assert(
   !skinSource.includes("fullBodyDataUrl"),
   "skin route must not consume the full-body VTO source"
 );
-console.log("PASS: /api/skin consumes only the face selfie (imageDataUrl)");
+console.log("PASS: archived skin handler consumes only the face selfie (imageDataUrl)");
 
 // ── 2. /api/vto is full-body-only, never the face selfie ─────────────────────
 
@@ -57,16 +40,12 @@ assert(
 );
 console.log("PASS: /api/vto consumes only fullBodyDataUrl and rejects a missing source");
 
-// ── 3. Frontend routing: selfie -> /api/skin, full body -> /api/vto ──────────
+// ── 3. Active frontend: no skin analysis, full body -> /api/vto ──────────
 
 const pageSource = readSource("src/app/page.tsx");
 
-// Upload/capture prepare a dedicated selfie; only the explicit action analyzes it.
-assert(pageSource.includes("void prepareSelfie(file)"), "selfie input must prepare the selfie");
-const selfiePreparation = pageSource.slice(pageSource.indexOf("const prepareSelfie"), pageSource.indexOf("const analyzeSkin"));
-assert(selfiePreparation.includes("setSelfieDataUrl(dataUrl)"));
-assert(!selfiePreparation.includes("fetch("), "preparing a selfie must not submit analysis");
-assert(pageSource.includes("body: JSON.stringify({ imageDataUrl: dataUrl })"), "Analyze sends only the dedicated selfie");
+assert(!pageSource.includes('fetch("/api/skin"'), "active frontend must not submit skin analysis");
+assert(!pageSource.includes("prepareSelfie") && !pageSource.includes("analyzeSkin") && !pageSource.includes("FaceCameraCapture"), "selfie preparation, analysis and camera UI must remain archived");
 
 // runVTO posts the full-body source; the body must not contain the selfie field.
 const vtoRunner = pageSource.slice(pageSource.indexOf("const runVTO"), pageSource.indexOf("const handleRestore"));
@@ -79,7 +58,7 @@ assert(
   vtoRunner.includes("const src = fullBodyDataUrl;"),
   "runVTO must source from fullBodyDataUrl only (no selfie fallback)"
 );
-console.log("PASS: frontend routes selfie -> /api/skin and full-body -> /api/vto");
+console.log("PASS: active frontend has no skin analysis and sends only full-body data to VTO");
 
 // ── 4. Preview retained on failure ────────────────────────────────────────────
 

@@ -1,14 +1,14 @@
 # SangeetFit — Devpost description draft
 
-Updated 31 October 2026. **Draft — not published or submitted.** Paste the section under "Devpost text" only after the final build, video and every [CONFIRM] item are settled and the exact text is approved.
+Updated 2 November 2026 after wedding planning/PDF were archived. **Draft — not published or submitted.** Paste the section under "Devpost text" only after the final build, video and every [CONFIRM] item are settled and the exact text is approved.
 
 ---
 
 ## Devpost text
 
-**Tagline:** Plan five celebrations with clothes you already own, preview uncertain looks, and choose what to wear.
+**Tagline:** Explore Indian wedding looks, preview an outfit on your photo, and choose what to wear.
 
-**For:** a guest at a five-event Indian wedding who doesn't want to buy five new outfits.
+**For:** a guest choosing what to wear to an Indian wedding celebration.
 
 **Built with:** the YouCam AI Clothes Virtual Try-On API (Cloth V4).
 
@@ -18,15 +18,15 @@ An Indian wedding is rarely one event. Sangeet, Mehendi, Haldi, the wedding and 
 
 ### What it does
 
-1. **Plan five events on one board.** Assign an outfit to Sangeet, Mehendi, Haldi, Wedding and Reception. Reuse a favourite across events, and the board counts it as a planned rewear.
+1. **Find a look for the occasion.** Explore Sangeet, Mehendi, Haldi, Wedding and Reception styles, and keep favourites in a session shortlist.
 2. **Add the clothes you own.** Photograph a garment and confirm its name, type, colour, style and occasions. Adding clothes never starts an AI task.
-3. **Preview only the looks you're unsure about.** Add a full-body photo, accept the photo notice and press **Generate try-on**. YouCam Cloth V4 renders the garment on you, with an original/result slider.
-4. **Decide and take the plan with you.** The board shows events planned, owned outfits used and planned rewears. **Print / Save as PDF** gives a text-only plan with no photos or links.
+3. **Preview a look on your photo.** Add a full-body photo, accept the photo notice and press **Generate try-on**. YouCam Cloth V4 renders the garment on you, with an original/result slider.
+4. **Compare and keep a result.** Compare two recent session results, inspect the originals, zoom and save/open an image.
 5. **Browse for inspiration without a photo.** A collection of 26 original AI-generated outfit concepts, each labelled as inspiration or as tested on a real photo.
 
 ### How we use the YouCam API
 
-Most virtual try-on puts a button next to a product you might buy. SangeetFit uses Cloth V4 as a **decision tool for clothes you already own**: the planner does the organising, and a try-on is spent only on the look you can't decide about.
+SangeetFit uses Cloth V4 as a visual decision tool for Indian wedding outfits. Users can explore occasion-based ideas or add a garment they own, then explicitly request a preview when they want to see a look on their photo.
 
 Under the hood, the browser shrinks the photos, our server validates them, uploads the person and garment through the YouCam File API, submits a `cloth-v4` task, and polls with back-off until the render is ready. In our three recorded live runs, Generate-to-render took 16 to 26 seconds. See the [architecture note](https://github.com/Pr1meGG/SangeetFit/blob/codex/redesign-v2/docs/submission/ARCHITECTURE.md).
 
@@ -42,8 +42,8 @@ Next.js 16, React 19 and TypeScript on Vercel, with a small Redis store for the 
 
 ### Accomplishments
 
-- A complete own-clothes → preview → five-event plan → PDF journey that works on a phone.
-- A planner that's useful with zero AI calls, with AI used only where it changes a decision.
+- A focused browse/add clothes → explicit preview → compare/save interface.
+- Clearly separated concept imagery, mock references and genuine live YouCam results.
 
 ### What we learned
 
@@ -53,10 +53,10 @@ Virtual try-on is most valuable at the moment of indecision, not at the moment o
 
 | Built and shown | Next |
 |---|---|
-| Five-event board with rewear counts | Family and friends planning together |
-| Add your own clothes | Separate top and bottom combinations |
-| Cloth V4 try-on with original/result slider | A permanent saved wardrobe |
-| Text-only PDF plan | Optional checkout for a missing piece |
+| Occasion-based browsing and session shortlist | Separate top and bottom combinations |
+| Add your own clothes | A permanent saved wardrobe |
+| Cloth V4 try-on with original/result slider | Optional checkout for a missing piece |
+| Session result comparison, zoom and save/open | |
 | Private 24-hour result saving | |
 
 ### FAQ
@@ -69,11 +69,11 @@ Virtual try-on is most valuable at the moment of indecision, not at the moment o
 
 **Does it preserve my face and the fit?** It's visual guidance, not a fit guarantee. AI previews can change facial or garment details and can't tell you how something fits physically.
 
-**How is this different from a shop's try-on widget?** Shop widgets help you buy one product. SangeetFit plans a whole week of events around clothes you already own and uses try-on only for the uncertain looks.
+**How is this different from a shop's try-on widget?** SangeetFit centres the occasion and the user's wardrobe: browse Indian wedding looks or add clothes you already own, then compare visual previews before deciding what to wear.
 
 ### Try it
 
-- **App:** https://sangeet-fit.vercel.app (no account needed). Live mode: Generate runs a real Cloth V4 try-on from a small shared allowance. If it runs out, the app says so plainly; planning, browsing and PDF export keep working.
+- **App:** https://sangeet-fit.vercel.app (no account needed). Live mode: Generate runs a real Cloth V4 try-on from a small shared allowance. If it runs out, the app says so plainly; browsing remains available. [CONFIRM: deploy the planning-archive candidate before submitting this description.]
 - **Video:** [CONFIRM: video link]
 - **Code:** https://github.com/Pr1meGG/SangeetFit (private; shared with contact_event@PerfectCorp.com as the rules require [CONFIRM: invite sent — not sent as of 1 Nov]). Run it without keys (Node 22): `npm ci && MOCK_MODE=true npm run dev`.
 
@@ -89,4 +89,6 @@ Virtual try-on is most valuable at the moment of indecision, not at the moment o
 - "16 to 26 seconds" comes from three live runs on AI-created demo sources: 15.7 s and 16.0 s on 26 October, and 26.0 s on production on 31 October (the video take) ([pilot record](../testing/CATALOGUE_AI_PILOT_2026_10_26.md)). Owned-garment live quality is **not** verified; don't claim it.
 - No problem statistics, savings, time-saved or demand numbers anywhere.
 - Video upload, Devpost publishing and submission each need the user's approval of the exact text.
+- Planning, rewear counts and PDF export were archived on 2 November. Older screenshots/videos showing them do not represent the active candidate. Owned-garment live quality remains unverified.
+- Skin-tone analysis and selfie capture were also archived. The active submission integrates YouCam Cloth V4; do not describe Skin AI as an available feature.
 - Older evidence notes from this file's previous version live in [PROJECT_STATE.md](../agent-workflow/PROJECT_STATE.md) and the dated testing records.

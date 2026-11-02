@@ -18,7 +18,7 @@ flowchart LR
 
 ## The five steps
 
-1. **Nothing happens until you press Generate.** Browsing, adding clothes, planning and printing never call YouCam. The fitting room needs the photo notice accepted, a full-body photo, and an explicit **Generate try-on** click (`src/app/page.tsx`).
+1. **Nothing happens until you press Generate.** Browsing, adding clothes, shortlisting and comparing never call YouCam. The fitting room needs the photo notice accepted, a full-body photo, and an explicit **Generate try-on** click (`src/app/page.tsx`).
 2. **The browser shrinks photos first.** `src/lib/image.ts` caps the person photo near 2.4 MB and the garment near 1.4 MB, so the JSON request stays under 4,000,000 bytes.
 3. **The server trusts nothing from the client.** `src/lib/vto-input.ts` checks the request shape, image types and sizes. A catalogue outfit can only use its own server-side reference image; a client file path is never accepted.
 4. **Cloth V4 runs as an async task.** `src/app/api/vto/route.ts` reserves one try-on from a shared Redis allowance *before* uploading anything (`src/lib/live-budget.ts`). It then uploads both images through the YouCam File API, submits `cloth-v4`, and polls with back-off until `success` or `error`. A 429 stops immediately and is never retried automatically.
@@ -32,6 +32,14 @@ flowchart LR
 | Result shown | The garment reference, labelled *“Mock preview — reference outfit, not a personal try-on”* | The generated image, labelled *“Generated result — live render from YouCam API”* |
 | Missing API key | n/a | Fails closed with an error; never swaps in a mock image |
 
-## The planner (no AI needed)
+## Archived planning feature
 
-`src/components/WeddingWeekBoard.tsx` holds one outfit per event (Sangeet, Mehendi, Haldi, Wedding, Reception). It counts events planned, distinct owned outfits used, and planned rewears. **Print / Save as PDF** prints a text-only plan: no photos, no links.
+Wedding-week planning and text-only PDF export were archived on 2 November.
+Their components remain in source but are not mounted by the active app. See
+the [archive record](../archive/planning/README.md).
+
+Skin-tone analysis and its selfie flow are also archived. Active `POST /api/skin`
+returns private/no-store HTTP410 before reading input or contacting a provider.
+The original handler is preserved for reference and offline contract tests in
+the [skin archive](../archive/skin-tone/README.md). Occasion selection goes
+directly to outfits; manual colour preference remains available.

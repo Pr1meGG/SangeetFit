@@ -92,13 +92,13 @@ function testUploadHelper(): void {
 
 testUploadHelper();
 
-const skinSource = readSource("src/app/api/skin/route.ts");
+const skinSource = readSource("docs/archive/skin-tone/route.ts");
 assert(skinSource.includes("body: JSON.stringify({ src_file_id: fileId })"));
 assert(skinSource.includes("/task/skin-tone-analysis/${taskId}"));
 assert(!skinSource.includes("pollTask(YOUCAM_API_KEY, fileId)"));
 assert(skinSource.includes('data.data.task_status === "error"'));
 assert(!skinSource.includes('data.data.task_status === "failed"'));
-console.log("PASS: skin task uses src_file_id and task_id");
+console.log("PASS: archived skin task uses src_file_id and task_id");
 
 const vtoSource = readSource("src/app/api/vto/route.ts");
 // Per-outfit reference allowlist with garmentType scoping (no category collapse).

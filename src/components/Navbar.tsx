@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, Cpu, Menu, X, Zap } from "lucide-react";
 
 type Mode = "mock" | "live" | "unconfigured";
-export type NavigationView = "home" | "clothes" | "shortlist" | "plan" | "how-it-works" | "faq";
+export type NavigationView = "home" | "clothes" | "shortlist" | "try-on" | "how-it-works" | "faq";
 
 interface Props {
   activeView?: NavigationView | "collection";
@@ -101,9 +101,9 @@ export default function Navbar({ activeView = "home", onNavigate, shortlistCount
       ? <button type="button" key={item.view} className={className} aria-current={current ? "page" : undefined} onClick={() => navigate(item.view)}>{content}</button>
       : <Link key={item.view} href={item.href} className={className} aria-current={current ? "page" : undefined} onClick={closeAfterLink}>{content}</Link>;
   });
-  const planAction = onNavigate
-    ? <button type="button" className="sf-nav-cta" aria-current={activeView === "plan" ? "page" : undefined} onClick={() => navigate("plan")}>Plan my week <ArrowUpRight size={16} aria-hidden="true" /></button>
-    : <Link href="/?step=3&view=plan" className="sf-nav-cta" onClick={closeAfterLink}>Plan my week <ArrowUpRight size={16} aria-hidden="true" /></Link>;
+  const tryOnAction = onNavigate
+    ? <button type="button" className="sf-nav-cta" aria-current={activeView === "try-on" ? "page" : undefined} onClick={() => navigate("try-on")}>Try on a look <ArrowUpRight size={16} aria-hidden="true" /></button>
+    : <Link href="/?step=3&view=try-on" className="sf-nav-cta" onClick={closeAfterLink}>Try on a look <ArrowUpRight size={16} aria-hidden="true" /></Link>;
 
   return (
     <header ref={headerRef} className="sf-navbar sticky top-0 z-50">
@@ -123,14 +123,14 @@ export default function Navbar({ activeView = "home", onNavigate, shortlistCount
         <div className="sf-nav-links">{navLinks()}</div>
         <div className="sf-navbar-state">
           {modeBadge}
-          {planAction}
+          {tryOnAction}
         </div>
         <button ref={toggleRef} type="button" className="sf-menu-toggle" aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} aria-controls="sf-mobile-menu" onClick={() => setMenuOpen(open => !open)}>{menuOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}</button>
       </nav>
       {menuOpen && <span className="sf-menu-scrim" aria-hidden="true" onClick={() => setMenuOpen(false)} />}
       {menuOpen && <nav id="sf-mobile-menu" className="sf-mobile-menu" aria-label="Mobile navigation">
         {navLinks(true)}
-        <div className="sf-mobile-footer">{modeBadge}{planAction}</div>
+        <div className="sf-mobile-footer">{modeBadge}{tryOnAction}</div>
       </nav>}
     </header>
   );
