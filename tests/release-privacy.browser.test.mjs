@@ -67,9 +67,15 @@ try {
   await page.getByRole("button", { name: "Try on Emerald Silk Kurta", exact: true }).click();
   await dialog.getByRole("button", { name: "I understand — continue" }).click();
   // The sample model goes through the same preparation path and still needs an explicit Generate.
-  await dialog.getByRole("button", { name: /Use our sample model/ }).click();
+  await dialog.getByRole("button", { name: "Use our sample model (woman)", exact: true }).click();
   await dialog.getByText("Photo ready. Uploading did not start a task.").waitFor();
-  assert.equal(vtoRequests, 1, "loading the sample must not submit");
+  const womanPhoto = await dialog.getByAltText("Your full-body photo").getAttribute("src");
+  // Either sample can be swapped in before generating, still without starting a task.
+  const manSample = page.waitForResponse(response => response.url().endsWith("/garment_test/fullbody_mock_man.png") && response.ok());
+  await dialog.getByRole("button", { name: "Use our sample model (man)", exact: true }).click();
+  await manSample;
+  await page.waitForFunction(previous => document.querySelector('img[alt="Your full-body photo"]')?.getAttribute("src") !== previous, womanPhoto);
+  assert.equal(vtoRequests, 1, "loading either sample must not submit");
   await dialog.getByRole("button", { name: "Generate try-on", exact: true }).click();
   await dialog.getByRole("slider").waitFor();
   await dialog.getByRole("button", { name: "Close try-on" }).click();

@@ -49,7 +49,7 @@ try {
   const dialog = page.getByRole("dialog", { name: "Make this look yours." });
   await dialog.waitFor();
   await dialog.getByRole("button", { name: "I understand — continue" }).click();
-  await dialog.getByRole("button", { name: /Use our sample model/ }).click();
+  await dialog.getByRole("button", { name: "Use our sample model (woman)", exact: true }).click();
   await dialog.getByText("Photo ready. Uploading did not start a task.").waitFor();
   assert(await dialog.getByRole("button", { name: "Generate try-on", exact: true }).isEnabled());
   await noSelfie();

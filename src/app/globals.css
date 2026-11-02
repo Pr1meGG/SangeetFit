@@ -360,6 +360,7 @@ a, button { touch-action: manipulation; }
 .sf-source { text-align: center; padding-top: 12px; }
 .sf-source > h3 { font-family: var(--sf-display-serif); font-size: 24px; margin-bottom: 8px; font-weight: 400; letter-spacing: -.045em; }
 .sf-source > p { font-size: 13px; color: var(--sf-muted); line-height: 1.6; }
+.sf-sample-models { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 14px; margin-top: 12px; font-size: 13px; color: var(--sf-muted); }
 .sf-photo-permission { padding-top: 24px; color: var(--sf-burgundy); }
 .sf-photo-permission > svg { margin: auto; }
 .sf-photo-permission p { color: var(--sf-muted); font-size: 13px; line-height: 1.7; padding: 16px 0 24px; }
